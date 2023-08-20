@@ -41,7 +41,8 @@ public class GTDCLI implements Beholder<String>
 	
 	private Map<String, JSONObject> projectMap = new HashMap<>();
 	private Map<String, JSONObject> modProjectMap = new HashMap<>();
-	
+	private Map<String, JSONObject> knownProjects = new HashMap<>();
+
 	public final static String newPrjctStgClsd = "New Project Stage closed.";
 
 	
@@ -188,6 +189,10 @@ public class GTDCLI implements Beholder<String>
 		
     	loadProjects();
     	loadMODProjects();
+    	
+		knownProjects.putAll(projectMap);
+		knownProjects.putAll(modProjectMap);
+
     	//states = loadStates();
     	checkForDeadlineAbuse();
     	
@@ -210,6 +215,22 @@ public class GTDCLI implements Beholder<String>
     		{
     			System.out.println("Not yet Installed.");
     			break;
+    		}
+    		
+    		case "newP":
+    		{
+    			  			
+    			JSONObject pJson = DataSpawn_ii.spawnNewProject(knownProjects, states);
+    			if(pJson!=null)
+    			{
+    				String name = pJson.getString(ProjectJSONKeyz.nameKey);
+    				if(pJson.getString(ProjectJSONKeyz.statusKey).equals(StatusMGMT.mod))
+					{
+    					modProjectMap.put(name, pJson);
+					}
+    				else projectMap.put(name, pJson);
+    			}
+    			else System.out.println("No Project.");
     		}
     		default:
     		{

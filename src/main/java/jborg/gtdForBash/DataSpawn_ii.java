@@ -1,5 +1,6 @@
 package jborg.gtdForBash;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import java.util.function.Supplier;
@@ -7,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,7 +51,9 @@ public class DataSpawn_ii implements Subjekt<String>
 	private final boolean statusRangeIsEditable = false;
 	private final boolean terminalIsInTxtA = true;
 
-	public static final String prjctNmLblTxt = "Project_Name";
+	public static final String prjctNameQ = "Project Name: ";
+	public static final String prjctNameError = "Name already in use.";
+	
 	public static final String modPrjctNmLblQstn = "MOD Project?";
 	public static final String sttsNmLblTxt = "Status";
 	public static final String goalNmLblTxt = "Goal";
@@ -80,7 +86,9 @@ public class DataSpawn_ii implements Subjekt<String>
 	public static final String noteAddPhrase = "Write Note:";
 	public static final boolean notTxtAQstn = true;
 	
-	private Set<String> stepStartStatuses = new HashSet<>(Arrays.asList(StatusMGMT.atbd, StatusMGMT.waiting));
+	private static Set<String> stepStartStatuses = new HashSet<>(Arrays.asList(StatusMGMT.atbd, StatusMGMT.waiting));
+	private static Set<String> projectStartStatie = new HashSet<>(Arrays.asList(StatusMGMT.atbd, StatusMGMT.waiting));
+	
 	public static final String stepStatusPhrase = "Choose Status: ";
 	public static final String wantToChangeTDTOfStepQstn = "Wan't to change TDT of Step?";
 	public static final String waitingForPhrase = "What u waiting for?";
@@ -90,202 +98,127 @@ public class DataSpawn_ii implements Subjekt<String>
 	public static final String unknownDLLblTxt = "Unkown Deadline";
 	public static final String makeDLBtnTxt = "Make Deadline";
 	
-	public JSONObject spawnNewProject(String name)
+	public static JSONObject spawnNewProject(Map<String, JSONObject> knownProjects, StatusMGMT statusMGMT)
 	{
+		
+		String name = Input.getString(prjctNameQ);
+		name = name.trim();
+		if(knownProjects.keySet().contains(name)) throw new IllegalArgumentException();
 
-		/*
-		System.out.println("Spawning Project: "+name);
-		
-		JSONObject pJson[] = new JSONObject[1];
-		pJson[0] = null;
-		
-		Stage stage = new Stage();
-		stage.initStyle(StageStyle.UNDECORATED);
-		
-		VBox root = new VBox();
-		root.getStyleClass().add(styleClassGenericNode);
-		
-		Scene scene = new Scene(root,400,400);
-		stage.setScene(scene);
-		scene.getStylesheets().add(getClass().getResource("/application.css").toExternalForm());
-		
-		Label pNameLabel = new Label(prjctNmLblTxt+":");
-		pNameLabel.getStyleClass().add(styleClassGenericNode);
-		
-		TextField pName = new TextField();
-		pName.setText(name);
-		pName.setDisable(nameIsNotEditable);
-		pName.getStyleClass().add(styleClassGenericNode);
-		
-		HBox nameBox = new HBox();
-		nameBox.getChildren().addAll(pNameLabel, pName);
-		
-		Label modLbl = new Label(modPrjctNmLblQstn);
-		modLbl.getStyleClass().add(styleClassGenericNode);
-		
-		CheckBox modCheck = new CheckBox();
-		modCheck.getStyleClass().add(styleClassGenericNode);
-		
-		Label statusLbl = new Label(sttsNmLblTxt + ": " +StatusMGMT.atbd);
-		statusLbl.getStyleClass().add(styleClassGenericNode);
-		
-		HBox modBox = new HBox();
-		modBox.getChildren().addAll(modLbl, modCheck, statusLbl);
-		
-		Label goalLbl = new Label(goalNmLblTxt+":");
-		goalLbl.getStyleClass().add(styleClassGenericNode);
-		
-		TextArea goalTxtA = new TextArea();
-		goalTxtA.getStyleClass().add(styleClassGenericNode);
-		goalTxtA.setText("");
-		
-		VBox goalBox = new VBox();
-		goalBox.getChildren().addAll(goalLbl, goalTxtA);
+		JSONObject pJson = new JSONObject();
+		pJson = null;
+ 
+		boolean isModProject = false;
+		String status = "";
+		boolean changedBDT = false;
+		LocalDateTime bdt = null;
+		LocalDateTime nddt = LocalDateTime.now();
+		LocalDateTime dldt = null;
 
-		LocalDateTime now = LocalDateTime.now();
-		String[] bdt = new String[1];
-		bdt[0] = LittleTimeTools.timeString(now);
-		Label bdtLbl = new Label(bdtNowLblTxt + ": " + bdt[0]);
-		bdtLbl.getStyleClass().add(styleClassGenericNode);
 		
-		Button changeBDTBtn = new Button(btnTxtChangeBDT);
-		
-		HBox bdtBox = new HBox();
-		bdtBox.getChildren().addAll(bdtLbl, changeBDTBtn);
-		
-		Button deadLineBtn = new Button(makeDLBtnTxt);
-		
-		String[] deadLineStr = new String[1];
-		deadLineStr[0] = "";
-		Label deadLineLbl = new Label(unknownDLLblTxt);
-		deadLineLbl.getStyleClass().add(styleClassGenericNode);
-		
-		HBox deadLineBox = new HBox();
-		deadLineBox.getChildren().addAll(deadLineLbl, deadLineBtn);
-
-		Button cancel = new Button(btnTxtCancel);
-		Button create = new Button(btnTxtCreate);
-		
-		HBox submitOrNotBox = new HBox();
-		submitOrNotBox.getChildren().addAll(cancel, create);
-		
-		String []status = new String[1];
-		status[0] = StatusMGMT.atbd;
-		modCheck.setOnAction((event)->
-		{
-			if(modCheck.isSelected())
-			{
-				statusLbl.setText(sttsNmLblTxt + ": " + StatusMGMT.mod);
-				status[0] = StatusMGMT.mod;
-			}
-			else 
-			{
-				statusLbl.setText(sttsNmLblTxt + ": " + StatusMGMT.atbd);
-				status[0] = StatusMGMT.atbd;
-			}
-		});
-
-		Supplier<Boolean> dataIsValide = ()->
-		{
-			/*String n = pName.getText().trim();/Name already checked/
-			String g = goalTxtA.getText().trim();
-			
-			if(deadLineStr[0].equals(""))
-			{
-				Output.errorAlert(prjctNotValide[0]);
-				return false;
-			}
-			
-			LocalDateTime prjctBorn = LittleTimeTools.LDTfromTimeString(bdt[0]);
-			LocalDateTime prjctDeadline = LittleTimeTools.LDTfromTimeString(deadLineStr[0]);
-			
-			if(prjctBorn.isAfter(prjctDeadline))
-			{
-				Output.errorAlert(prjctNotValide[1]);
-				return false;
-			}
-			
-			LocalDateTime jetzt = LocalDateTime.now();
-			
-			if(jetzt.isBefore(prjctBorn))
-			{
-				Output.errorAlert(prjctNotValide[2]);
-				return false;
-			}
-			
-			if(g.trim().equals(""))
-			{
-				Output.errorAlert(prjctNotValide[3]);
-				return false;
-			}
-			
-			return true;
-		};
-		
-		deadLineBtn.setOnAction((event)->
+		if(!isModProject)
 		{
 			
-			LocalDateTime deadLineLDT = Input.getDateTimeInput("", deadLinePrjctQstn);
-			deadLineStr[0] = LittleTimeTools.timeString(deadLineLDT);
-			deadLineLbl.setText("DLDT: " + deadLineStr[0]);
-		});
-		
-		create.setOnAction((event)->
-		{
 			
-			pJson[0] = new JSONObject();
-			
-			changeBDTBtn.setDisable(true);
-			create.setDisable(true);
-			cancel.setDisable(true);
-			
-			pJson[0].put(ProjectJSONKeyz.nameKey, pName.getText());
-			pJson[0].put(ProjectJSONKeyz.goalKey, goalTxtA.getText());
-			pJson[0].put(ProjectJSONKeyz.statusKey, status[0]);//overwrites!!!by Step spawn.(wait:<->:status)
-			pJson[0].put(ProjectJSONKeyz.DLDTKey, deadLineStr[0]);
-			pJson[0].put(ProjectJSONKeyz.BDTKey, bdt[0]);
-			pJson[0].put(ProjectJSONKeyz.NDDTKey, LittleTimeTools.timeString(now));
+			try 
+			{
+				
+				isModProject = Input.getYesOrNo
+						("Maybe one Day-Project?(yes) or are we actually try "
+								+ "to do it soon enough?(no)");
+				if(!isModProject)
+				{
+					List<String> startStatie = new ArrayList<>();
+					startStatie.addAll(projectStartStatie);
+					status = Input.getAnswerOutOfList(startStatie);
+				}
+				else status = StatusMGMT.mod;
+				
+				String goal = Input.getString("Goal of Project:");
 
-			if(dataIsValide.get()&&!status[0].equals(StatusMGMT.mod))spawnFirstStep(pJson[0]);
+				changedBDT = Input.getYesOrNo("Want to change Birthdatetime of Project?");
 			
-			changeBDTBtn.setDisable(false);
-			create.setDisable(false);
-			cancel.setDisable(false);
-			
-			if(dataIsValide.get())stage.close();
-		});
-		
-		changeBDTBtn.setOnAction((event)->
-		{
-			LocalDateTime ldt = Input.getDateTimeInput(time, changingBDTInputPhrase);
-			bdt[0]= LittleTimeTools.timeString(ldt);
-			bdtLbl.setText(bdtThenLblTxt + ": " + bdt[0]);
-		});
-		
-		cancel.setOnAction((event)->
-		{
-			informBeholders(GTDCLI.newPrjctStgClsd);
-			stage.close();
-		});
+				if(changedBDT)bdt = Input.getDateTime("BDT of Project", 1800, 300, 1, 1, 0, 1);
+				else bdt = nddt;
+				
+				if(!isModProject)
+				{
+					dldt = Input.getDateTime("Deadline for Project", nddt.getYear(), 100, nddt.getMonthValue(), nddt.getDayOfMonth(), nddt.getHour(), nddt.plusMinutes(5).getMinute());
+					JSONObject tmp = spawnFirstStep(pJson);
+					if(tmp==null)return null;
+					else pJson = tmp;
+				}
 
-		root.getChildren().addAll(nameBox, modBox, goalBox, bdtBox, deadLineBox, submitOrNotBox);
+				pJson.put(ProjectJSONKeyz.nameKey, name);
+				pJson.put(ProjectJSONKeyz.goalKey, goal);
+				pJson.put(ProjectJSONKeyz.statusKey, status);
+				
+				String deadLineStr = LittleTimeTools.timeString(dldt);
+				pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);
+				
+				String bdtStr = LittleTimeTools.timeString(bdt);
+				pJson.put(ProjectJSONKeyz.BDTKey, bdtStr);
+				
+				String nddtStr = LittleTimeTools.timeString(nddt);
+				pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 
-		stage.showAndWait();
-
-		return pJson[0];
-		*/
-		
-		return null;
+				if(!dataIsValide(nddt, bdt, dldt, goal))return null;
+			} 
+			catch (InputMismatchException e) 
+			{
+				e.printStackTrace();
+				return null;
+			} 
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+				return null;
+			}
+		}
+				
+		return pJson;
 	}
 	
-	public void spawnFirstStep(JSONObject pJson)
+	private static boolean dataIsValide(LocalDateTime nddt, LocalDateTime bdt, LocalDateTime dldt, String goal)
+	{
+		
+		if(dldt==null)
+		{
+			System.out.println(prjctNotValide[0]);
+			return false;
+		}
+		
+		if(dldt!=null&&bdt.isAfter(dldt))//Maybe it is mod Project!!!
+		{
+			System.out.println(prjctNotValide[1]);
+			return false;
+		}
+		
+		LocalDateTime jetzt = LocalDateTime.now();
+		
+		if(jetzt.isBefore(bdt))
+		{
+			System.out.println(prjctNotValide[2]);
+			return false;
+		}
+		
+		if(goal.trim().equals(""))
+		{
+			System.out.println(prjctNotValide[3]);
+			return false;
+		}
+		
+		return true;
+	};
+
+	public static JSONObject spawnFirstStep(JSONObject pJson)
 	{	
 		
 		System.out.println("Spawning first Step for Project: " + pJson.getString(ProjectJSONKeyz.nameKey));
-		pJson = spawnStep(pJson, firstStepIndex);
+		return spawnStep(pJson, firstStepIndex);
 	}
 
-	public void appendStep(JSONObject pJson)
+	public static void appendStep(JSONObject pJson)
 	{
 		
 		System.out.println("Appending Step to Project: " + pJson.getString(ProjectJSONKeyz.nameKey));
@@ -296,10 +229,9 @@ public class DataSpawn_ii implements Subjekt<String>
 		pJson = spawnStep(pJson, length);
 	}
 	
-	private JSONObject spawnStep(JSONObject pJson, int index)
+	private static JSONObject spawnStep(JSONObject pJson, int index)
 	{
 
-		/*
 		System.out.println("Spawning Step. Index: " + index + " Project: "+pJson.toString(4));
 
 		if(index<firstStepIndex) throw new IllegalArgumentException("Index too Small.");
@@ -322,78 +254,60 @@ public class DataSpawn_ii implements Subjekt<String>
 		LocalDateTime nddtOfStep = LocalDateTime.now();
 		LocalDateTime bdtOfStep;
 		
-		String differentBDT = Input.question.apply(differentBDTQstn);
-		//?TODO:if(differentBDT.equals(Input.cancelAnswerToQuestion))//
-		if(differentBDT.equals(Input.yesAnswerToQuestion))bdtOfStep = Input.getDateTimeInput(bdtInputTitle, bdtInputPhrase);
-		else bdtOfStep = nddtOfStep;
-		
+		boolean differentBDT;
 		String stepStatus = "";
-		String title = "";
-		while(stepStatus.trim().equals("")) 
+		try 
 		{
-			stepStatus = Input.getRangeInput(stepStartStatuses, title, stepStatusPhrase, statusRangeIsEditable);
-		}
-					
-		String phrase;
-		if(stepStatus.equals(StatusMGMT.waiting))phrase = waitingForPhrase;
-		else phrase = stepDescPhrase;
+			differentBDT = Input.getYesOrNo("Want to change bdt of Step");
 
-		String descriptionOfStep = Input.getTextInput(descStepInputTitle, phrase, stepDescInTxtA);
 		
-		String prjctNDDT = pJson.getString(ProjectJSONKeyz.NDDTKey);
-		String prjctDeadLine = pJson.getString(ProjectJSONKeyz.DLDTKey);
-		if(index==firstStepIndex)Output.infoAlert("Deadline must be between StepNDDT: " + prjctNDDT
-													+ " and Project Deadline: " + prjctDeadLine);
-		else
-		{
-			String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
-			Output.infoAlert("Deadline must be between old-Step TDT: " + oldStepTDT
-								+" and Project Deadline: " + prjctDeadLine);
-		}
-		
-		LocalDateTime deadLineLDT = Input.getDateTimeInput(title, "Step DeadLine Please.");
-		String deadLineStr = LittleTimeTools.timeString(deadLineLDT);
-		
-		newStep.put(StepJSONKeyz.DLDTKey, deadLineStr);
-		newStep.put(StepJSONKeyz.statusKey, stepStatus);
-		newStep.put(StepJSONKeyz.descKey, descriptionOfStep);
-		newStep.put(StepJSONKeyz.NDDTKey, LittleTimeTools.timeString(nddtOfStep));
-		newStep.put(StepJSONKeyz.BDTKey, LittleTimeTools.timeString(bdtOfStep));
-
-		Supplier<Boolean> stepDataIsValide = ()->
-		{
-		
-			String msg = stepIsOkToItsSelf(newStep);
-			if(!msg.equals("OK"))
+			if(differentBDT)bdtOfStep = Input.getDateTime("DateTime of Step:", 0,2100,0,0,0,0);
+			else bdtOfStep = nddtOfStep;
+			
+			
+			String title = "";
+			while(stepStatus.trim().equals("")) 
 			{
-				Output.errorAlert(msg);
-				return false;
+				List<String> sss = new ArrayList<>();
+				sss.addAll(stepStartStatuses);
+				stepStatus = Input.getAnswerOutOfList(sss);
 			}
-			else Output.infoAlert(msg);
+						
+			String phrase;
+			if(stepStatus.equals(StatusMGMT.waiting))phrase = waitingForPhrase;
+			else phrase = stepDescPhrase;
 
-			msg = stepIsNotViolatingTimeframeOfProject(newStep, pJson);
-			if(!msg.equals("OK"))
+			String descriptionOfStep = Input.getString(phrase);
+			
+			String prjctNDDT = pJson.getString(ProjectJSONKeyz.NDDTKey);
+			String prjctDeadLine = pJson.getString(ProjectJSONKeyz.DLDTKey);
+			
+			if(index==firstStepIndex)
 			{
-				Output.errorAlert(msg);
-				return false;
+				System.out.println("Deadline must be between StepNDDT: " + prjctNDDT + " and Project Deadline: " + prjctDeadLine);
 			}
-			else Output.infoAlert(msg);
-
-			if(index>firstStepIndex)
+			else
 			{
-				msg = stepIsNotViolatingTimeframeOfFormerStep(oldStep, newStep);
-				if(!msg.equals("OK"))
-				{
-					Output.errorAlert(msg);
-					return false;
-				}
-				else Output.infoAlert(msg);
+				String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
+				System.out.println("Deadline must be between old-Step TDT: " + oldStepTDT
+									+" and Project Deadline: " + prjctDeadLine);
 			}
 			
-			return true;
-		};
+			LocalDateTime deadLineLDT = Input.getDateTime("Step DeadLine Please.",0,2100,0,0,0,0);
+			String deadLineStr = LittleTimeTools.timeString(deadLineLDT);
+			
+			newStep.put(StepJSONKeyz.DLDTKey, deadLineStr);
+			newStep.put(StepJSONKeyz.statusKey, stepStatus);
+			newStep.put(StepJSONKeyz.descKey, descriptionOfStep);
+			newStep.put(StepJSONKeyz.NDDTKey, LittleTimeTools.timeString(nddtOfStep));
+			newStep.put(StepJSONKeyz.BDTKey, LittleTimeTools.timeString(bdtOfStep));
+		} 
+		catch (InputMismatchException | IOException e) 
+		{
+			return null;
+		}
 		
-		if(stepDataIsValide.get())
+		if(stepDataIsValide(pJson, oldStep, newStep, index))
 		{
 			pJson.put(ProjectJSONKeyz.statusKey, stepStatus);//this overwrites old status!
 						
@@ -403,13 +317,47 @@ public class DataSpawn_ii implements Subjekt<String>
 			
 			return pJson;
 		}
-		else return spawnStep(pJson, index);
-		*/
-		
-		return null;
+		else 
+		{
+			System.out.println("Neuer Versuch für step Data!!");
+			return spawnStep(pJson, index);//Enforced Input!!
+		}
 	}
 
-	public String stepIsNotViolatingTimeframeOfProject(JSONObject step, JSONObject pJson)
+	public static boolean stepDataIsValide(JSONObject pJson, JSONObject oldStep, JSONObject newStep, int index)
+	{
+	
+		String msg = stepIsOkToItsSelf(newStep);
+		if(!msg.equals("OK"))
+		{
+			System.out.println(msg);
+			return false;
+		}
+		else System.out.println(msg);
+
+		msg = stepIsNotViolatingTimeframeOfProject(newStep, pJson);
+		if(!msg.equals("OK"))
+		{
+			System.out.println(msg);
+			return false;
+		}
+		else System.out.println(msg);
+
+		if(index>firstStepIndex)
+		{
+			msg = stepIsNotViolatingTimeframeOfFormerStep(oldStep, newStep);
+			if(!msg.equals("OK"))
+			{
+				System.out.println(msg);
+				return false;
+			}
+			else System.out.println(msg);
+		}
+		
+		return true;
+	}
+	
+	public static String stepIsNotViolatingTimeframeOfProject(JSONObject step, JSONObject pJson)
 	{
 		
 
@@ -430,7 +378,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		return "OK";
 	}
 
-	public String stepIsNotViolatingTimeframeOfFormerStep(JSONObject oldStep, JSONObject newStep)
+	public static String stepIsNotViolatingTimeframeOfFormerStep(JSONObject oldStep, JSONObject newStep)
 	{
 		
 		String tdtOfOldStepStr = oldStep.getString(StepJSONKeyz.TDTKey);
@@ -444,7 +392,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		return "OK";
 	}
 	
-	public String stepIsOkToItsSelf(JSONObject step)
+	public static String stepIsOkToItsSelf(JSONObject step)
 	{
 		
 		
