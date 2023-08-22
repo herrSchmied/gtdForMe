@@ -45,8 +45,6 @@ public class GTDCLI implements Beholder<String>
 
 	public final static String newPrjctStgClsd = "New Project Stage closed.";
 
-	
-
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
 
 
@@ -217,13 +215,15 @@ public class GTDCLI implements Beholder<String>
     			break;
     		}
     		
-    		case "newP":
+    		case "new Project":
     		{
     			  			
     			JSONObject pJson = DataSpawn_ii.spawnNewProject(knownProjects, states);
     			if(pJson!=null)
     			{
     				String name = pJson.getString(ProjectJSONKeyz.nameKey);
+    				knownProjects.put(name, pJson);
+    				
     				if(pJson.getString(ProjectJSONKeyz.statusKey).equals(StatusMGMT.mod))
 					{
     					modProjectMap.put(name, pJson);

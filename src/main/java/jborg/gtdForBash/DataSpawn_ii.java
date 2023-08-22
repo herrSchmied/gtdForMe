@@ -3,7 +3,6 @@ package jborg.gtdForBash;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-import java.util.function.Supplier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
@@ -46,19 +45,21 @@ public class DataSpawn_ii implements Subjekt<String>
 	
 	public static final String notValide = "Name or Goal not valide.";
 
-	private final boolean nameIsNotEditable = true;
-	private final boolean stepDescInTxtA = true;
-	private final boolean statusRangeIsEditable = false;
-	private final boolean terminalIsInTxtA = true;
-
 	public static final String prjctNameQ = "Project Name: ";
-	public static final String prjctNameError = "Name already in use.";
+	public static final String prjctNameError = "Name already in use.";	
+	public static final String isModProjectQ = "Maybe one Day-Project?(yes) or are we actually try "
+			+ "to do it soon enough?(no): ";
+	public static final String goalQ = "Goal of Project: ";
+	public static final String changeBDTQ = "Want to change Birthdatetime of Project? ";
+	public static final String bdtQ = "BDT of Project:";
+	public static final int minBDTYear = 1800;
+	public static final int minMonth = 1;
+	public static final int minDay = 1;
+	public static final int minHour = 0;
+	public static final int minMinute = 0;
+	public static final String dldtQ = "Deadline for Project?";
+	public static final int dldtRange = 100;
 	
-	public static final String modPrjctNmLblQstn = "MOD Project?";
-	public static final String sttsNmLblTxt = "Status";
-	public static final String goalNmLblTxt = "Goal";
-	public static final String bdtNowLblTxt = "BDT(Now)";
-	public static final String bdtThenLblTxt = "BDT(Then)";
 	public final static String prjctWhenTDTQstn = "When took the Termination of this Project place?";
 	public final static String wantToChangeTDTOfPrjctQstn = "Wan't to change TDT of Project?";
 	public final static String prjctSuccessQstn = "Was Project a Success?";
@@ -71,11 +72,6 @@ public class DataSpawn_ii implements Subjekt<String>
 	public static final String descStepInputTitle = "Description";
 	public static final String stepSuccesQstn = "Was Step a Success?";
 	
-	public static final String bdtInputTitle = "BDT";
-	public static final String bdtInputPhrase = "When?";
-	
-	public static final String btnTxtCancel = "Cancel";
-	public static final String btnTxtCreate = "Create";
 	
 	public static final String illAExceMsg = "Don't know that Beholder.";
 	
@@ -106,11 +102,9 @@ public class DataSpawn_ii implements Subjekt<String>
 		if(knownProjects.keySet().contains(name)) throw new IllegalArgumentException();
 
 		JSONObject pJson = new JSONObject();
-		pJson = null;
  
 		boolean isModProject = false;
 		String status = "";
-		boolean changedBDT = false;
 		LocalDateTime bdt = null;
 		LocalDateTime nddt = LocalDateTime.now();
 		LocalDateTime dldt = null;
@@ -123,37 +117,34 @@ public class DataSpawn_ii implements Subjekt<String>
 			try 
 			{
 				
-				isModProject = Input.getYesOrNo
-						("Maybe one Day-Project?(yes) or are we actually try "
-								+ "to do it soon enough?(no)");
+				isModProject = Input.getYesOrNo(isModProjectQ);
+				
 				if(!isModProject)
 				{
 					List<String> startStatie = new ArrayList<>();
 					startStatie.addAll(projectStartStatie);
-					status = Input.getAnswerOutOfList(startStatie);
+					status = Input.getAnswerOutOfList("Choose Project Status", startStatie);
 				}
 				else status = StatusMGMT.mod;
 				
-				String goal = Input.getString("Goal of Project:");
+				String goal = Input.getString(goalQ);
 
-				changedBDT = Input.getYesOrNo("Want to change Birthdatetime of Project?");
-			
-				if(changedBDT)bdt = Input.getDateTime("BDT of Project", 1800, 300, 1, 1, 0, 1);
+				
+				boolean changeBDT = Input.getYesOrNo(changeBDTQ);
+				System.out.println("changeBDT: " + changeBDT);
+				int yearRange = LocalDateTime.now().getYear()-minBDTYear;//must be born before now.
+
+				if(changeBDT)
+				{
+					bdt = Input.getDateTime(bdtQ, minBDTYear, yearRange, minMonth, minDay, minHour, minMinute);
+				}
 				else bdt = nddt;
 				
-				if(!isModProject)
-				{
-					dldt = Input.getDateTime("Deadline for Project", nddt.getYear(), 100, nddt.getMonthValue(), nddt.getDayOfMonth(), nddt.getHour(), nddt.plusMinutes(5).getMinute());
-					JSONObject tmp = spawnFirstStep(pJson);
-					if(tmp==null)return null;
-					else pJson = tmp;
-				}
-
 				pJson.put(ProjectJSONKeyz.nameKey, name);
 				pJson.put(ProjectJSONKeyz.goalKey, goal);
 				pJson.put(ProjectJSONKeyz.statusKey, status);
 				
-				String deadLineStr = LittleTimeTools.timeString(dldt);
+				String deadLineStr = "UNKNOWN";
 				pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);
 				
 				String bdtStr = LittleTimeTools.timeString(bdt);
@@ -162,9 +153,27 @@ public class DataSpawn_ii implements Subjekt<String>
 				String nddtStr = LittleTimeTools.timeString(nddt);
 				pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 
-				if(!dataIsValide(nddt, bdt, dldt, goal))return null;
+				if(!isModProject)
+				{
+					
+					int minYear = nddt.getYear();
+					int minMonth = nddt.getMonthValue();
+					int minDay = nddt.getDayOfMonth();
+					int minHour = nddt.getHour();
+					int minMinute = nddt.plusMinutes(5).getMinute();//Deadline should be at least five Minutes in the Future.
+					
+					dldt = Input.getDateTime(dldtQ, nddt.getYear(), dldtRange, minMonth, minDay, minHour, minMinute);
+					deadLineStr = LittleTimeTools.timeString(dldt);
+					pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
+
+					JSONObject tmp = spawnFirstStep(pJson);
+					if(tmp==null)return null;
+					else pJson = tmp;
+					if(!timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))return null;
+				}
+
 			} 
-			catch (InputMismatchException e) 
+			catch (IllegalArgumentException | InputMismatchException e) 
 			{
 				e.printStackTrace();
 				return null;
@@ -179,7 +188,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		return pJson;
 	}
 	
-	private static boolean dataIsValide(LocalDateTime nddt, LocalDateTime bdt, LocalDateTime dldt, String goal)
+	private static boolean timeAndGoalOfActiveProjectIsValide(LocalDateTime nddt, LocalDateTime bdt, LocalDateTime dldt, String goal)
 	{
 		
 		if(dldt==null)
@@ -255,22 +264,28 @@ public class DataSpawn_ii implements Subjekt<String>
 		LocalDateTime bdtOfStep;
 		
 		boolean differentBDT;
+
 		String stepStatus = "";
+		int minYear = 0;
+		int yearRange = 2100;
+		int monthOffset = 1;
+		int dayOffset = 1;
+		int minHour = 0;
+		int minMinute = 0;
+
 		try 
 		{
-			differentBDT = Input.getYesOrNo("Want to change bdt of Step");
+			differentBDT = Input.getYesOrNo("Want to change bdt of Step?");
 
 		
-			if(differentBDT)bdtOfStep = Input.getDateTime("DateTime of Step:", 0,2100,0,0,0,0);
+			if(differentBDT)bdtOfStep = Input.getDateTime("DateTime of Step:", minYear, yearRange, monthOffset, dayOffset, minHour, minMinute);
 			else bdtOfStep = nddtOfStep;
 			
-			
-			String title = "";
 			while(stepStatus.trim().equals("")) 
 			{
 				List<String> sss = new ArrayList<>();
 				sss.addAll(stepStartStatuses);
-				stepStatus = Input.getAnswerOutOfList(sss);
+				stepStatus = Input.getAnswerOutOfList("Choose Step Status", sss);
 			}
 						
 			String phrase;
@@ -293,7 +308,7 @@ public class DataSpawn_ii implements Subjekt<String>
 									+" and Project Deadline: " + prjctDeadLine);
 			}
 			
-			LocalDateTime deadLineLDT = Input.getDateTime("Step DeadLine Please.",0,2100,0,0,0,0);
+			LocalDateTime deadLineLDT = Input.getDateTime("Step DeadLine Please.",minYear, yearRange, monthOffset, dayOffset, minHour, minMinute);
 			String deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			
 			newStep.put(StepJSONKeyz.DLDTKey, deadLineStr);
