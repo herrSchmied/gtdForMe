@@ -1,7 +1,6 @@
 package jborg.gtdForBash;
 
 
-
 import java.io.File;
 import java.io.IOException;
 
@@ -14,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.HashMap;
 
 
@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import allgemein.Beholder;
 
 import allgemein.LittleTimeTools;
+import consoleTools.Input;
 import consoleTools.TerminalTableDisplay;
 import fileShortCuts.LoadAndSave;
 
@@ -46,7 +47,22 @@ public class GTDCLI implements Beholder<String>
 	public final static String newPrjctStgClsd = "New Project Stage closed.";
 
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
+ 
+	public final Predicate<String> activeProject = (n)->
+	{
+		JSONObject jo = null;
+		
+		if(projectMap.containsKey(n))jo = projectMap.get(n);
+		else return false;
+		
+		String status = jo.getString(ProjectJSONKeyz.statusKey);
+		
+		if(!states.getStatesOfASet(StatusMGMT.terminalSetName).contains(status))return true;
 
+		return false;
+	};
+	
+	public final Predicate<String> notActiveProject = (n)-> !activeProject.test(n);
 
 	/*
 	private EventHandler<MouseEvent> stepsView = (mouseEvent)->
@@ -201,9 +217,36 @@ public class GTDCLI implements Beholder<String>
     	
     	String command = consoleTools.Input.getString("Type command. (ex. help or exit).");
     	
+    	System.out.println("Trying to excecute: '" + command.trim() + "'");
     	switch(command.trim())
     	{
-    		case "exit": stop();
+    		case "exit": stop();//No break needed.
+    		case "list not active ones":
+    		{
+    			List<String> noAPrjcts = findProjectNames(notActiveProject);
+    			for(String prjctName: noAPrjcts)System.out.println(prjctName);
+    			
+    			break;
+    		}
+    		case "list active ones":
+    		{
+    			List<String> aPrjcts = findProjectNames(activeProject);
+    			for(String prjctName: aPrjcts)System.out.println(prjctName);
+    			
+    			break;
+    		}
+    		case "next Step"://Test! Test!
+    		{
+    			List<String> aPrjcts = findProjectNames(activeProject);
+    			for(String prjctName: aPrjcts)System.out.println(prjctName);
+ 
+    			String choosenOne = Input.getAnswerOutOfList("Which one?", aPrjcts);
+    			String prjct = choosenOne.trim();
+    			if(aPrjcts.contains(prjct))nxtStp(prjct);
+    			else System.out.println("Please choose more wise. Because '" + choosenOne + "' is not"
+    					+ " on the List!");
+    			break;
+    		}
     		case "list": 
     		{
     			showProjectTable();
@@ -231,6 +274,7 @@ public class GTDCLI implements Beholder<String>
     				else projectMap.put(name, pJson);
     			}
     			else System.out.println("No Project.");
+    			break;
     		}
     		default:
     		{
@@ -241,6 +285,46 @@ public class GTDCLI implements Beholder<String>
     	loopForCommands();
     }
 
+    public List<String> findActiveProjectsNames()
+    {
+    	
+    	List<String> activeProjectNames = new ArrayList<>();
+    	
+    	for(JSONObject jo: projectMap.values())
+    	{
+    		String name = jo.getString(ProjectJSONKeyz.nameKey);
+    		String status = (String) jo.getString(ProjectJSONKeyz.statusKey);
+    		
+    		if(!states.getStatesOfASet(StatusMGMT.terminalSetName).contains(status))
+    		{
+    			activeProjectNames.add(name);
+    		}
+    	}
+
+    	return activeProjectNames;
+    }
+    
+    public void listActiveProjectNames()
+    {
+		
+    	int i = 1;
+    	
+    	for(String projectName: findActiveProjectsNames())
+    	{
+    		System.out.println(i + ".)" + projectName);
+    		i++;
+    	}
+    }
+       
+    public List<String> findProjectNames(Predicate<String> condition)
+    {
+    	List<String> output = new ArrayList<>();
+    	
+    	for(String projectName: knownProjects.keySet())if(condition.test(projectName))output.add(projectName);
+    	
+    	return output;
+    }
+    
     public void showProjectTable() throws JSONException
     {
 		List<String> headers = columnList;
@@ -277,73 +361,18 @@ public class GTDCLI implements Beholder<String>
 		gtdTool.loopForCommands();
     }
 
-	
-    
-   	
-    	/*
-    	newPrjctBtn.setOnAction((event)->
-    	{
-    		
-    		guiUtils.doCollectionOfNodes(btnList, disableBtns);
-    		
-    		String name = Input.getTextInput("Project creation", "Name please:", false);
-    		
-    		if((projectMap.keySet().contains(name))||(modProjectMap.keySet().contains(name)))
-    		{
-    			Output.errorAlert("Project Name is Already in use.");
-    			guiUtils.doCollectionOfNodes(btnList, enableBtns);
-    			return;
-    		}
-    		
-    		if(name.trim().equals(""))
-    		{
-    			Output.errorAlert("That is not a valid Name.");
-    			guiUtils.doCollectionOfNodes(btnList, enableBtns);
-    			return;
-    		}
-    		
-    		JSONObject pJson = ds.spawnNewProject(name);
-    		ProjectTableViewModel ptvm;
-    		
-    		if(pJson!=null)ptvm = createPTVMFromJSON(pJson);
-    		else
-    		{
-    			Output.errorAlert("Couldn't create Project.");
-    			return;
-    		}
-    		
-    		String status = pJson.getString(ProjectJSONKeyz.statusKey);
-    		
-    		if(status.equals(StatusMGMT.atbd)||status.equals(StatusMGMT.waiting))//Is it About to be done, or what?
-    		{
-    			projectMap.put(name, pJson);
-    			if(!tableIsShowingMODProjects)tStage.getObservableList().add(ptvm);//Hide or show?
-    		}
-    		
-    		if(pJson.get(ProjectJSONKeyz.statusKey).equals(StatusMGMT.mod))//Is it MOD, or what?
-    		{
-    			modProjectMap.put(name, pJson);
-    			if(tableIsShowingMODProjects)tStage.getObservableList().add(ptvm);//Maybe table isn't in that Mode.
-    		}
+	/*
+	 * TODO: Test this!!!!!!!!!!!!!!!!!!!!
+	 */
+	public void nxtStp(String projectName) throws IOException
+    {
 
-    		guiUtils.doCollectionOfNodes(btnList, enableBtns);
-
-    	});
-
-    	nxtStpBtn.setOnAction((event)->
-    	{
-    		
-    		ProjectTableViewModel ptvm = detectedSelection();
-    		
-    		if((ptvm==null)||(ptvmIsMODProject(ptvm)))Output.errorAlert("Click on Row First. And make it NOT a MOD-Project!");
-    		else
-    		{
-    			JSONObject jo = projectMap.get(ptvm.getProjectName());
-    			if(ds.terminateStep(jo))ds.appendStep(jo);
-    			else Output.errorAlert("Insufficient Data. Couldn't Terminate Step.");
-    		}
-    	});
+		JSONObject jo = projectMap.get(projectName);
+    	if(DataSpawn_ii.terminateStep(jo))DataSpawn_ii.appendStep(jo);
+    	else System.out.println("Insufficient Data. Couldn't Terminate Step.");
+    }
     	
+    	/*
     	terminatePrjctBtn.setOnAction((event)->
     	{
     	
@@ -488,18 +517,6 @@ public class GTDCLI implements Beholder<String>
     						+ "Successfull Steps: " + successfullSteps;
     		
     		tStage.setInfoText(infoText);
-    	});
-    	
-    	exitBtn.setOnAction((event)->
-    	{
-    		try
-    		{
-				stop();
-			}
-    		catch(JSONException | IOException | URISyntaxException e)
-    		{
-				e.printStackTrace();
-			}
     	});
     	*/
   

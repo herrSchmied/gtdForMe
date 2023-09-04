@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -28,9 +29,7 @@ public class DataSpawn_ii implements Subjekt<String>
 {
 	
 	
-	//Done->		Eliminate rest of Literals in Code.		<-Done
-	
-	public static final String styleClassGenericNode = "generic-node";
+	//TODO:->		Eliminate rest of Literals in Code.		<-
 	
 	public static final int firstStepIndex = 0;
 	
@@ -57,6 +56,8 @@ public class DataSpawn_ii implements Subjekt<String>
 	public static final int minDay = 1;
 	public static final int minHour = 0;
 	public static final int minMinute = 0;
+	public static final LocalDateTime ancient = LocalDateTime.of(minBDTYear, minMonth, minDay, minHour, minMinute);
+
 	public static final String dldtQ = "Deadline for Project?";
 	public static final int dldtRange = 100;
 	
@@ -83,8 +84,7 @@ public class DataSpawn_ii implements Subjekt<String>
 	public static final boolean notTxtAQstn = true;
 	
 	private static Set<String> stepStartStatuses = new HashSet<>(Arrays.asList(StatusMGMT.atbd, StatusMGMT.waiting));
-	private static Set<String> projectStartStatie = new HashSet<>(Arrays.asList(StatusMGMT.atbd, StatusMGMT.waiting));
-	
+		
 	public static final String stepStatusPhrase = "Choose Status: ";
 	public static final String wantToChangeTDTOfStepQstn = "Wan't to change TDT of Step?";
 	public static final String waitingForPhrase = "What u waiting for?";
@@ -99,78 +99,68 @@ public class DataSpawn_ii implements Subjekt<String>
 		
 		String name = Input.getString(prjctNameQ);
 		name = name.trim();
-		if(knownProjects.keySet().contains(name)) throw new IllegalArgumentException();
+		if(knownProjects.keySet().contains(name))
+		{
+			System.out.println("There is already a Project with that Name.");
+			return null;
+		}
 
 		JSONObject pJson = new JSONObject();
  
-		boolean isModProject = false;
 		String status = "";
 		LocalDateTime bdt = null;
 		LocalDateTime nddt = LocalDateTime.now();
 		LocalDateTime dldt = null;
 
-		
-		if(!isModProject)
+
+		try 
 		{
+				
+			boolean isModProject = Input.getYesOrNo(isModProjectQ);		
+			if(isModProject)status = StatusMGMT.mod;
 			
+			String goal = Input.getString(goalQ);
+				
+			boolean changeBDT = Input.getYesOrNo(changeBDTQ);
+			System.out.println("changeBDT: " + changeBDT);
+			int yearRange = LocalDateTime.now().getYear()-minBDTYear;//must be born before now.
+
+			if(changeBDT)
+			{
+				bdt = Input.getDateTime(bdtQ, ancient, yearRange);
+			}
+			else bdt = nddt;
+				
+			pJson.put(ProjectJSONKeyz.nameKey, name);
+			pJson.put(ProjectJSONKeyz.goalKey, goal);
+			pJson.put(ProjectJSONKeyz.statusKey, status);
 			
-			try 
+			String deadLineStr = "UNKNOWN";
+			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);
+				
+			String bdtStr = LittleTimeTools.timeString(bdt);
+			pJson.put(ProjectJSONKeyz.BDTKey, bdtStr);
+			
+			String nddtStr = LittleTimeTools.timeString(nddt);
+			pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
+
+			if(!isModProject)
 			{
 				
-				isModProject = Input.getYesOrNo(isModProjectQ);
-				
-				if(!isModProject)
-				{
-					List<String> startStatie = new ArrayList<>();
-					startStatie.addAll(projectStartStatie);
-					status = Input.getAnswerOutOfList("Choose Project Status", startStatie);
-				}
-				else status = StatusMGMT.mod;
-				
-				String goal = Input.getString(goalQ);
-
-				
-				boolean changeBDT = Input.getYesOrNo(changeBDTQ);
-				System.out.println("changeBDT: " + changeBDT);
-				int yearRange = LocalDateTime.now().getYear()-minBDTYear;//must be born before now.
-
-				if(changeBDT)
-				{
-					bdt = Input.getDateTime(bdtQ, minBDTYear, yearRange, minMonth, minDay, minHour, minMinute);
-				}
-				else bdt = nddt;
-				
-				pJson.put(ProjectJSONKeyz.nameKey, name);
-				pJson.put(ProjectJSONKeyz.goalKey, goal);
-				pJson.put(ProjectJSONKeyz.statusKey, status);
-				
-				String deadLineStr = "UNKNOWN";
-				pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);
-				
-				String bdtStr = LittleTimeTools.timeString(bdt);
-				pJson.put(ProjectJSONKeyz.BDTKey, bdtStr);
-				
-				String nddtStr = LittleTimeTools.timeString(nddt);
-				pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
-
-				if(!isModProject)
-				{
-					
-					int minYear = nddt.getYear();
-					int minMonth = nddt.getMonthValue();
-					int minDay = nddt.getDayOfMonth();
-					int minHour = nddt.getHour();
-					int minMinute = nddt.plusMinutes(5).getMinute();//Deadline should be at least five Minutes in the Future.
-					
-					dldt = Input.getDateTime(dldtQ, nddt.getYear(), dldtRange, minMonth, minDay, minHour, minMinute);
-					deadLineStr = LittleTimeTools.timeString(dldt);
-					pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
-
-					JSONObject tmp = spawnFirstStep(pJson);
-					if(tmp==null)return null;
-					else pJson = tmp;
-					if(!timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))return null;
-				}
+				int minYear = nddt.getYear();
+				int minMonth = nddt.getMonthValue();
+				int minDay = nddt.getDayOfMonth();
+				int minHour = nddt.getHour();
+				int minMinute = nddt.plusMinutes(5).getMinute();//Deadline should be at least five Minutes in the Future.		
+				LocalDateTime timeOffset = LocalDateTime.of(minYear, minMonth, minDay, minHour, minMinute);
+				dldt = Input.getDateTime(dldtQ, timeOffset, dldtRange);
+				deadLineStr = LittleTimeTools.timeString(dldt);
+				pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
+				JSONObject tmp = spawnFirstStep(pJson);//Here status will be overwritten.
+				if(tmp==null)return null;
+				else pJson = tmp;
+				if(!timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))return null;
+			}
 
 			} 
 			catch (IllegalArgumentException | InputMismatchException e) 
@@ -183,7 +173,6 @@ public class DataSpawn_ii implements Subjekt<String>
 				e.printStackTrace();
 				return null;
 			}
-		}
 				
 		return pJson;
 	}
@@ -266,19 +255,14 @@ public class DataSpawn_ii implements Subjekt<String>
 		boolean differentBDT;
 
 		String stepStatus = "";
-		int minYear = 0;
-		int yearRange = 2100;
-		int monthOffset = 1;
-		int dayOffset = 1;
-		int minHour = 0;
-		int minMinute = 0;
+		int yearRange = 100;
 
 		try 
 		{
 			differentBDT = Input.getYesOrNo("Want to change bdt of Step?");
 
 		
-			if(differentBDT)bdtOfStep = Input.getDateTime("DateTime of Step:", minYear, yearRange, monthOffset, dayOffset, minHour, minMinute);
+			if(differentBDT)bdtOfStep = Input.getDateTime("DateTime of Step BDT:", ancient, yearRange);
 			else bdtOfStep = nddtOfStep;
 			
 			while(stepStatus.trim().equals("")) 
@@ -308,7 +292,7 @@ public class DataSpawn_ii implements Subjekt<String>
 									+" and Project Deadline: " + prjctDeadLine);
 			}
 			
-			LocalDateTime deadLineLDT = Input.getDateTime("Step DeadLine Please.",minYear, yearRange, monthOffset, dayOffset, minHour, minMinute);
+			LocalDateTime deadLineLDT = Input.getDateTime("Step DeadLine Please.", nddtOfStep, yearRange);
 			String deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			
 			newStep.put(StepJSONKeyz.DLDTKey, deadLineStr);
@@ -319,7 +303,9 @@ public class DataSpawn_ii implements Subjekt<String>
 		} 
 		catch (InputMismatchException | IOException e) 
 		{
-			return null;
+			
+			System.out.println("Sometin went wrong! Do it again.");
+			return spawnStep(pJson, index);//Enforced!!!
 		}
 		
 		if(stepDataIsValide(pJson, oldStep, newStep, index))
@@ -369,6 +355,7 @@ public class DataSpawn_ii implements Subjekt<String>
 			else System.out.println(msg);
 		}
 		
+		System.out.println("Step Data is Ok");
 		return true;
 	}
 	
@@ -434,7 +421,6 @@ public class DataSpawn_ii implements Subjekt<String>
 	public void addNote(JSONObject pJson)
 	{
 		int index = 0;
-		String title = "";
 		JSONArray ja;
 		boolean hasNoteArray = pJson.has(ProjectJSONKeyz.noteArrayKey);
 		
@@ -455,32 +441,32 @@ public class DataSpawn_ii implements Subjekt<String>
 	}
 	
 	//Can only terminate last Step of Project JSONObject.
-	public boolean terminateStep(JSONObject pJson)
+	public static boolean terminateStep(JSONObject pJson) throws IOException
 	{
-		/*
-		String title = "";
 		
 		JSONArray steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
 		int index = steps.length();
 		
 		JSONObject step = steps.getJSONObject(index-1);
+		String nddtOfStepStr = step.getString(StepJSONKeyz.NDDTKey);
+		LocalDateTime nddtOfStep = LittleTimeTools.LDTfromTimeString(nddtOfStepStr);
 		
-		String terminalStatus = Input.question.apply(stepSuccesQstn);
-		if(terminalStatus.equals(Input.yesAnswerToQuestion)||terminalStatus.equals(Input.noAnswerToQuestion))
+		boolean wasItASuccess = Input.getYesOrNo(stepSuccesQstn);
+		if(wasItASuccess||!wasItASuccess)
 		{
 			
+			int tdtYearRangeMax = 1;
 			String stepStatus = "";
-			if(terminalStatus.equals(Input.yesAnswerToQuestion))stepStatus = StatusMGMT.success;
+			if(wasItASuccess)stepStatus = StatusMGMT.success;
 			else stepStatus = StatusMGMT.failed;
 			
-			String terminalNote = Input.getTextInput(title, stepTerminationNotePhrase, terminalIsInTxtA);
-			String whenQuestion = Input.question.apply(wantToChangeTDTOfStepQstn);
-			LocalDateTime tdt = LocalDateTime.now();
+			String terminalNote = "";
+			boolean thereIsATerminalNote = Input.getYesOrNo("want to make a Terminal note?");
+			if(thereIsATerminalNote)terminalNote = Input.getString(stepTerminationNotePhrase);
 			
-			if(whenQuestion.equals(Input.yesAnswerToQuestion))
-			{
-				tdt = Input.getDateTimeInput(title, stepWhenTDTQstn);
-			}
+			LocalDateTime tdt = LocalDateTime.now();
+			boolean wantToChangeTDTOfStep = Input.getYesOrNo(wantToChangeTDTOfStepQstn);	
+			if(wantToChangeTDTOfStep)tdt = Input.getDateTime(stepWhenTDTQstn, nddtOfStep, tdtYearRangeMax);
 			
 			step.put(StepJSONKeyz.statusKey, stepStatus);//Project Status ain't bothered!!
 			String when = LittleTimeTools.timeString(tdt);
@@ -490,76 +476,75 @@ public class DataSpawn_ii implements Subjekt<String>
 			return true;
 		}
 		else return false;
-		*/
-		
-		return false;
 	}
 	
-	public void terminateProject(JSONObject pJson)
+	public boolean terminateProject(JSONObject pJson) throws InputMismatchException, JSONException, IOException
 	{
 		
-		/*
-		Output.infoAlert(infoAlertTxtPhrase);
+		System.out.println(infoAlertTxtPhrase);
 		
 		if(terminateStep(pJson))
 		{
 			
 			String title = "";
 			String prjctStatus = "";
-			String terminalStatus = Input.question.apply(prjctSuccessQstn);
+			boolean success = Input.getYesOrNo(prjctSuccessQstn);
 			
-			if(terminalStatus.equals(Input.cancelAnswerToQuestion))return;
 			
-			if(terminalStatus.equals(Input.yesAnswerToQuestion)||terminalStatus.equals(Input.noAnswerToQuestion))
+			if(success)prjctStatus = StatusMGMT.success;
+			else prjctStatus = StatusMGMT.failed;
+
+			JSONArray steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
+			int index = steps.length();
+				
+			JSONObject step = steps.getJSONObject(index-1);				
+			String terminalNote = step.getString(StepJSONKeyz.TDTNoteKey);//Step TDT-Note = Project TDT-Note.
+				
+			boolean wantChangeTDTQuestion = Input.getYesOrNo(wantToChangeTDTOfPrjctQstn);
+			LocalDateTime tdt = LocalDateTime.now();
+			int yearRange = 1;	
+			if(wantChangeTDTQuestion)tdt = Input.getDateTime(prjctWhenTDTQstn,ancient, yearRange);
+				
+			String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
+			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
+				
+			if(tdt.isAfter(dldt))
 			{
-				
-				if(terminalStatus.equals(Input.yesAnswerToQuestion))prjctStatus = StatusMGMT.success;
-				else prjctStatus = StatusMGMT.failed;
-					
-				
-				JSONArray steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
-				int index = steps.length();
-				
-				JSONObject step = steps.getJSONObject(index-1);				
-				String terminalNote = step.getString(StepJSONKeyz.TDTNoteKey);//Step TDT-Note = Project TDT-Note.
-				steps.put(index-1, step);
-				
-				String wantChangeTDTQuestion = Input.question.apply(wantToChangeTDTOfPrjctQstn);
-				LocalDateTime tdt = LocalDateTime.now();
-				
-				if(wantChangeTDTQuestion.equals(Input.yesAnswerToQuestion))
-				{
-					tdt = Input.getDateTimeInput(title, prjctWhenTDTQstn);
-				}
-				
-				String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
-				LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-				
-				if(tdt.isAfter(dldt))
-				{
-					Output.errorAlert("Termination can't be after Deadline.");
-					return;
-				}
-				
-				String nddtStr = pJson.getString(ProjectJSONKeyz.NDDTKey);
-				LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
-				
-				if(tdt.isBefore(nddt))
-				{
-					Output.errorAlert("Termination can't be before Note-Down-Date-Time");
-					return;
-				}
-				
-				pJson.put(ProjectJSONKeyz.statusKey, prjctStatus);
-				
-				String tdtStr = LittleTimeTools.timeString(tdt);
-				pJson.put(ProjectJSONKeyz.TDTKey, tdtStr);
-				
-				//Step TDT-Note = Project TDT-Note.
-				if(!terminalNote.trim().equals(""))pJson.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);	
+				System.out.println("Termination can't be after Deadline.");
+				return false;
 			}
+				
+			String nddtStr = pJson.getString(ProjectJSONKeyz.NDDTKey);
+			LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
+				
+			if(tdt.isBefore(nddt))
+			{
+				System.out.println("Termination can't be before Note-Down-Date-Time");
+				return false;
+			}
+			
+			LocalDateTime jetzt = LocalDateTime.now();
+			if(tdt.isAfter(jetzt))
+			{
+				System.out.println("TDT can't be after now.");
+				return false;
+			}
+				
+			pJson.put(ProjectJSONKeyz.statusKey, prjctStatus);
+				
+			String tdtStr = LittleTimeTools.timeString(tdt);
+			pJson.put(ProjectJSONKeyz.TDTKey, tdtStr);
+				
+			//Step TDT-Note = Project TDT-Note.
+			if(!terminalNote.trim().equals(""))pJson.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);
+			
+			return true;
 		}
-		*/
+		else
+		{
+			System.out.println("Can't Terminate last Step.");
+			return false;
+		}
 	}
 	
 	@Override
