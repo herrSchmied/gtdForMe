@@ -97,6 +97,7 @@ public class DataSpawn_ii implements Subjekt<String>
 	public static JSONObject spawnNewProject(Map<String, JSONObject> knownProjects, StatusMGMT statusMGMT)
 	{
 		
+		System.out.println("");
 		String name = Input.getString(prjctNameQ);
 		name = name.trim();
 		if(knownProjects.keySet().contains(name))
@@ -115,18 +116,21 @@ public class DataSpawn_ii implements Subjekt<String>
 
 		try 
 		{
-				
+			System.out.println("");
 			boolean isModProject = Input.getYesOrNo(isModProjectQ);		
 			if(isModProject)status = StatusMGMT.mod;
 			
+			System.out.println("");
 			String goal = Input.getString(goalQ);
-				
+			
+			System.out.println("");
 			boolean changeBDT = Input.getYesOrNo(changeBDTQ);
 			System.out.println("changeBDT: " + changeBDT);
 			int yearRange = LocalDateTime.now().getYear()-minBDTYear;//must be born before now.
 
 			if(changeBDT)
 			{
+				System.out.println("");
 				bdt = Input.getDateTime(bdtQ, ancient, yearRange);
 			}
 			else bdt = nddt;
@@ -153,9 +157,12 @@ public class DataSpawn_ii implements Subjekt<String>
 				int minHour = nddt.getHour();
 				int minMinute = nddt.plusMinutes(5).getMinute();//Deadline should be at least five Minutes in the Future.		
 				LocalDateTime timeOffset = LocalDateTime.of(minYear, minMonth, minDay, minHour, minMinute);
+				
+				System.out.println("");
 				dldt = Input.getDateTime(dldtQ, timeOffset, dldtRange);
 				deadLineStr = LittleTimeTools.timeString(dldt);
 				pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
+				
 				JSONObject tmp = spawnFirstStep(pJson);//Here status will be overwritten.
 				if(tmp==null)return null;
 				else pJson = tmp;
@@ -418,7 +425,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		return "OK";
 	}
 	
-	public void addNote(JSONObject pJson)
+	public static void addNote(JSONObject pJson)
 	{
 		int index = 0;
 		JSONArray ja;
@@ -478,7 +485,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		else return false;
 	}
 	
-	public boolean terminateProject(JSONObject pJson) throws InputMismatchException, JSONException, IOException
+	public static boolean terminateProject(JSONObject pJson) throws InputMismatchException, JSONException, IOException
 	{
 		
 		System.out.println(infoAlertTxtPhrase);
@@ -497,9 +504,11 @@ public class DataSpawn_ii implements Subjekt<String>
 			JSONArray steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
 			int index = steps.length();
 				
-			JSONObject step = steps.getJSONObject(index-1);				
-			String terminalNote = step.getString(StepJSONKeyz.TDTNoteKey);//Step TDT-Note = Project TDT-Note.
-				
+			JSONObject step = steps.getJSONObject(index-1);
+			String terminalNote = "";
+			//Step TDT-Note = Project TDT-Note. Step might not have a TDT-Note.
+			if(step.has(StepJSONKeyz.TDTNoteKey))terminalNote = step.getString(StepJSONKeyz.TDTNoteKey);
+			
 			boolean wantChangeTDTQuestion = Input.getYesOrNo(wantToChangeTDTOfPrjctQstn);
 			LocalDateTime tdt = LocalDateTime.now();
 			int yearRange = 1;	

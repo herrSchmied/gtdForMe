@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.function.Predicate;
 import java.util.HashMap;
 
@@ -47,6 +48,22 @@ public class GTDCLI implements Beholder<String>
 	public final static String newPrjctStgClsd = "New Project Stage closed.";
 
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
+	
+	private static final String exit = "exit";
+	private static final String list_not_active_ones = "list not active ones";
+	private static final String list_active_ones = "list active ones";
+	private static final String next_Step = "next Step";
+	private static final String list = "list";
+	private static final String help = "help";
+	private static final String new_Project ="new Project";
+	private static final String list_commands = "list commands";
+	private static final String terminate_Project = "terminate Project";
+	private static final String add_Note = "add Note";
+	
+	private static final Set<String> commands = new HashSet<>(Arrays.asList(exit, list, help, 
+			list_active_ones, list_not_active_ones, new_Project, next_Step, list_commands, terminate_Project,
+			add_Note));
+
  
 	public final Predicate<String> activeProject = (n)->
 	{
@@ -61,7 +78,7 @@ public class GTDCLI implements Beholder<String>
 
 		return false;
 	};
-	
+
 	public final Predicate<String> notActiveProject = (n)-> !activeProject.test(n);
 
 	/*
@@ -104,40 +121,6 @@ public class GTDCLI implements Beholder<String>
 		}
 	};
 
-	private EventHandler<MouseEvent> notesView = (mouseEvent)->
-	{
-		
-		ProjectTableViewModel ptvm = detectedSelection();
-
-		if(ptvm!=null)
-		{
-				
-	    	String prjctName = ptvm.getProjectName();
-	    	JSONObject jo;
-	    	
-	    	if(!tableIsShowingMODProjects)jo= projectMap.get(prjctName);
-	    	else jo = modProjectMap.get(prjctName);
-	    	
-	    	if(jo.has(ProjectJSONKeyz.noteArrayKey))
-	    	{
-	    		JSONArray ja = jo.getJSONArray(ProjectJSONKeyz.noteArrayKey);//Can't not have no stepArrayJSON
-	    		
-	    		String s = "";
-	   			int size = ja.length();
-	   			for(int n=0;n<size;n++)
-	    		{
-	    			s = s + "NoteNr.: " + n + "\n" + ja.get(n) + "\n\n"; 
-	   			}
-
-	   			tStage.setInfoText(s);
-	    	}
-	    	else tStage.setInfoText("No Notes.");
-		}
-		else
-		{
-			tStage.setInfoText("No Steps in MOD-Project.");
-		}
-	};
 	
 	private EventHandler<MouseEvent> JSONView = (mouseEvent)->
 	{
@@ -215,30 +198,87 @@ public class GTDCLI implements Beholder<String>
     public void loopForCommands() throws JSONException, IOException, URISyntaxException
     {
     	
-    	String command = consoleTools.Input.getString("Type command. (ex. help or exit).");
+    	String px = BashSigns.boldBBCPX;
+    	String sx = BashSigns.boldBBCSX;
+    	
+    	System.out.println("");
+    	String command = consoleTools.Input.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	
     	System.out.println("Trying to excecute: '" + command.trim() + "'");
     	switch(command.trim())
     	{
-    		case "exit": stop();//No break needed.
-    		case "list not active ones":
+    		case exit: stop();//No break needed.
+    		
+    		case add_Note:
     		{
+    			
+    			System.out.println("");
+    			List<String> aPrjcts = findProjectNames(activeProject);
+    			if(aPrjcts.isEmpty())
+    			{
+    				System.out.println("No active Projects.");
+    				break;
+    			}
+    			
+    			String pName = Input.getAnswerOutOfList("Which one?", aPrjcts);
+    			if(aPrjcts.contains(pName))
+    			{
+    				JSONObject pJSON = projectMap.get(pName);
+    				DataSpawn_ii.addNote(pJSON);
+    			}
+    			break;
+    		}
+
+    		case terminate_Project:
+    		{
+    			
+    			System.out.println("");
+    			List<String> aPrjcts = findProjectNames(activeProject);
+    			if(aPrjcts.isEmpty())
+    			{
+    				System.out.println("No active Projects.");
+    				break;
+    			}
+    			
+    			String pName = Input.getAnswerOutOfList("Which one?", aPrjcts);
+    			if(aPrjcts.contains(pName))
+    			{
+    				JSONObject pJSON = projectMap.get(pName);
+    				DataSpawn_ii.terminateProject(pJSON);
+    			}
+    			break;
+    		}
+    		
+    		case list_commands:
+    		{
+    			System.out.println("");
+    			for(String cmds: commands)System.out.println(cmds);
+    			System.out.println("");
+    			break;
+    		}
+    		
+    		case list_not_active_ones:
+    		{
+    			System.out.println("");
     			List<String> noAPrjcts = findProjectNames(notActiveProject);
     			for(String prjctName: noAPrjcts)System.out.println(prjctName);
     			
     			break;
     		}
-    		case "list active ones":
+ 
+    		case list_active_ones:
     		{
+    			System.out.println("");
     			List<String> aPrjcts = findProjectNames(activeProject);
     			for(String prjctName: aPrjcts)System.out.println(prjctName);
     			
     			break;
     		}
-    		case "next Step"://Test! Test!
+
+    		case next_Step://Test! Test!
     		{
+    			System.out.println("");
     			List<String> aPrjcts = findProjectNames(activeProject);
-    			for(String prjctName: aPrjcts)System.out.println(prjctName);
  
     			String choosenOne = Input.getAnswerOutOfList("Which one?", aPrjcts);
     			String prjct = choosenOne.trim();
@@ -247,20 +287,24 @@ public class GTDCLI implements Beholder<String>
     					+ " on the List!");
     			break;
     		}
-    		case "list": 
+    
+    		case list: 
     		{
+    			System.out.println("");
     			showProjectTable();
     			break;
     		}
-    		case "help": 
+    	
+    		case help: 
     		{
+    			System.out.println("");
     			System.out.println("Not yet Installed.");
     			break;
     		}
     		
-    		case "new Project":
+    		case new_Project:
     		{
-    			  			
+    			System.out.println(""); 			
     			JSONObject pJson = DataSpawn_ii.spawnNewProject(knownProjects, states);
     			if(pJson!=null)
     			{
@@ -275,7 +319,7 @@ public class GTDCLI implements Beholder<String>
     			}
     			else System.out.println("No Project.");
     			break;
-    		}
+    		}    		
     		default:
     		{
     			System.out.println("Unknown command!");
