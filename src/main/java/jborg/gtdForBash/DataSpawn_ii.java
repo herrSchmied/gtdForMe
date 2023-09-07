@@ -125,7 +125,6 @@ public class DataSpawn_ii implements Subjekt<String>
 			
 			System.out.println("");
 			boolean changeBDT = Input.getYesOrNo(changeBDTQ);
-			System.out.println("changeBDT: " + changeBDT);
 			int yearRange = LocalDateTime.now().getYear()-minBDTYear;//must be born before now.
 
 			if(changeBDT)
@@ -262,20 +261,27 @@ public class DataSpawn_ii implements Subjekt<String>
 		boolean differentBDT;
 
 		String stepStatus = "";
-		int yearRange = 100;
 
 		try 
 		{
+			
+			String bdtOfPrj = pJson.getString(ProjectJSONKeyz.BDTKey);
+			LocalDateTime ldtBDTOfPrj = LittleTimeTools.LDTfromTimeString(bdtOfPrj);
+			String jetzt = LittleTimeTools.timeString(LocalDateTime.now());
+			
+			System.out.println("");
 			differentBDT = Input.getYesOrNo("Want to change bdt of Step?");
-
-		
-			if(differentBDT)bdtOfStep = Input.getDateTime("DateTime of Step BDT:", ancient, yearRange);
+			int yearRangeStepBDT = LocalDateTime.now().getYear()-ldtBDTOfPrj.getYear();
+			System.out.println("");
+			System.out.println("BDT of Project(" + bdtOfPrj + ") - Now!(" + jetzt + ") Step BDT must be in that Range.");
+			if(differentBDT)bdtOfStep = Input.getDateTime("DateTime of Step BDT: ", ldtBDTOfPrj, yearRangeStepBDT);
 			else bdtOfStep = nddtOfStep;
 			
 			while(stepStatus.trim().equals("")) 
 			{
 				List<String> sss = new ArrayList<>();
 				sss.addAll(stepStartStatuses);
+				System.out.println("");
 				stepStatus = Input.getAnswerOutOfList("Choose Step Status", sss);
 			}
 						
@@ -286,21 +292,28 @@ public class DataSpawn_ii implements Subjekt<String>
 			String descriptionOfStep = Input.getString(phrase);
 			
 			String prjctNDDT = pJson.getString(ProjectJSONKeyz.NDDTKey);
-			String prjctDeadLine = pJson.getString(ProjectJSONKeyz.DLDTKey);
+			LocalDateTime ldtNDDTOfPrjct = LittleTimeTools.LDTfromTimeString(prjctNDDT);
 			
+			String prjctDeadLine = pJson.getString(ProjectJSONKeyz.DLDTKey);
+			String deadLineStr = "";
+			LocalDateTime prjctDLDTYear = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
 			if(index==firstStepIndex)
 			{
-				System.out.println("Deadline must be between StepNDDT: " + prjctNDDT + " and Project Deadline: " + prjctDeadLine);
+				System.out.println("");
+				System.out.println("Deadline must be between Projec NDDT: " + prjctNDDT + " and Project Deadline: " + prjctDeadLine);
+				LocalDateTime deadLineLDT = Input.getDateTime("Step DeadLine Please.", ldtNDDTOfPrjct, prjctDLDTYear);
+				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
 			else
 			{
+				System.out.println("");
 				String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
 				System.out.println("Deadline must be between old-Step TDT: " + oldStepTDT
 									+" and Project Deadline: " + prjctDeadLine);
+				LocalDateTime ldtOldStepTDT = LittleTimeTools.LDTfromTimeString(oldStepTDT);
+				LocalDateTime deadLineLDT = Input.getDateTime("Step DeadLine Please.", ldtOldStepTDT, prjctDLDTYear);
+				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
-			
-			LocalDateTime deadLineLDT = Input.getDateTime("Step DeadLine Please.", nddtOfStep, yearRange);
-			String deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			
 			newStep.put(StepJSONKeyz.DLDTKey, deadLineStr);
 			newStep.put(StepJSONKeyz.statusKey, stepStatus);
@@ -310,7 +323,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		} 
 		catch (InputMismatchException | IOException e) 
 		{
-			
+			System.out.println("");
 			System.out.println("Sometin went wrong! Do it again.");
 			return spawnStep(pJson, index);//Enforced!!!
 		}
@@ -327,6 +340,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		}
 		else 
 		{
+			System.out.println("");
 			System.out.println("Neuer Versuch für step Data!!");
 			return spawnStep(pJson, index);//Enforced Input!!
 		}
@@ -336,6 +350,7 @@ public class DataSpawn_ii implements Subjekt<String>
 	{
 	
 		String msg = stepIsOkToItsSelf(newStep);
+		System.out.println("");
 		if(!msg.equals("OK"))
 		{
 			System.out.println(msg);
