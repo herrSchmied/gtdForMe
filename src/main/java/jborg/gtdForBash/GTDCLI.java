@@ -193,7 +193,13 @@ public class GTDCLI implements Beholder<String>
     	//states = loadStates();
     	checkForDeadlineAbuse();
     	
+    	loopForCommands();
 	}
+    
+    public static void main(String... args) throws ClassNotFoundException, IOException, URISyntaxException
+    {
+    	new GTDCLI();
+    }
     
     public void loopForCommands() throws JSONException, IOException, URISyntaxException
     {
@@ -397,14 +403,6 @@ public class GTDCLI implements Beholder<String>
 		System.out.println(ttd);
     }
     
-	public static void main(String[] args) throws ClassNotFoundException, IOException, URISyntaxException
-    {
-		
-		GTDCLI gtdTool = new GTDCLI();
-		
-		gtdTool.loopForCommands();
-    }
-
 	/*
 	 * TODO: Test this!!!!!!!!!!!!!!!!!!!!
 	 */
