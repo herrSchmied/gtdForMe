@@ -3,7 +3,7 @@ package jborg.gtdForBash;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.net.URISyntaxException;
 
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ import org.json.JSONObject;
 import allgemein.Beholder;
 
 import allgemein.LittleTimeTools;
-import consoleTools.Input;
+import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
 import fileShortCuts.LoadAndSave;
 
@@ -65,7 +65,7 @@ public class GTDCLI implements Beholder<String>
 			add_Note));
 
  
-	private final DataSpawn_ii ds;
+	private final GTDDataSpawnSession ds;
 	
 	public final Predicate<String> activeProject = (n)->
 	{
@@ -82,47 +82,11 @@ public class GTDCLI implements Beholder<String>
 	};
 
 	public final Predicate<String> notActiveProject = (n)-> !activeProject.test(n);
-
+	
+	private final InputStreamSession iss;
+	
 	/*
-	private EventHandler<MouseEvent> stepsView = (mouseEvent)->
-	{
-		
-		ProjectTableViewModel ptvm = detectedSelection();
-
-		if(!tableIsShowingMODProjects)
-		{
-			if(ptvm!=null)
-			{
-				
-	    		String prjctName = ptvm.getProjectName();
-	    		JSONObject jo = projectMap.get(prjctName);
-	    		JSONArray ja = jo.getJSONArray(ProjectJSONKeyz.stepArrayKey);//Can't not have no stepArrayJSON
-	    		
-	    		String s = "";
-	    		int size = ja.length();
-	    		for(int n=0;n<size;n++)
-	    		{
-	    			
-	    			JSONObject step = (JSONObject)ja.get(n);
-	    			String desc = step.getString(StepJSONKeyz.descKey);
-	    			String stepStatus = step.getString(StepJSONKeyz.statusKey);
-	    			String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
-	    			
-	    			s = s + "StepNr.: " + n + "\n" 
-	    			+ "Status: \n" + stepStatus + "\n"
-	    			+ "Description: \n" + desc + "\n"
-	    			+ "Deadline: " + dldtStr+"\n\n";
-	    		}
-	    		
-	    		tStage.setInfoText(s);
-			}
-		}
-		else
-		{
-			tStage.setInfoText("No Steps in MOD-Project.");
-		}
-	};
-
+	stepsView -> show all Last Steps or all Steps of one Project
 	
 	private EventHandler<MouseEvent> JSONView = (mouseEvent)->
 	{
@@ -178,10 +142,12 @@ public class GTDCLI implements Beholder<String>
     private EventHandler<MouseEvent> currentView = stndrtView;
     */
 	
-    public GTDCLI() throws ClassNotFoundException, IOException, URISyntaxException
+    public GTDCLI(InputStreamSession iss) throws ClassNotFoundException, IOException, URISyntaxException
 	{
     	
-    	ds = new DataSpawn_ii(System.in);
+    	this.iss = iss;
+
+    	ds = new GTDDataSpawnSession(this.iss);
     	
 		//states = loadStates();
 		if(states==null)states = StatusMGMT.getInstance();
@@ -202,18 +168,17 @@ public class GTDCLI implements Beholder<String>
     
     public static void main(String... args) throws ClassNotFoundException, IOException, URISyntaxException
     {
-    	new GTDCLI();
+    	new GTDCLI(new InputStreamSession(System.in));
     }
     
     public void loopForCommands() throws JSONException, IOException, URISyntaxException
     {
     	
-    	Input inTaker = new Input(System.in);
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
     	
     	System.out.println("");
-    	String command = inTaker.getString(px + "Type" + sx + " command. (ex. help or exit).");
+    	String command = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	
     	System.out.println("Trying to excecute: '" + command.trim() + "'");
     	switch(command.trim())
@@ -231,7 +196,7 @@ public class GTDCLI implements Beholder<String>
     				break;
     			}
     			
-    			String pName = inTaker.getAnswerOutOfList("Which one?", aPrjcts);
+    			String pName = iss.getAnswerOutOfList("Which one?", aPrjcts);
     			if(aPrjcts.contains(pName))
     			{
     				JSONObject pJSON = projectMap.get(pName);
@@ -251,7 +216,7 @@ public class GTDCLI implements Beholder<String>
     				break;
     			}
     			
-    			String pName = inTaker.getAnswerOutOfList("Which one?", aPrjcts);
+    			String pName = iss.getAnswerOutOfList("Which one?", aPrjcts);
     			if(aPrjcts.contains(pName))
     			{
     				JSONObject pJSON = projectMap.get(pName);
@@ -291,7 +256,7 @@ public class GTDCLI implements Beholder<String>
     			System.out.println("");
     			List<String> aPrjcts = findProjectNames(activeProject);
  
-    			String choosenOne = inTaker.getAnswerOutOfList("Which one?", aPrjcts);
+    			String choosenOne = iss.getAnswerOutOfList("Which one?", aPrjcts);
     			String prjct = choosenOne.trim();
     			if(aPrjcts.contains(prjct))nxtStp(prjct);
     			else System.out.println("Please choose more wise. Because '" + choosenOne + "' is not"

@@ -27,7 +27,7 @@ import allgemein.Subjekt;
 import consoleTools.*;
 
 
-public class DataSpawn_ii implements Subjekt<String>
+public class GTDDataSpawnSession implements Subjekt<String>
 {
 	
 	
@@ -95,20 +95,19 @@ public class DataSpawn_ii implements Subjekt<String>
 	public static final String deadLinePrjctQstn = "Deadline for Project";
 	public static final String unknownDLLblTxt = "Unkown Deadline";
 	public static final String makeDLBtnTxt = "Make Deadline";
-	final InputStream is;
-	final Input inTaker;
+
+	final InputStreamSession iss;
 	
-	public DataSpawn_ii(InputStream is)
+	public GTDDataSpawnSession(InputStreamSession iss)
 	{
-		this.is = is;
-		this.inTaker = new Input(is);
+		this.iss = iss;
 	}
 	
 	public JSONObject spawnNewProject(Map<String, JSONObject> knownProjects, StatusMGMT statusMGMT)
 	{
 		
 		System.out.println("");
-		String name = inTaker.getString(prjctNameQ);
+		String name = iss.getString(prjctNameQ);
 		name = name.trim();
 		if(knownProjects.keySet().contains(name))
 		{
@@ -127,20 +126,20 @@ public class DataSpawn_ii implements Subjekt<String>
 		try 
 		{
 			System.out.println("");
-			boolean isModProject = inTaker.getYesOrNo(isModProjectQ);		
+			boolean isModProject = iss.getYesOrNo(isModProjectQ);		
 			if(isModProject)status = StatusMGMT.mod;
 			
 			System.out.println("");
-			String goal = inTaker.getString(goalQ);
+			String goal = iss.getString(goalQ);
 			
 			System.out.println("");
-			boolean changeBDT = inTaker.getYesOrNo(changeBDTQ);
+			boolean changeBDT = iss.getYesOrNo(changeBDTQ);
 			int yearRange = LocalDateTime.now().getYear()-minBDTYear;//must be born before now.
 
 			if(changeBDT)
 			{
 				System.out.println("");
-				bdt = inTaker.getDateTime(bdtQ, ancient, LocalDateTime.now());
+				bdt = iss.getDateTime(bdtQ, ancient, LocalDateTime.now());
 			}
 			else bdt = nddt;
 				
@@ -168,11 +167,11 @@ public class DataSpawn_ii implements Subjekt<String>
 				LocalDateTime timeOffset = LocalDateTime.of(minYear, minMonth, minDay, minHour, minMinute);
 				
 				System.out.println("");
-				dldt = inTaker.getDateTime(dldtQ, LocalDateTime.now(), LocalDateTime.now().plusYears(20));
+				dldt = iss.getDateTime(dldtQ, LocalDateTime.now(), LocalDateTime.now().plusYears(20));
 				deadLineStr = LittleTimeTools.timeString(dldt);
 				pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 				
-				JSONObject tmp = spawnFirstStep(is, pJson);//Here status will be overwritten.
+				JSONObject tmp = spawnFirstStep(pJson);//Here status will be overwritten.
 				if(tmp==null)return null;
 				else pJson = tmp;
 				if(!timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))return null;
@@ -225,11 +224,11 @@ public class DataSpawn_ii implements Subjekt<String>
 		return true;
 	};
 
-	public JSONObject spawnFirstStep(InputStream is, JSONObject pJson)
+	public JSONObject spawnFirstStep(JSONObject pJson)
 	{	
 		
 		System.out.println("Spawning first Step for Project: " + pJson.getString(ProjectJSONKeyz.nameKey));
-		return spawnStep(is, pJson, firstStepIndex);
+		return spawnStep(pJson, firstStepIndex);
 	}
 
 	public void appendStep(JSONObject pJson)
@@ -240,10 +239,10 @@ public class DataSpawn_ii implements Subjekt<String>
 		JSONArray steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
 		int length = steps.length();
 		
-		pJson = spawnStep(is, pJson, length);
+		pJson = spawnStep(pJson, length);
 	}
 	
-	private JSONObject spawnStep(InputStream is, JSONObject pJson, int index)
+	private JSONObject spawnStep(JSONObject pJson, int index)
 	{
 
 		System.out.println("Spawning Step. Index: " + index + " Project: "+pJson.toString(4));
@@ -280,11 +279,10 @@ public class DataSpawn_ii implements Subjekt<String>
 			String jetzt = LittleTimeTools.timeString(LocalDateTime.now());
 			
 			System.out.println("");
-			differentBDT = inTaker.getYesOrNo("Want to change bdt of Step?");
-			int yearRangeStepBDT = LocalDateTime.now().getYear()-ldtBDTOfPrj.getYear();
+			differentBDT = iss.getYesOrNo("Want to change bdt of Step?");
 			System.out.println("");
 			System.out.println("BDT of Project(" + bdtOfPrj + ") - Now!(" + jetzt + ") Step BDT must be in that Range.");
-			if(differentBDT)bdtOfStep = inTaker.getDateTime("DateTime of Step BDT: ", ldtBDTOfPrj, LocalDateTime.now());
+			if(differentBDT)bdtOfStep = iss.getDateTime("DateTime of Step BDT: ", ldtBDTOfPrj, LocalDateTime.now());
 			else bdtOfStep = nddtOfStep;
 			
 			while(stepStatus.trim().equals("")) 
@@ -292,14 +290,14 @@ public class DataSpawn_ii implements Subjekt<String>
 				List<String> sss = new ArrayList<>();
 				sss.addAll(stepStartStatuses);
 				System.out.println("");
-				stepStatus = inTaker.getAnswerOutOfList("Choose Step Status", sss);
+				stepStatus = iss.getAnswerOutOfList("Choose Step Status", sss);
 			}
 						
 			String phrase;
 			if(stepStatus.equals(StatusMGMT.waiting))phrase = waitingForPhrase;
 			else phrase = stepDescPhrase;
 
-			String descriptionOfStep = inTaker.getString(phrase);
+			String descriptionOfStep = iss.getString(phrase);
 			
 			String prjctNDDT = pJson.getString(ProjectJSONKeyz.NDDTKey);
 			LocalDateTime ldtNDDTOfPrjct = LittleTimeTools.LDTfromTimeString(prjctNDDT);
@@ -311,7 +309,7 @@ public class DataSpawn_ii implements Subjekt<String>
 			{
 				System.out.println("");
 				System.out.println("Deadline must be between Projec NDDT: " + prjctNDDT + " and Project Deadline: " + prjctDeadLine);
-				LocalDateTime deadLineLDT = inTaker.getDateTime("Step DeadLine Please.", ldtNDDTOfPrjct, prjctDLDTYear);
+				LocalDateTime deadLineLDT = iss.getDateTime("Step DeadLine Please.", ldtNDDTOfPrjct, prjctDLDTYear);
 				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
 			else
@@ -321,7 +319,7 @@ public class DataSpawn_ii implements Subjekt<String>
 				System.out.println("Deadline must be between old-Step TDT: " + oldStepTDT
 									+" and Project Deadline: " + prjctDeadLine);
 				LocalDateTime ldtOldStepTDT = LittleTimeTools.LDTfromTimeString(oldStepTDT);
-				LocalDateTime deadLineLDT = inTaker.getDateTime("Step DeadLine Please.", ldtOldStepTDT, prjctDLDTYear);
+				LocalDateTime deadLineLDT = iss.getDateTime("Step DeadLine Please.", ldtOldStepTDT, prjctDLDTYear);
 				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
 			
@@ -335,7 +333,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		{
 			System.out.println("");
 			System.out.println("Sometin went wrong! Do it again.");
-			return spawnStep(is, pJson, index);//Enforced!!!
+			return spawnStep(pJson, index);//Enforced!!!
 		}
 		
 		if(stepDataIsValide(pJson, oldStep, newStep, index))
@@ -352,7 +350,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		{
 			System.out.println("");
 			System.out.println("Neuer Versuch für step Data!!");
-			return spawnStep(is, pJson, index);//Enforced Input!!
+			return spawnStep(pJson, index);//Enforced Input!!
 		}
 	}
 
@@ -464,7 +462,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		else ja = new JSONArray();
 		
 		
-		String noteTxt = inTaker.getString(noteAddPhrase);
+		String noteTxt = iss.getString(noteAddPhrase);
 		if(!noteTxt.trim().equals(""))
 		{
 			ja.put(index, noteTxt);
@@ -483,7 +481,7 @@ public class DataSpawn_ii implements Subjekt<String>
 		String nddtOfStepStr = step.getString(StepJSONKeyz.NDDTKey);
 		LocalDateTime nddtOfStep = LittleTimeTools.LDTfromTimeString(nddtOfStepStr);
 		
-		boolean wasItASuccess = inTaker.getYesOrNo(stepSuccesQstn);
+		boolean wasItASuccess = iss.getYesOrNo(stepSuccesQstn);
 		if(wasItASuccess||!wasItASuccess)
 		{
 			
@@ -493,12 +491,12 @@ public class DataSpawn_ii implements Subjekt<String>
 			else stepStatus = StatusMGMT.failed;
 			
 			String terminalNote = "";
-			boolean thereIsATerminalNote = inTaker.getYesOrNo("want to make a Terminal note?");
-			if(thereIsATerminalNote)terminalNote = inTaker.getString(stepTerminationNotePhrase);
+			boolean thereIsATerminalNote = iss.getYesOrNo("want to make a Terminal note?");
+			if(thereIsATerminalNote)terminalNote = iss.getString(stepTerminationNotePhrase);
 			
 			LocalDateTime tdt = LocalDateTime.now();
-			boolean wantToChangeTDTOfStep = inTaker.getYesOrNo(wantToChangeTDTOfStepQstn);	
-			if(wantToChangeTDTOfStep)tdt = inTaker.getDateTime(stepWhenTDTQstn, nddtOfStep, LocalDateTime.now().plusYears(tdtYearRangeMax));
+			boolean wantToChangeTDTOfStep = iss.getYesOrNo(wantToChangeTDTOfStepQstn);	
+			if(wantToChangeTDTOfStep)tdt = iss.getDateTime(stepWhenTDTQstn, nddtOfStep, LocalDateTime.now().plusYears(tdtYearRangeMax));
 			
 			step.put(StepJSONKeyz.statusKey, stepStatus);//Project Status ain't bothered!!
 			String when = LittleTimeTools.timeString(tdt);
@@ -520,7 +518,7 @@ public class DataSpawn_ii implements Subjekt<String>
 			
 			String title = "";
 			String prjctStatus = "";
-			boolean success = inTaker.getYesOrNo(prjctSuccessQstn);
+			boolean success = iss.getYesOrNo(prjctSuccessQstn);
 			
 			
 			if(success)prjctStatus = StatusMGMT.success;
@@ -534,10 +532,10 @@ public class DataSpawn_ii implements Subjekt<String>
 			//Step TDT-Note = Project TDT-Note. Step might not have a TDT-Note.
 			if(step.has(StepJSONKeyz.TDTNoteKey))terminalNote = step.getString(StepJSONKeyz.TDTNoteKey);
 			
-			boolean wantChangeTDTQuestion = inTaker.getYesOrNo(wantToChangeTDTOfPrjctQstn);
+			boolean wantChangeTDTQuestion = iss.getYesOrNo(wantToChangeTDTOfPrjctQstn);
 			LocalDateTime tdt = LocalDateTime.now();
 			
-			if(wantChangeTDTQuestion)tdt = inTaker.getDateTime(prjctWhenTDTQstn,ancient, LocalDateTime.now());
+			if(wantChangeTDTQuestion)tdt = iss.getDateTime(prjctWhenTDTQstn,ancient, LocalDateTime.now());
 				
 			String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
 			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
