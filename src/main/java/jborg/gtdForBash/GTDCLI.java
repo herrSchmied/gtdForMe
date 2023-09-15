@@ -65,6 +65,8 @@ public class GTDCLI implements Beholder<String>
 			add_Note));
 
  
+	private final DataSpawn_ii ds;
+	
 	public final Predicate<String> activeProject = (n)->
 	{
 		JSONObject jo = null;
@@ -179,6 +181,8 @@ public class GTDCLI implements Beholder<String>
     public GTDCLI() throws ClassNotFoundException, IOException, URISyntaxException
 	{
     	
+    	ds = new DataSpawn_ii(System.in);
+    	
 		//states = loadStates();
 		if(states==null)states = StatusMGMT.getInstance();
 		String javaVersion = SystemInfo.javaVersion();
@@ -204,11 +208,12 @@ public class GTDCLI implements Beholder<String>
     public void loopForCommands() throws JSONException, IOException, URISyntaxException
     {
     	
+    	Input inTaker = new Input(System.in);
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
     	
     	System.out.println("");
-    	String command = consoleTools.Input.getString(px + "Type" + sx + " command. (ex. help or exit).");
+    	String command = inTaker.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	
     	System.out.println("Trying to excecute: '" + command.trim() + "'");
     	switch(command.trim())
@@ -226,11 +231,11 @@ public class GTDCLI implements Beholder<String>
     				break;
     			}
     			
-    			String pName = Input.getAnswerOutOfList("Which one?", aPrjcts);
+    			String pName = inTaker.getAnswerOutOfList("Which one?", aPrjcts);
     			if(aPrjcts.contains(pName))
     			{
     				JSONObject pJSON = projectMap.get(pName);
-    				DataSpawn_ii.addNote(pJSON);
+    				ds.addNote(pJSON);
     			}
     			break;
     		}
@@ -246,11 +251,11 @@ public class GTDCLI implements Beholder<String>
     				break;
     			}
     			
-    			String pName = Input.getAnswerOutOfList("Which one?", aPrjcts);
+    			String pName = inTaker.getAnswerOutOfList("Which one?", aPrjcts);
     			if(aPrjcts.contains(pName))
     			{
     				JSONObject pJSON = projectMap.get(pName);
-    				DataSpawn_ii.terminateProject(pJSON);
+    				ds.terminateProject(pJSON);
     			}
     			break;
     		}
@@ -286,7 +291,7 @@ public class GTDCLI implements Beholder<String>
     			System.out.println("");
     			List<String> aPrjcts = findProjectNames(activeProject);
  
-    			String choosenOne = Input.getAnswerOutOfList("Which one?", aPrjcts);
+    			String choosenOne = inTaker.getAnswerOutOfList("Which one?", aPrjcts);
     			String prjct = choosenOne.trim();
     			if(aPrjcts.contains(prjct))nxtStp(prjct);
     			else System.out.println("Please choose more wise. Because '" + choosenOne + "' is not"
@@ -311,7 +316,7 @@ public class GTDCLI implements Beholder<String>
     		case new_Project:
     		{
     			System.out.println(""); 			
-    			JSONObject pJson = DataSpawn_ii.spawnNewProject(knownProjects, states);
+    			JSONObject pJson = ds.spawnNewProject(knownProjects, states);
     			if(pJson!=null)
     			{
     				String name = pJson.getString(ProjectJSONKeyz.nameKey);
@@ -403,42 +408,16 @@ public class GTDCLI implements Beholder<String>
 		System.out.println(ttd);
     }
     
-	/*
-	 * TODO: Test this!!!!!!!!!!!!!!!!!!!!
-	 */
 	public void nxtStp(String projectName) throws IOException
     {
 
 		JSONObject jo = projectMap.get(projectName);
-    	if(DataSpawn_ii.terminateStep(jo))DataSpawn_ii.appendStep(jo);
+    	if(ds.terminateStep(jo))ds.appendStep(jo);
     	else System.out.println("Insufficient Data. Couldn't Terminate Step.");
     }
     	
-    	/*
-    	terminatePrjctBtn.setOnAction((event)->
-    	{
-    	
-    		guiUtils.doCollectionOfNodes(btnList, disableBtns);
 
-    		ProjectTableViewModel ptvm = detectedSelection();
-    		
-    		if(ptvm!=null&&(!tableIsShowingMODProjects))
-    		{
-    			String prjctStatus = ptvm.getStatus();
-    			
-    			JSONObject jo = projectMap.get(ptvm.getProjectName());
-    			Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
-    			
-    			boolean isAlive = (!terminalSet.contains(prjctStatus));
-    		
-    			if(isAlive)ds.terminateProject(jo);
-    		}
-    		else Output.errorAlert("Please select a NOT MOD-Project first.");
-    		
-    		guiUtils.doCollectionOfNodes(btnList, enableBtns);
-    		refreshTable();
-    	});
-    
+	/*
     	showMODPrjctsBtn.setOnAction((event)->
     	{
     		
