@@ -1,8 +1,6 @@
 package jborg.gtdForBash;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -31,7 +29,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 {
 	
 	
-	//TODO:->		Eliminate rest of Literals in Code.		<-
+	//TODO:->Eliminate rest of Literals in Code.		<-
 	
 	public static final int firstStepIndex = 0;
 	
@@ -96,6 +94,10 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	public static final String unknownDLLblTxt = "Unkown Deadline";
 	public static final String makeDLBtnTxt = "Make Deadline";
 
+	public static final String invalidePrjctName = "There is already a Project with that Name.";
+
+	public static final String deadLineUnknownStr = "UNKNOWN";
+	
 	final InputStreamSession iss;
 	
 	public GTDDataSpawnSession(InputStreamSession iss)
@@ -111,7 +113,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		name = name.trim();
 		if(knownProjects.keySet().contains(name))
 		{
-			System.out.println("There is already a Project with that Name.");
+			System.out.println(invalidePrjctName);
 			return null;
 		}
 
@@ -134,12 +136,11 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			
 			System.out.println("");
 			boolean changeBDT = iss.getYesOrNo(changeBDTQ);
-			int yearRange = LocalDateTime.now().getYear()-minBDTYear;//must be born before now.
 
 			if(changeBDT)
 			{
 				System.out.println("");
-				bdt = iss.getDateTime(bdtQ, ancient, LocalDateTime.now());
+				bdt = iss.getDateTime(bdtQ, ancient, LocalDateTime.now());//must be born before now.
 			}
 			else bdt = nddt;
 				
@@ -147,8 +148,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			pJson.put(ProjectJSONKeyz.goalKey, goal);
 			pJson.put(ProjectJSONKeyz.statusKey, status);
 			
-			String deadLineStr = "UNKNOWN";
-			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);
+			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineUnknownStr);
 				
 			String bdtStr = LittleTimeTools.timeString(bdt);
 			pJson.put(ProjectJSONKeyz.BDTKey, bdtStr);
@@ -159,16 +159,11 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			if(!isModProject)
 			{
 				
-				int minYear = nddt.getYear();
-				int minMonth = nddt.getMonthValue();
-				int minDay = nddt.getDayOfMonth();
-				int minHour = nddt.getHour();
-				int minMinute = nddt.plusMinutes(5).getMinute();//Deadline should be at least five Minutes in the Future.		
-				LocalDateTime timeOffset = LocalDateTime.of(minYear, minMonth, minDay, minHour, minMinute);
 				
 				System.out.println("");
-				dldt = iss.getDateTime(dldtQ, LocalDateTime.now(), LocalDateTime.now().plusYears(20));
-				deadLineStr = LittleTimeTools.timeString(dldt);
+				//Deadline should be at least five Minutes in the Future. But not more than 20 Years.
+				dldt = iss.getDateTime(dldtQ, LocalDateTime.now().plusMinutes(5), LocalDateTime.now().plusYears(20));
+				String deadLineStr = LittleTimeTools.timeString(dldt);
 				pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 				
 				JSONObject tmp = spawnFirstStep(pJson);//Here status will be overwritten.
@@ -244,8 +239,6 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	
 	private JSONObject spawnStep(JSONObject pJson, int index)
 	{
-
-		System.out.println("Spawning Step. Index: " + index + " Project: "+pJson.toString(4));
 
 		if(index<firstStepIndex) throw new IllegalArgumentException("Index too Small.");
 
@@ -516,7 +509,6 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		if(terminateStep(pJson))
 		{
 			
-			String title = "";
 			String prjctStatus = "";
 			boolean success = iss.getYesOrNo(prjctSuccessQstn);
 			

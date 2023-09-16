@@ -44,7 +44,7 @@ public class TestingGTDDataSpawnSession extends TestCase {
 		assert(name.equals("neueArbeit"));
 
 		String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-		assert(StatusMGMT.getInstance().atbd.equals(status));
+		assert(StatusMGMT.atbd.equals(status));
 		
 		JSONArray stepArray = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 		JSONObject step = stepArray.getJSONObject(0);

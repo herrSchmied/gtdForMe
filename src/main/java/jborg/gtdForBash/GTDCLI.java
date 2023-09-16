@@ -3,7 +3,6 @@ package jborg.gtdForBash;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 
 import java.time.LocalDateTime;
@@ -64,7 +63,27 @@ public class GTDCLI implements Beholder<String>
 			list_active_ones, list_not_active_ones, new_Project, next_Step, list_commands, terminate_Project,
 			add_Note));
 
- 
+
+	/*TODO: some only need Testing.
+	stepsView -> show all Last Steps or all Steps of one Project
+	
+	JSONView -> View JSONObject of a Project.
+		
+	stndrtView -> prjctName, Deadline, Goal and NxtStp.
+	
+	noteView -> view Notes of a Prjct.
+
+	showMODPrjcts ->!
+
+	wakeMODPrjct->!
+    	
+	addNote -> Test it!(append Note.)
+    	
+    Statistics ->	Number of Projects, Number of active ones, Number of mod Projects,
+    	        	Number of all Steps, Number of successful Steps. Number of failed Steps,
+    	        	Think about Stats.
+	 */
+
 	private final GTDDataSpawnSession ds;
 	
 	public final Predicate<String> activeProject = (n)->
@@ -84,64 +103,7 @@ public class GTDCLI implements Beholder<String>
 	public final Predicate<String> notActiveProject = (n)-> !activeProject.test(n);
 	
 	private final InputStreamSession iss;
-	
-	/*
-	stepsView -> show all Last Steps or all Steps of one Project
-	
-	private EventHandler<MouseEvent> JSONView = (mouseEvent)->
-	{
 		
-    	ProjectTableViewModel ptvm = detectedSelection();
-    	if(ptvm!=null)
-    	{
-    		String prjctName = ptvm.getProjectName();
-    		JSONObject jo;
-    		
-    		if(!tableIsShowingMODProjects)jo = projectMap.get(prjctName);
-    		else jo = modProjectMap.get(prjctName);
-    		
-    		tStage.setInfoText(jo.toString(jsonPrintStyle));
-    	}
-	};
-	
-	private EventHandler<MouseEvent> stndrtView = (mouseEvent)->
-    {
-    	
-    	ProjectTableViewModel ptvm = detectedSelection();
-    	if(ptvm!=null)
-    	{
-    		String prjctName = ptvm.getProjectName();
-    		JSONObject jo;
-    		
-    		String nxt = "";
-    		if(!tableIsShowingMODProjects)
-    		{
-    			jo = projectMap.get(prjctName);
-    			JSONArray stepArray = jo.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-    			
-    			int index = stepArray.length()-1;
-    			JSONObject step = stepArray.getJSONObject(index);
-    			
-    			nxt = "Next Step: " + "\n" + step.getString(StepJSONKeyz.descKey);
-    			
-    		}
-    		else jo = modProjectMap.get(prjctName);
-    		
-    		String goal = jo.getString(ProjectJSONKeyz.goalKey);
-    		String prjctDeadline = jo.getString(ProjectJSONKeyz.DLDTKey);
-
-    		String infoText = "Project: " + prjctName + "\n"
-    				+ "Deadline: " + prjctDeadline +"\n\n"
-					+ "Goal: " + goal + "\n\n" 
-					+ nxt;
-    		
-    		tStage.setInfoText(infoText);
-    	}
-    };
-
-    private EventHandler<MouseEvent> currentView = stndrtView;
-    */
-	
     public GTDCLI(InputStreamSession iss) throws ClassNotFoundException, IOException, URISyntaxException
 	{
     	
@@ -380,131 +342,6 @@ public class GTDCLI implements Beholder<String>
     	if(ds.terminateStep(jo))ds.appendStep(jo);
     	else System.out.println("Insufficient Data. Couldn't Terminate Step.");
     }
-    	
-
-	/*
-    	showMODPrjctsBtn.setOnAction((event)->
-    	{
-    		
-    		tStage.getObservableList().clear();
-    		if(!tableIsShowingMODProjects)
-    		{
-    			showMODPrjctsBtn.setText(modHideTextState);
-    		
-    			for(JSONObject jo: modProjectMap.values())
-    			{
-    				ProjectTableViewModel ptvm = createPTVMFromJSON(jo);
-    				tStage.getObservableList().add(ptvm);
-    			}
-    		}
-    		else
-    		{
-    			showMODPrjctsBtn.setText(modShowTextState);
-    			
-    			for(JSONObject jo: projectMap.values())
-    			{
-    				ProjectTableViewModel ptvm = createPTVMFromJSON(jo);
-    				tStage.getObservableList().add(ptvm);
-    			}
-    		}
-    		
-    		tableIsShowingMODProjects = !(tableIsShowingMODProjects);
-    	});
-    	
-    	wakeMODPrjctBtn.setOnAction((event)->
-    	{
-    		
-    		ProjectTableViewModel ptvm = detectedSelection();
-    		String prjctName = ptvm.getProjectName();
-    		
-    		if(!tableIsShowingMODProjects||ptvm==null)Output.errorAlert("U didn't choose a MOD-Project!");
-			else
-			{
-				JSONObject jo = modProjectMap.get(prjctName);
-				modProjectMap.remove(prjctName);
-				tStage.getObservableList().remove(ptvm);//Clearly the Table is in showing MOD-Project Mode.
-				ds.spawnFirstStep(jo);
-				projectMap.put(prjctName, jo);
-				eraseMODProjectFile(prjctName);
-			}
-    	});
-    	
-    	noteViewBtn.setOnAction((event)->
-    	{
-    		currentView = notesView;
-    	});
-    	
-    	stepsViewBtn.setOnAction((event)->
-    	{
-    		currentView = stepsView;
-    	});
-    	
-    	JSONViewBtn.setOnAction((event)->
-    	{
-    		currentView = JSONView;
-    	});
-    	
-    	stndrtViewBtn.setOnAction((event)->
-    	{
-    		currentView = stndrtView;
-    	});
-    	
-    	addNoteBtn.setOnAction((event)->
-    	{
-    		guiUtils.doCollectionOfNodes(btnList, disableBtns);
-    		
-    		ProjectTableViewModel ptvm = detectedSelection();
-    		
-    		if(ptvm!=null)
-    		{
-    			
-    			JSONObject jo;
-    			
-    			if(!tableIsShowingMODProjects)jo = projectMap.get(ptvm.getProjectName());
-    			else jo = modProjectMap.get(ptvm.getProjectName());
-
-    			ds.addNote(jo);
-    		}
-    		
-    		guiUtils.doCollectionOfNodes(btnList, enableBtns);    		
-    	});
-    	
-    	statsBtn.setOnAction((event)->
-    	{
-    		int a = 0;
-    		int nrOfAllSteps = 0;
-    		int successfullSteps = 0;
-    		
-    		for(JSONObject jo: projectMap.values())
-    		{
-    			String status = jo.getString(ProjectJSONKeyz.statusKey);
-    			boolean isAlive = !states.getStatesOfASet(StatusMGMT.terminalSetName).contains(status);
-    			if(isAlive)a++;
-    			
-    			JSONArray steps = jo.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-    			nrOfAllSteps += steps.length();
-    			
-    			for(int n=0;n<steps.length();n++)
-    			{
-    				JSONObject step = steps.getJSONObject(n);
-    				String stepStatus = step.getString(StepJSONKeyz.statusKey);
-    				
-    				if(stepStatus.equals(StatusMGMT.success))successfullSteps++;
-    			}
-    		}
-    		
-    		int modPrjcts = modProjectMap.size();
-    		int n = projectMap.size() + modProjectMap.size();
-    		
-    		String infoText = "Projects: " + n + "\n"
-    						+ "Active: " + a + "\n"
-    						+ "MOD-Projects: " + modPrjcts + "\n"
-    						+ "Nr. of all Steps: " + nrOfAllSteps +"\n"
-    						+ "Successfull Steps: " + successfullSteps;
-    		
-    		tStage.setInfoText(infoText);
-    	});
-    	*/
   
     private String getPathOfClass()
     {
