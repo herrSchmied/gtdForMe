@@ -16,17 +16,19 @@ public class TestingGTDDataSpawnSession extends TestCase
 	
 	JSONObject pJSON;
 	
+	String prjctName = "neueArbeit\n";
+
+	String prjctGoal = "TryToNotFailThisTest\n";
+	String stpDesc = "Just do it!\n";
+
 	public String setUpDataNewProjectHappyPath(boolean modQ, boolean pBDTQ, boolean sBDTQ, boolean startStatus, LocalDateTime ldtPrjctDLDT, 
 			LocalDateTime ldtStpDLDT)
 	{
-		String prjctName = "neueArbeit\n";
 		
 		String modPrjct;
 		if(!modQ)modPrjct= "No\n";
 		else modPrjct = "Yes\n";
-		
-		String prjctGoal = "TryToNotFailThisTest\n";
-		
+
 		String specialPrjctBDT;
 		String prjctBDT = "";
 		if(!pBDTQ)specialPrjctBDT= "No\n";
@@ -37,13 +39,14 @@ public class TestingGTDDataSpawnSession extends TestCase
 			prjctBDT = translateTimeToAnswerString(oneHourBefore);
 		}
 		
-		if(modQ&&!pBDTQ) return prjctName + prjctGoal;
+		String setup = prjctName + modPrjct +prjctGoal + specialPrjctBDT;
+		if(modQ&&!pBDTQ) return setup;
 		if(modQ&&pBDTQ)
 		{
 			LocalDateTime tenBeforeNow = LocalDateTime.now().minusMinutes(10);
 			String ldtString = translateTimeToAnswerString(tenBeforeNow);
 			
-			return prjctName + prjctGoal + ldtString;
+			return setup + ldtString;
 		}
 		
 		String prjctDLDT = translateTimeToAnswerString(ldtPrjctDLDT);
@@ -61,9 +64,7 @@ public class TestingGTDDataSpawnSession extends TestCase
 		String chosenFromStatieList;
 		if(!startStatus)chosenFromStatieList = "1\n";//ATBD
 		else chosenFromStatieList = "2\n";
-		
-		String stepDesc = "Just do it!\n";
-		
+				
 		String stepDLDT = translateTimeToAnswerString(ldtStpDLDT);
 
 		String data = prjctName
@@ -75,11 +76,10 @@ public class TestingGTDDataSpawnSession extends TestCase
 				+ specialStpBDT
 				+ stpBDT
 				+ chosenFromStatieList
-				+ stepDesc
+				+ stpDesc
 				+ stepDLDT;
 		
 		return data;
-
 	}
 	
 	public String translateTimeToAnswerString(LocalDateTime ldt)
@@ -98,6 +98,7 @@ public class TestingGTDDataSpawnSession extends TestCase
 	public void testSpawnNewProject() 
 	{
 
+		prjctName = "neueArbeit\n";
 		
 		LocalDateTime jetzt = LocalDateTime.now();
 		
@@ -109,7 +110,8 @@ public class TestingGTDDataSpawnSession extends TestCase
 		pJSON = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
 	
 		String name = pJSON.getString(ProjectJSONKeyz.nameKey);
-		assert(name.equals("neueArbeit"));
+		int l = prjctName.length()-1;
+		assert(name.equals(prjctName.substring(0, l)));
 
 		String status = pJSON.getString(ProjectJSONKeyz.statusKey);
 		System.out.println(status);
@@ -120,14 +122,59 @@ public class TestingGTDDataSpawnSession extends TestCase
 		String stpStatus = step.getString(StepJSONKeyz.statusKey);
 		assert(stpStatus.equals(status));
 		
+		String stpDesc = step.getString(StepJSONKeyz.descKey);
+		l = this.stpDesc.length()-1;
+		assert(stpDesc.equals(this.stpDesc.substring(0,l)));
+		
+		String goal = pJSON.getString(ProjectJSONKeyz.goalKey);
+		l = prjctGoal.length()-1;
+		assert(goal.equals(prjctGoal.substring(0,l)));
 		
 		System.out.println(pJSON.toString(4));
 	}
+
+	public void testSpawnMODProject()
+	{
+		
+		boolean mod = true;
+		boolean specificPrjctBDT = false;
+		boolean specificStpBDT = false;
+		boolean startStatus = false;
+		
+		prjctName = "Maybe Baby\n";
+		
+		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime pDLDT = jetzt.plusHours(1);
+		LocalDateTime stpDLDT = jetzt.plusMinutes(30);
+		String data = setUpDataNewProjectHappyPath(mod, specificPrjctBDT, specificStpBDT, startStatus, pDLDT, stpDLDT);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
+		InputStreamSession iss = new InputStreamSession(bais);
+		GTDDataSpawnSession gdss = new GTDDataSpawnSession(iss);
+		pJSON = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
+	
+		String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+		int l = prjctName.length()-1;
+		assert(name.equals(prjctName.substring(0, l)));
+
+		String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+		System.out.println(status);
+		assert(StatusMGMT.mod.equals(status));
+				
+		String goal = pJSON.getString(ProjectJSONKeyz.goalKey);
+		l = prjctGoal.length()-1;
+		assert(goal.equals(prjctGoal.substring(0,l)));
+		
+		System.out.println(pJSON.toString(4));
+	}
+	
 	/*
-	public void testSpawnFirstStep() {
-		fail("Not yet implemented");
+	public void testWakeMOD() 
+	{
+		//fail("Not yet implemented");
 	}
 
+	/*
 	public void testAppendStep() {
 		fail("Not yet implemented");
 	}
