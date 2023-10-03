@@ -24,6 +24,8 @@ public class TestingGTDDataSpawnSession
 	
 	String prjctGoal = "TryToNotFailThisTest\n";
 	String stpDesc = "Just do it!\n";
+	String stpDesc2 = "another Step.\n";
+	
 
 	public GTDDataSpawnSession arrangePrjct()
 	{
@@ -111,16 +113,24 @@ public class TestingGTDDataSpawnSession
 		String chosenFromStatieList;
 		if(!startStatus)chosenFromStatieList = "1\n";//ATBD
 		else chosenFromStatieList = "2\n";
-				
+
 		String stepDLDT = translateTimeToAnswerString(ldtStpDLDT);
+		
 		String oldStepWasSuccess = "Yes\n";
 		String wantToMakeTerminalNote = "Yes\n";
-		String terminalNote = "I'm Thru wit it\n";
+		String terminalNote = "I'm Thru wit it.\n";
 		String wantToChangeTDT = "No\n";
 		String specialStpBDT2 = "No\n";
-		String stpDesc2 = "another Step\n";
+		String stpDesc2 = this.stpDesc2;
 		String step2DLDT = translateTimeToAnswerString(ldtPrjctDLDT.minusSeconds(1));
-		
+
+		String step2WasSuccess = "No\n";
+		String wantToMakeTerminalNote2 = "No\n";
+		String wantToChangeTDT2 = "No\n";
+		String specialStpBDT3 = "No\n";
+		String stpDesc3 = "Step 3\n";
+		String step3DLDT = translateTimeToAnswerString(ldtPrjctDLDT.minusSeconds(2));
+
 		String data = prjctName
 				+ modPrjct
 				+ prjctGoal
@@ -139,7 +149,14 @@ public class TestingGTDDataSpawnSession
 				+ specialStpBDT2
 				+ chosenFromStatieList
 				+ stpDesc2
-				+ step2DLDT;
+				+ step2DLDT
+				+ step2WasSuccess
+				+ wantToMakeTerminalNote2
+				+ wantToChangeTDT2
+				+ specialStpBDT3
+				+ chosenFromStatieList
+				+ stpDesc3
+				+ step3DLDT;
 				
 		return data;
 	}
@@ -219,6 +236,14 @@ public class TestingGTDDataSpawnSession
 		
 		JSONArray jArray = pJSON1.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 		assert(jArray.length()==2);
+		
+		JSONObject step2 = jArray.getJSONObject(1);
+		String desc2 = step2.getString(StepJSONKeyz.descKey);
+		int l = this.stpDesc2.length()-1;
+		assert(desc2.equals(this.stpDesc2.substring(0, l)));
+		
+		gdss.appendStep(pJSON1);
+		assert(jArray.length()==3);
 		
 		System.out.println(pJSON1.toString(4));
 	}
