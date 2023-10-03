@@ -219,14 +219,14 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		return true;
 	};
 
-	public JSONObject spawnFirstStep(JSONObject pJson)
+	public JSONObject spawnFirstStep(JSONObject pJson) throws IOException
 	{	
 		
 		System.out.println("Spawning first Step for Project: " + pJson.getString(ProjectJSONKeyz.nameKey));
 		return spawnStep(pJson, firstStepIndex);
 	}
 
-	public void appendStep(JSONObject pJson)
+	public void appendStep(JSONObject pJson) throws IOException
 	{
 		
 		System.out.println("Appending Step to Project: " + pJson.getString(ProjectJSONKeyz.nameKey));
@@ -237,7 +237,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		pJson = spawnStep(pJson, length);
 	}
 	
-	private JSONObject spawnStep(JSONObject pJson, int index)
+	private JSONObject spawnStep(JSONObject pJson, int index) throws IOException
 	{
 
 		if(index<firstStepIndex) throw new IllegalArgumentException("Index too Small.");
@@ -255,6 +255,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		{
 			steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
 			oldStep = steps.getJSONObject(index-1);
+			terminateStep(pJson);
 		}
 		
 		LocalDateTime nddtOfStep = LocalDateTime.now();
