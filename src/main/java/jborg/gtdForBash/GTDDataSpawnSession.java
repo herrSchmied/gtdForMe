@@ -61,6 +61,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	public static final String dldtQ = "Deadline for Project?";
 	public static final int dldtRange = 100;
 	
+	public final static String prjctTDTNoteQstn = "Please type ur TDT-Note?";
 	public final static String prjctWhenTDTQstn = "When took the Termination of this Project place?";
 	public final static String wantToChangeTDTOfPrjctQstn = "Wan't to change TDT of Project?";
 	public final static String prjctSuccessQstn = "Was Project a Success?";
@@ -87,6 +88,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		
 	public static final String stepStatusPhrase = "Choose Status: ";
 	public static final String wantToChangeTDTOfStepQstn = "Wan't to change TDT of Step?";
+	public static final String wantToMakeTDTNoteQstn = "Wan't to make a TDT Note for the Projekt?";
 	public static final String waitingForPhrase = "What u waiting for?";
 	
 	public static final String infoAlertTxtPhrase = "Remember Step Termination Note is Project Termination Note at this last Step.";
@@ -519,16 +521,14 @@ public class GTDDataSpawnSession implements Subjekt<String>
 
 			JSONArray steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
 			int index = steps.length();
-				
-			JSONObject step = steps.getJSONObject(index-1);
-			String terminalNote = "";
-			//Step TDT-Note = Project TDT-Note. Step might not have a TDT-Note.
-			if(step.has(StepJSONKeyz.TDTNoteKey))terminalNote = step.getString(StepJSONKeyz.TDTNoteKey);
 			
 			boolean wantChangeTDTQuestion = iss.getYesOrNo(wantToChangeTDTOfPrjctQstn);
 			LocalDateTime tdt = LocalDateTime.now();
-			
 			if(wantChangeTDTQuestion)tdt = iss.getDateTime(prjctWhenTDTQstn,ancient, LocalDateTime.now());
+			
+			String terminalNote = "";
+			boolean wantToMakeTDTNoteQuestion = iss.getYesOrNo(wantToMakeTDTNoteQstn);
+			if(wantToMakeTDTNoteQuestion) terminalNote = iss.getString(prjctTDTNoteQstn);
 				
 			String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
 			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
@@ -559,8 +559,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 				
 			String tdtStr = LittleTimeTools.timeString(tdt);
 			pJson.put(ProjectJSONKeyz.TDTKey, tdtStr);
-				
-			//Step TDT-Note = Project TDT-Note.
+
 			if(!terminalNote.trim().equals(""))pJson.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);
 			
 			return true;
