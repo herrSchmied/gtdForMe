@@ -446,24 +446,44 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	
 	public void addNote(JSONObject pJson)
 	{
-		int index = 0;
 		JSONArray ja;
 		boolean hasNoteArray = pJson.has(ProjectJSONKeyz.noteArrayKey);
 		
-		if(hasNoteArray)
-		{
-			ja = pJson.getJSONArray(ProjectJSONKeyz.noteArrayKey);
-			index = ja.length();
-		}
+		if(hasNoteArray)ja = pJson.getJSONArray(ProjectJSONKeyz.noteArrayKey);
 		else ja = new JSONArray();
 		
 		
 		String noteTxt = iss.getString(noteAddPhrase);
 		if(!noteTxt.trim().equals(""))
 		{
-			ja.put(index, noteTxt);
+			ja.put(noteTxt);
 			pJson.put(ProjectJSONKeyz.noteArrayKey, ja);
 		}
+	}
+	
+	public void wakeMODProject(JSONObject pJson) throws IOException
+	{
+		
+		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(pJson.getString(ProjectJSONKeyz.BDTKey));
+		LocalDateTime nddt = LocalDateTime.now();
+		LocalDateTime dldt = null;
+				
+		String nddtStr = LittleTimeTools.timeString(nddt);
+		pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
+
+		System.out.println("");
+		//Deadline should be at least five Minutes in the Future. But not more than 20 Years.
+		dldt = iss.getDateTime(dldtQ, LocalDateTime.now().plusMinutes(5), LocalDateTime.now().plusYears(20));
+		String deadLineStr = LittleTimeTools.timeString(dldt);
+		pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
+	
+		JSONObject tmp = spawnFirstStep(pJson);//Here status will be overwritten.
+		if(tmp==null)return;
+		else pJson = tmp;
+			
+		String goal = pJson.getString(ProjectJSONKeyz.goalKey);
+		if(!timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))return;
+
 	}
 	
 	//Can only terminate last Step of Project JSONObject.
@@ -515,12 +535,8 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			String prjctStatus = "";
 			boolean success = iss.getYesOrNo(prjctSuccessQstn);
 			
-			
 			if(success)prjctStatus = StatusMGMT.success;
 			else prjctStatus = StatusMGMT.failed;
-
-			JSONArray steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
-			int index = steps.length();
 			
 			boolean wantChangeTDTQuestion = iss.getYesOrNo(wantToChangeTDTOfPrjctQstn);
 			LocalDateTime tdt = LocalDateTime.now();
