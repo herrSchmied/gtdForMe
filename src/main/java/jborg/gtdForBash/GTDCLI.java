@@ -48,20 +48,28 @@ public class GTDCLI implements Beholder<String>
 
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
 	
+	private static final String save = "save";
 	private static final String exit = "exit";
 	private static final String list_not_active_ones = "list not active ones";
 	private static final String list_active_ones = "list active ones";
-	private static final String next_Step = "next Step";
+	private static final String list_mod_Projects = "list mod projects";
+	private static final String correct_last_step = "correct last step";//TODO
+	private static final String view_Project = "view Project";
+	private static final String view_last_step_of_Project = "view last step";//TODO
+	private static final String view_most_near_Deadline = "view most near deadline";//TODO
+	private static final String view_statistics = "view stats";
+	private static final String next_Step = "next step";
 	private static final String list = "list";
 	private static final String help = "help";
-	private static final String new_Project ="new Project";
+	private static final String new_Project ="new project";
 	private static final String list_commands = "list commands";
-	private static final String terminate_Project = "terminate Project";
-	private static final String add_Note = "add Note";
+	private static final String terminate_Project = "terminate project";
+	private static final String add_Note = "add note";
 	
-	private static final Set<String> commands = new HashSet<>(Arrays.asList(exit, list, help, 
-			list_active_ones, list_not_active_ones, new_Project, next_Step, list_commands, terminate_Project,
-			add_Note));
+	private static final Set<String> commands = new HashSet<>(Arrays.asList(save, exit, list, help, 
+			list_active_ones, list_mod_Projects, correct_last_step, view_Project, view_last_step_of_Project, 
+			view_most_near_Deadline, view_statistics, list_not_active_ones, new_Project, next_Step, list_commands, 
+			terminate_Project, add_Note));
 
 
 	/*TODO: some only need Testing.
@@ -138,13 +146,70 @@ public class GTDCLI implements Beholder<String>
     	
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
-    	
+    	    	
     	System.out.println("");
     	String command = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
+    	command = command.trim();
     	
     	System.out.println("Trying to excecute: '" + command.trim() + "'");
-    	switch(command.trim())
+    	
+    	switch(command)
     	{
+    	
+    		case view_Project:
+    		{
+    			System.out.println("");
+    			List<String> names = new ArrayList<>();
+    			names.addAll(knownProjects.keySet());
+ 
+    			String choosenOne = iss.getAnswerOutOfList("Which one?", names);
+    			String prjct = choosenOne.trim();
+    			if(knownProjects.keySet().contains(prjct))showProjectDetail(knownProjects.get(prjct));
+    			else System.out.println("Please choose more wise. Because '" + choosenOne + "' is not"
+    					+ " on the List!");
+    			break;
+
+    		}
+    		
+    		case view_statistics:
+    		{
+    			int nrOfPrjcts = knownProjects.size();
+    			int nrOfActivePrjcts = findProjectNames(activeProject).size();
+    			int nrOfModPrjcts = modProjectMap.size();
+    			
+    			int nrOfSuccessfulSteps = 0;
+    			int nrOfSuccessfulPrjcts = 0;
+    			for(JSONObject pJSON: projectMap.values())
+    			{
+    				
+    				String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
+    				if(prjctStatus.equals(StatusMGMT.success))nrOfSuccessfulPrjcts++;
+    				
+    				JSONArray steps = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+    				int i = steps.length();
+    				for(int n=0;n<i;n++)
+    				{
+    					JSONObject step = steps.getJSONObject(n);
+    					String stepStatus = step.getString(StepJSONKeyz.statusKey);
+    					
+    					if(stepStatus.equals(StatusMGMT.success))nrOfSuccessfulSteps++;
+    				}
+    			}
+    			
+    			System.out.println("Nr. of Projects: "+ nrOfPrjcts);
+    			System.out.println("Nr. of active Projects: " + nrOfActivePrjcts);
+    			System.out.println("Nr. of Mod Projects: " + nrOfModPrjcts);
+    			
+    			System.out.println("Nr. of Success Steps: " + nrOfSuccessfulSteps);
+    			System.out.println("Nr. of Success Projects: " + nrOfSuccessfulPrjcts);
+    		}
+    		
+    		case save:
+    		{
+    			saveAll();
+    			break;
+    		}
+    			
     		case exit: stop();//No break needed.
     		
     		case add_Note:
@@ -198,17 +263,40 @@ public class GTDCLI implements Beholder<String>
     		case list_not_active_ones:
     		{
     			System.out.println("");
-    			List<String> noAPrjcts = findProjectNames(notActiveProject);
-    			for(String prjctName: noAPrjcts)System.out.println(prjctName);
     			
+    			Map<String, JSONObject> map = new HashMap<>();
+    			List<String> noAPrjcts = findProjectNames(notActiveProject);
+    			for(String prjctName: noAPrjcts)
+    			{
+    				JSONObject pJSON = knownProjects.get(prjctName);
+    				map.put(prjctName, pJSON);
+    			}
+    			showProjectTable(map);
+    			
+    			break;
+    		}
+    		
+    		case list_mod_Projects:
+    		{
+    			showProjectTable(modProjectMap);
     			break;
     		}
  
     		case list_active_ones:
     		{
     			System.out.println("");
+    			showProjectTable(projectMap);
+    			
+    			Map<String, JSONObject> map = new HashMap<>();
+    			
     			List<String> aPrjcts = findProjectNames(activeProject);
-    			for(String prjctName: aPrjcts)System.out.println(prjctName);
+    			for(String prjctName: aPrjcts)
+    			{
+    				JSONObject pJSON = projectMap.get(prjctName);
+    				map.put(prjctName, pJSON);
+    			}
+
+    			showProjectTable(map);
     			
     			break;
     		}
@@ -229,7 +317,7 @@ public class GTDCLI implements Beholder<String>
     		case list: 
     		{
     			System.out.println("");
-    			showProjectTable();
+    			showProjectTable(knownProjects);
     			break;
     		}
     	
@@ -307,12 +395,12 @@ public class GTDCLI implements Beholder<String>
     	return output;
     }
     
-    public void showProjectTable() throws JSONException
+    public void showProjectTable(Map<String, JSONObject> map) throws JSONException
     {
 		List<String> headers = columnList;
 		List<List<String>> rows = new ArrayList<>();
 		
-    	for(JSONObject jo: projectMap.values())
+    	for(JSONObject jo: map.values())
     	{
     		String name = jo.getString(ProjectJSONKeyz.nameKey);
     		String status = (String) jo.getString(ProjectJSONKeyz.statusKey);
@@ -333,6 +421,47 @@ public class GTDCLI implements Beholder<String>
     	
 		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 20);
 		System.out.println(ttd);
+    }
+    
+    public static void showProjectDetail(JSONObject pJSON)
+    {
+    	String gpx = BashSigns.boldGBCPX;
+    	String gsx = BashSigns.boldGBCSX;
+
+    	String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+    	String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+    	String bdt = pJSON.getString(ProjectJSONKeyz.BDTKey);
+    	String nddt = pJSON.getString(ProjectJSONKeyz.NDDTKey);
+    	String goal = pJSON.getString(ProjectJSONKeyz.goalKey);
+
+    	int stpNr = 0;
+    	if(!status.equals(StatusMGMT.mod))
+    	{
+    		JSONArray jArray = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+    		stpNr = jArray.length();
+    	}
+    	
+    	int noteNr = 0;
+    	if(pJSON.has(ProjectJSONKeyz.noteArrayKey))
+    	{
+    		JSONArray jArray = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
+    		noteNr = jArray.length();
+    	}
+    	
+    	
+    	String dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
+    	
+    	
+    	System.out.println("");
+    	System.out.println(gpx + "Project Name:" + gsx + " "+ name);
+    	System.out.println(gpx + "Status:" + gsx + " " + status);
+    	System.out.println(gpx + "BDT:" + gsx + " " + bdt);
+    	System.out.println(gpx + "NDDT:" + gsx + " " + nddt);
+    	System.out.println(gpx + "Deadline:" + gsx + " " + dldtStr);
+    	System.out.println(gpx + "Goal:" + gsx + " " + goal);
+    	System.out.println(gpx + "Steps:" + gsx + " " + stpNr);
+    	System.out.println(gpx + "Notes:" + gsx + " " + noteNr);
+    	
     }
     
 	public void nxtStp(String projectName) throws IOException
@@ -508,11 +637,17 @@ public class GTDCLI implements Beholder<String>
     	LoadAndSave.saveObject(getPathOfClass()+statesFileName, StatusMGMT.getInstance());
     }
 
-    public void stop() throws JSONException, IOException, URISyntaxException
-    {
+    public void saveAll() throws JSONException, IOException, URISyntaxException
+    { 	
     	saveProjects();
     	saveMODProjects();
     	saveStatusMGMT();
+    }
+    
+    public void stop() throws JSONException, IOException, URISyntaxException
+    {
+
+    	saveAll();
     	System.out.println("Bye!");
     	System.exit(0);
     }
