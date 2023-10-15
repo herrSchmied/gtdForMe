@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import java.time.LocalDateTime;
-
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,21 +53,21 @@ public class GTDCLI implements Beholder<String>
 	private static final String list_not_active_ones = "list not active ones";
 	private static final String list_active_ones = "list active ones";
 	private static final String list_mod_Projects = "list mod projects";
-	private static final String correct_last_step = "correct last step";//TODO
+	//private static final String correct_last_step = "correct last step";//TODO
 	private static final String view_Project = "view Project";
-	private static final String view_last_step_of_Project = "view last step";//TODO
-	private static final String view_most_near_Deadline = "view most near deadline";//TODO
+	private static final String view_last_steps_of_Projects = "last steps";
+	private static final String view_most_near_Deadline = "most near deadline";//TODO
 	private static final String view_statistics = "view stats";
 	private static final String next_Step = "next step";
 	private static final String list = "list";
 	private static final String help = "help";
 	private static final String new_Project ="new project";
-	private static final String list_commands = "list commands";
+	private static final String list_commands = "list cmds";
 	private static final String terminate_Project = "terminate project";
 	private static final String add_Note = "add note";
 	
 	private static final Set<String> commands = new HashSet<>(Arrays.asList(save, exit, list, help, 
-			list_active_ones, list_mod_Projects, correct_last_step, view_Project, view_last_step_of_Project, 
+			list_active_ones, list_mod_Projects,/* correct_last_step, */ view_Project, view_last_steps_of_Projects, 
 			view_most_near_Deadline, view_statistics, list_not_active_ones, new_Project, next_Step, list_commands, 
 			terminate_Project, add_Note));
 
@@ -77,19 +77,9 @@ public class GTDCLI implements Beholder<String>
 	
 	JSONView -> View JSONObject of a Project.
 		
-	stndrtView -> prjctName, Deadline, Goal and NxtStp.
-	
 	noteView -> view Notes of a Prjct.
-
-	showMODPrjcts ->!
-
-	wakeMODPrjct->!
     	
-	addNote -> Test it!(append Note.)
-    	
-    Statistics ->	Number of Projects, Number of active ones, Number of mod Projects,
-    	        	Number of all Steps, Number of successful Steps. Number of failed Steps,
-    	        	Think about Stats.
+    Statistics -> Think about Stats.
 	 */
 
 	private final GTDDataSpawnSession ds;
@@ -156,6 +146,97 @@ public class GTDCLI implements Beholder<String>
     	switch(command)
     	{
     	
+    		case view_most_near_Deadline:
+    		{
+    			LocalDateTime jetzt = LocalDateTime.now();
+    			long newHours = 100000;
+    			List<String> prjctList = new ArrayList<>();
+    			List<Long> hourList = new ArrayList<>();
+    			
+    			for(JSONObject pJSON: projectMap.values())
+    			{
+    				
+    				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
+    				
+    				JSONObject lastStep = getLastStep(pJSON);
+    				
+    				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
+    				LocalDateTime ldtDLDT = LittleTimeTools.LDTfromTimeString(dldt);
+    				System.out.println(dldt);
+    				
+    				long hours = jetzt.until(ldtDLDT, ChronoUnit.HOURS);
+    				boolean isNearer = (Math.abs(hours)<Math.abs(newHours));
+    				
+    				System.out.println(hours + "** is more near: " + isNearer);
+    				
+    				if(isNearer)
+    				{
+    					newHours=hours;
+    					prjctList.clear();
+    					prjctList.add(prjctName);
+    					hourList.clear();
+    					hourList.add(newHours);
+    				}
+		
+    				if(Math.abs(hours)==Math.abs(newHours))
+    				{
+    					prjctList.add(prjctName);
+    					hourList.add(newHours);
+    				}
+    			}
+    			
+    			List<String> headers = new ArrayList<>(Arrays.asList("Project", "Until or since Deadline of Last Step(Hours)"));
+    			List<List<String>> rows = new ArrayList<>();
+
+    			for(String prjctName: prjctList)
+    			{
+    				List<String> row = new ArrayList<>();
+    				int i = prjctList.indexOf(prjctName);
+    				
+    				row.add(prjctName);
+    				row.add(hourList.get(i).toString());
+    				
+    				rows.add(row);
+    			}
+
+    			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+    			System.out.println(ttd);
+    			
+    			break;
+    		}
+    		
+    		case view_last_steps_of_Projects:
+    		{
+    			
+    			List<String> headers = new ArrayList<>(Arrays.asList("Project", "Desc", "Status", "Deadline"));
+    			List<List<String>> rows = new ArrayList<>();
+
+    			for(JSONObject pJSON: projectMap.values())
+    			{
+    				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
+    				
+    				JSONObject lastStep = getLastStep(pJSON);
+    				String desc = lastStep.getString(StepJSONKeyz.descKey);
+    				String status = lastStep.getString(StepJSONKeyz.statusKey);
+    				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
+    				
+    				List<String> row = new ArrayList<>();
+    				row.add(prjctName);
+    				row.add(desc);
+    				row.add(status);
+    				row.add(dldt);
+    				
+    				rows.add(row);
+    			}
+    			
+    			
+    			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 12);
+    			System.out.println(ttd);
+    			
+    			break;
+
+    		}
+    		
     		case view_Project:
     		{
     			System.out.println("");
@@ -301,11 +382,15 @@ public class GTDCLI implements Beholder<String>
     			break;
     		}
 
-    		case next_Step://Test! Test!
+    		case next_Step:
     		{
     			System.out.println("");
     			List<String> aPrjcts = findProjectNames(activeProject);
- 
+    			if(aPrjcts.isEmpty())
+    			{
+    				System.out.println("Sorry no active Project!");
+    				break;
+    			}
     			String choosenOne = iss.getAnswerOutOfList("Which one?", aPrjcts);
     			String prjct = choosenOne.trim();
     			if(aPrjcts.contains(prjct))nxtStp(prjct);
@@ -423,6 +508,15 @@ public class GTDCLI implements Beholder<String>
 		System.out.println(ttd);
     }
     
+    public static JSONObject getLastStep(JSONObject pJSON)
+    {
+    	String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
+    	JSONArray stepArr = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+    	int l = stepArr.length();
+    	
+    	return stepArr.getJSONObject(l-1);
+    }
+    
     public static void showProjectDetail(JSONObject pJSON)
     {
     	String gpx = BashSigns.boldGBCPX;
@@ -466,10 +560,8 @@ public class GTDCLI implements Beholder<String>
     
 	public void nxtStp(String projectName) throws IOException
     {
-
 		JSONObject jo = projectMap.get(projectName);
-    	if(ds.terminateStep(jo))ds.appendStep(jo);
-    	else System.out.println("Insufficient Data. Couldn't Terminate Step.");
+    	ds.appendStep(jo);
     }
   
     private String getPathOfClass()
@@ -498,7 +590,7 @@ public class GTDCLI implements Beholder<String>
 			JSONArray steps = jo.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 			int index = steps.length()-1;
 			
-			JSONObject step = steps.getJSONObject(index);
+			JSONObject step = getLastStep(jo);
 
 			if(deadLine.isBefore(jetzt))
     		{
