@@ -4,7 +4,9 @@ package jborg.gtdForBash;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -111,20 +113,46 @@ public class GTDCLI implements Beholder<String>
     	
 		//states = loadStates();
 		if(states==null)states = StatusMGMT.getInstance();
-		String javaVersion = SystemInfo.javaVersion();
-		System.out.println("Java Version: " + javaVersion);
 		
-    	loadProjects();
-    	loadMODProjects();
+		if(isThereADataFolder())
+		{
+			boot();
+		}
+		else 
+		{
+			System.out.println("There is no DataFolder");
+			String directoryPath = getPathToDataFolder();
+
+	        File directory = new File(directoryPath);
+
+	        // Create the directory
+	        if (directory.mkdir())
+	        {
+	            System.out.println("Directory created successfully.");
+	            boot();
+	        }
+	        else
+	        {
+	            System.out.println("Failed to create the directory.");
+	            System.out.println("Bye!");
+	        }
+		}
+	}
+    
+    private void boot() throws IOException, URISyntaxException
+    {
     	
+		loadProjects();
+		loadMODProjects();
+	
 		knownProjects.putAll(projectMap);
 		knownProjects.putAll(modProjectMap);
 
-    	//states = loadStates();
-    	checkForDeadlineAbuse();
-    	
-    	loopForCommands();
-	}
+		//states = loadStates();
+		checkForDeadlineAbuse();
+	
+		loopForCommands();
+    }
     
     public static void main(String... args) throws ClassNotFoundException, IOException, URISyntaxException
     {
@@ -510,7 +538,6 @@ public class GTDCLI implements Beholder<String>
     
     public static JSONObject getLastStep(JSONObject pJSON)
     {
-    	String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
     	JSONArray stepArr = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
     	int l = stepArr.length();
     	
@@ -564,10 +591,28 @@ public class GTDCLI implements Beholder<String>
     	ds.appendStep(jo);
     }
   
-    private String getPathOfClass()
+    private String getPathToDataFolder()
     {
     	return "projectDATA/";
-    }    
+    }
+    
+    private boolean isThereADataFolder()
+    {
+    	  String folderPath = getPathToDataFolder();
+
+          Path path = Paths.get(folderPath);
+
+          if (Files.exists(path) && Files.isDirectory(path))
+          {
+              System.out.println("The folder exists.");
+              return true;
+          }
+          else 
+          {
+              System.out.println("The folder does not exist.");
+              return false;
+          }
+    }
     
     private void checkForDeadlineAbuse()
     {
@@ -585,10 +630,6 @@ public class GTDCLI implements Beholder<String>
     		LocalDateTime jetzt = LocalDateTime.now();
     		String deadLineStr = jo.getString(ProjectJSONKeyz.DLDTKey);
     		LocalDateTime deadLine = LittleTimeTools.LDTfromTimeString(deadLineStr);
- 
-    		
-			JSONArray steps = jo.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-			int index = steps.length()-1;
 			
 			JSONObject step = getLastStep(jo);
 
@@ -625,11 +666,22 @@ public class GTDCLI implements Beholder<String>
 
     private void eraseMODProjectFile(String prjctName)
     {
-    	String path = getPathOfClass();
+    	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
-    	File[] listOfFiles = folder.listFiles();
+    	if(folder==null)
+    	{
+    		System.out.println("Folder is Null.");
+    		System.exit(0);
+    	}
 
+    	File[] listOfFiles = folder.listFiles();
+    	if(listOfFiles==null)
+    	{		
+    		System.out.println("listOfFiles is Null.");
+    		System.exit(0);
+    	}
+    	
     	for(File file: listOfFiles)
     	{
     		
@@ -641,10 +693,21 @@ public class GTDCLI implements Beholder<String>
     private void loadMODProjects() throws IOException
     {
     	
-    	String path = getPathOfClass();
+    	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
+    	if(folder==null)
+    	{
+    		System.out.println("Folder is Null.");
+    		System.exit(0);
+    	}
+
     	File[] listOfFiles = folder.listFiles();
+    	if(listOfFiles==null)
+    	{		
+    		System.out.println("listOfFiles is Null.");
+    		System.exit(0);
+    	}
 
     	for(File file: listOfFiles)
     	{
@@ -664,10 +727,21 @@ public class GTDCLI implements Beholder<String>
     
     private StatusMGMT loadStates() throws ClassNotFoundException, IOException
     {
-    	String path = getPathOfClass();
+    	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
+    	if(folder==null)
+    	{
+    		System.out.println("Folder is Null.");
+    		System.exit(0);
+    	}
+
     	File[] listOfFiles = folder.listFiles();
+    	if(listOfFiles==null)
+    	{		
+    		System.out.println("listOfFiles is Null.");
+    		System.exit(0);
+    	}
 
     	for(File file: listOfFiles)
     	{
@@ -675,7 +749,7 @@ public class GTDCLI implements Beholder<String>
     		if(file.isFile()&&name.equals(statesFileName))
     		{
     			
-    	    	return (StatusMGMT) LoadAndSave.loadObject(getPathOfClass()+statesFileName);
+    	    	return (StatusMGMT) LoadAndSave.loadObject(getPathToDataFolder()+statesFileName);
     		}
     	}
 
@@ -685,10 +759,21 @@ public class GTDCLI implements Beholder<String>
     private void loadProjects() throws IOException, URISyntaxException
     {
     	
-    	String path = getPathOfClass();
+    	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
+    	if(folder==null)
+    	{
+    		System.out.println("Folder is Null.");
+    		System.exit(0);
+    	}
+
     	File[] listOfFiles = folder.listFiles();
+    	if(listOfFiles==null)
+    	{		
+    		System.out.println("listOfFiles is Null.");
+    		System.exit(0);
+    	}
 
     	for(File file: listOfFiles)
     	{
@@ -710,7 +795,7 @@ public class GTDCLI implements Beholder<String>
     	
     	for(JSONObject jo: modProjectMap.values())
     	{
-    		String path = getPathOfClass();
+    		String path = getPathToDataFolder();
     		LoadAndSave.saveText(path, jo.getString(ProjectJSONKeyz.nameKey)+modPrjctMarker, jo.toString(jsonPrintStyle));
     	}
     }
@@ -719,14 +804,14 @@ public class GTDCLI implements Beholder<String>
     {
     	for(JSONObject jo: projectMap.values())
     	{
-    		String path = getPathOfClass();
+    		String path = getPathToDataFolder();
     		LoadAndSave.saveText(path, jo.getString(ProjectJSONKeyz.nameKey)+fileMarker, jo.toString(jsonPrintStyle));
     	}
     }
      
     private void saveStatusMGMT() throws IOException
     {
-    	LoadAndSave.saveObject(getPathOfClass()+statesFileName, StatusMGMT.getInstance());
+    	LoadAndSave.saveObject(getPathToDataFolder()+statesFileName, StatusMGMT.getInstance());
     }
 
     public void saveAll() throws JSONException, IOException, URISyntaxException
