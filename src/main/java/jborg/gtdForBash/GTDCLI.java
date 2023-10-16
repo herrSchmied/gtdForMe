@@ -669,18 +669,8 @@ public class GTDCLI implements Beholder<String>
     	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
-    	if(folder==null)
-    	{
-    		System.out.println("Folder is Null.");
-    		System.exit(0);
-    	}
 
     	File[] listOfFiles = folder.listFiles();
-    	if(listOfFiles==null)
-    	{		
-    		System.out.println("listOfFiles is Null.");
-    		System.exit(0);
-    	}
     	
     	for(File file: listOfFiles)
     	{
@@ -696,18 +686,8 @@ public class GTDCLI implements Beholder<String>
     	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
-    	if(folder==null)
-    	{
-    		System.out.println("Folder is Null.");
-    		System.exit(0);
-    	}
 
     	File[] listOfFiles = folder.listFiles();
-    	if(listOfFiles==null)
-    	{		
-    		System.out.println("listOfFiles is Null.");
-    		System.exit(0);
-    	}
 
     	for(File file: listOfFiles)
     	{
@@ -730,18 +710,8 @@ public class GTDCLI implements Beholder<String>
     	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
-    	if(folder==null)
-    	{
-    		System.out.println("Folder is Null.");
-    		System.exit(0);
-    	}
 
     	File[] listOfFiles = folder.listFiles();
-    	if(listOfFiles==null)
-    	{		
-    		System.out.println("listOfFiles is Null.");
-    		System.exit(0);
-    	}
 
     	for(File file: listOfFiles)
     	{
@@ -762,18 +732,8 @@ public class GTDCLI implements Beholder<String>
     	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
-    	if(folder==null)
-    	{
-    		System.out.println("Folder is Null.");
-    		System.exit(0);
-    	}
 
     	File[] listOfFiles = folder.listFiles();
-    	if(listOfFiles==null)
-    	{		
-    		System.out.println("listOfFiles is Null.");
-    		System.exit(0);
-    	}
 
     	for(File file: listOfFiles)
     	{
