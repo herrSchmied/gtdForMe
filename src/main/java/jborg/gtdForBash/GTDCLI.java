@@ -58,7 +58,7 @@ public class GTDCLI implements Beholder<String>
 	//private static final String correct_last_step = "correct last step";//TODO
 	private static final String view_Project = "view Project";
 	private static final String view_last_steps_of_Projects = "last steps";
-	private static final String view_most_near_Deadline = "most near deadline";//TODO
+	private static final String view_most_near_Deadline = "most near deadline";
 	private static final String view_statistics = "view stats";
 	private static final String next_Step = "next step";
 	private static final String list = "list";
@@ -67,11 +67,12 @@ public class GTDCLI implements Beholder<String>
 	private static final String list_commands = "list cmds";
 	private static final String terminate_Project = "terminate project";
 	private static final String add_Note = "add note";
+	private static final String view_Notes = "show Notes";
 	
 	private static final Set<String> commands = new HashSet<>(Arrays.asList(save, exit, list, help, 
 			list_active_ones, list_mod_Projects,/* correct_last_step, */ view_Project, view_last_steps_of_Projects, 
 			view_most_near_Deadline, view_statistics, list_not_active_ones, new_Project, next_Step, list_commands, 
-			terminate_Project, add_Note));
+			terminate_Project, add_Note, view_Notes));
 
 
 	/*TODO: some only need Testing.
@@ -340,7 +341,33 @@ public class GTDCLI implements Beholder<String>
     			}
     			break;
     		}
-
+    		
+    		case view_Notes:
+    		{
+    			System.out.println("");
+    			List<String> names = new ArrayList<>();
+    			names.addAll(knownProjects.keySet());
+ 
+    			String choosenOne = iss.getAnswerOutOfList("Notes of which Project?", names);
+    			
+    			JSONObject pJSON = knownProjects.get(choosenOne);
+    			
+    			JSONArray noteArr;
+    			if(pJSON.has(ProjectJSONKeyz.noteArrayKey))
+    			{
+    				noteArr = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
+    				int l = noteArr.length();
+    				
+    				for(int n=0;n<l;n++)
+    				{
+    					System.out.println("--> " + noteArr.get(n));
+    				}
+    			}
+    			else System.out.println("Project " + choosenOne + " has no Notes.");
+    			
+    			break;
+    		}
+    		
     		case terminate_Project:
     		{
     			
@@ -666,11 +693,8 @@ public class GTDCLI implements Beholder<String>
 
     private void eraseMODProjectFile(String prjctName)
     {
-    	String path = getPathToDataFolder();
-    	
-    	File folder = new File(path);
 
-    	File[] listOfFiles = folder.listFiles();
+    	File[] listOfFiles = getListOfFilesFromDataFolder();
     	
     	for(File file: listOfFiles)
     	{
@@ -684,10 +708,8 @@ public class GTDCLI implements Beholder<String>
     {
     	
     	String path = getPathToDataFolder();
-    	
-    	File folder = new File(path);
 
-    	File[] listOfFiles = folder.listFiles();
+    	File[] listOfFiles = getListOfFilesFromDataFolder();
 
     	for(File file: listOfFiles)
     	{
@@ -707,11 +729,8 @@ public class GTDCLI implements Beholder<String>
     
     private StatusMGMT loadStates() throws ClassNotFoundException, IOException
     {
-    	String path = getPathToDataFolder();
     	
-    	File folder = new File(path);
-
-    	File[] listOfFiles = folder.listFiles();
+    	File[] listOfFiles = getListOfFilesFromDataFolder();
 
     	for(File file: listOfFiles)
     	{
@@ -730,10 +749,8 @@ public class GTDCLI implements Beholder<String>
     {
     	
     	String path = getPathToDataFolder();
-    	
-    	File folder = new File(path);
 
-    	File[] listOfFiles = folder.listFiles();
+    	File[] listOfFiles = getListOfFilesFromDataFolder();
 
     	for(File file: listOfFiles)
     	{
@@ -748,6 +765,18 @@ public class GTDCLI implements Beholder<String>
     			projectMap.put(jo.getString(ProjectJSONKeyz.nameKey), jo);
     		}
     	}
+    }
+    
+    private File[] getListOfFilesFromDataFolder()
+    {
+    	
+    	String path = getPathToDataFolder();
+    	
+    	File folder = new File(path);
+
+    	File[] listOfFiles = folder.listFiles();
+    	
+    	return listOfFiles;
     }
     
     private void saveMODProjects() throws JSONException, IOException
