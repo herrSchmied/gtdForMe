@@ -213,7 +213,7 @@ public class GTDCLI implements Beholder<String>
     				LocalDateTime ldtDLDT = LittleTimeTools.LDTfromTimeString(dldt);
     				
     				String dauer = LittleTimeTools.fullLDTBetweenLDTs(ldtDLDT, jetzt);
-    				if("".equals(dauer.trim()))dauer = LittleTimeTools.fullLDTBetweenLDTs(jetzt, ldtDLDT);
+    				//if("".equals(dauer.trim()))dauer = LittleTimeTools.fullLDTBetweenLDTs(jetzt, ldtDLDT);
     				
     				long minutes = jetzt.until(ldtDLDT, ChronoUnit.MINUTES);
     				boolean isNearer = (Math.abs(minutes)<Math.abs(newMinutes));
