@@ -87,12 +87,11 @@ public class GTDCLI implements Beholder<String>
 
 	private final GTDDataSpawnSession ds;
 	
-	public final Predicate<String> activeProject = (n)->
+	
+	public final Predicate<JSONObject> activeProject = (jo)->
 	{
-		JSONObject jo = null;
 		
-		if(projectMap.containsKey(n))jo = projectMap.get(n);
-		else return false;
+		if(!projectMap.containsValue(jo))return false;
 		
 		String status = jo.getString(ProjectJSONKeyz.statusKey);
 		
@@ -101,8 +100,29 @@ public class GTDCLI implements Beholder<String>
 		return false;
 	};
 
-	public final Predicate<String> notActiveProject = (n)-> !activeProject.test(n);
+	public final Predicate<JSONObject> notActiveProject = (jo)-> 
+	{
+		if(!projectMap.containsValue(jo))return false;//Is a must!!
+		
+		return !activeProject.test(jo);
+	};
 	
+	public final Predicate<String> activePrjctName = (s)->
+	{
+		if(!projectMap.containsKey(s)) return false;
+		
+		JSONObject pJSON = projectMap.get(s);
+		
+		return activeProject.test(pJSON);
+	};
+	
+	public final Predicate<String> notActivePrjctName = (s)->
+	{
+		if(!projectMap.containsKey(s)) return false;//Is a must!!
+		
+		return !activePrjctName.test(s);
+	};
+
 	private final InputStreamSession iss;
 		
     public GTDCLI(InputStreamSession iss) throws ClassNotFoundException, IOException, URISyntaxException
@@ -178,9 +198,9 @@ public class GTDCLI implements Beholder<String>
     		case view_most_near_Deadline:
     		{
     			LocalDateTime jetzt = LocalDateTime.now();
-    			long newHours = 100000;
+    			long newMinutes = 1000000;
     			List<String> prjctList = new ArrayList<>();
-    			List<Long> hourList = new ArrayList<>();
+    			List<String> dauerList = new ArrayList<>();
     			
     			for(JSONObject pJSON: projectMap.values())
     			{
@@ -191,43 +211,48 @@ public class GTDCLI implements Beholder<String>
     				
     				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
     				LocalDateTime ldtDLDT = LittleTimeTools.LDTfromTimeString(dldt);
-    				System.out.println(dldt);
     				
-    				long hours = jetzt.until(ldtDLDT, ChronoUnit.HOURS);
-    				boolean isNearer = (Math.abs(hours)<Math.abs(newHours));
+    				String dauer = LittleTimeTools.fullLDTBetweenLDTs(ldtDLDT, jetzt);
+    				if("".equals(dauer.trim()))dauer = LittleTimeTools.fullLDTBetweenLDTs(jetzt, ldtDLDT);
     				
-    				System.out.println(hours + "** is more near: " + isNearer);
+    				long minutes = jetzt.until(ldtDLDT, ChronoUnit.MINUTES);
+    				boolean isNearer = (Math.abs(minutes)<Math.abs(newMinutes));
+    				boolean isEqual = Math.abs(minutes)==Math.abs(newMinutes);
+    				    				
+    				if(isEqual)
+    				{
+    					prjctList.add(prjctName);
+    					dauerList.add(dauer);
+    				}
+
     				
     				if(isNearer)
     				{
-    					newHours=hours;
+    					newMinutes=minutes;
+    					
     					prjctList.clear();
     					prjctList.add(prjctName);
-    					hourList.clear();
-    					hourList.add(newHours);
-    				}
-		
-    				if(Math.abs(hours)==Math.abs(newHours))
-    				{
-    					prjctList.add(prjctName);
-    					hourList.add(newHours);
+    					dauerList.clear();
+    					dauerList.add(dauer); 
+    					System.out.println("Hello " + dauerList.get(0));
     				}
     			}
+    			for(String z: dauerList)System.out.println("Hi " + z);
     			
-    			List<String> headers = new ArrayList<>(Arrays.asList("Project", "Until or since Deadline of Last Step(Hours)"));
     			List<List<String>> rows = new ArrayList<>();
-
-    			for(String prjctName: prjctList)
+    			
+    			int l = prjctList.size();
+    			for(int n=0;n<l;n++)
     			{
     				List<String> row = new ArrayList<>();
-    				int i = prjctList.indexOf(prjctName);
-    				
-    				row.add(prjctName);
-    				row.add(hourList.get(i).toString());
+
+    				row.add(prjctList.get(n));
+    				row.add(dauerList.get(n));
     				
     				rows.add(row);
     			}
 
+    			List<String> headers = new ArrayList<>(Arrays.asList("Project", "Most near Deadline of Last Steps."));
     			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
     			System.out.println(ttd);
     			
@@ -284,7 +309,7 @@ public class GTDCLI implements Beholder<String>
     		case view_statistics:
     		{
     			int nrOfPrjcts = knownProjects.size();
-    			int nrOfActivePrjcts = findProjectNames(activeProject).size();
+    			int nrOfActivePrjcts = findProjectsByCondition(activeProject).size();
     			int nrOfModPrjcts = modProjectMap.size();
     			
     			int nrOfSuccessfulSteps = 0;
@@ -326,7 +351,7 @@ public class GTDCLI implements Beholder<String>
     		{
     			
     			System.out.println("");
-    			List<String> aPrjcts = findProjectNames(activeProject);
+    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
     			if(aPrjcts.isEmpty())
     			{
     				System.out.println("No active Projects.");
@@ -372,7 +397,7 @@ public class GTDCLI implements Beholder<String>
     		{
     			
     			System.out.println("");
-    			List<String> aPrjcts = findProjectNames(activeProject);
+    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
     			if(aPrjcts.isEmpty())
     			{
     				System.out.println("No active Projects.");
@@ -401,38 +426,38 @@ public class GTDCLI implements Beholder<String>
     			System.out.println("");
     			
     			Map<String, JSONObject> map = new HashMap<>();
-    			List<String> noAPrjcts = findProjectNames(notActiveProject);
+    			List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
     			for(String prjctName: noAPrjcts)
     			{
     				JSONObject pJSON = knownProjects.get(prjctName);
     				map.put(prjctName, pJSON);
     			}
-    			showProjectTable(map);
+    			showProjectMapAsTable(map);
     			
     			break;
     		}
     		
     		case list_mod_Projects:
     		{
-    			showProjectTable(modProjectMap);
+    			showProjectMapAsTable(modProjectMap);
     			break;
     		}
  
     		case list_active_ones:
     		{
     			System.out.println("");
-    			showProjectTable(projectMap);
+    			showProjectMapAsTable(projectMap);
     			
     			Map<String, JSONObject> map = new HashMap<>();
     			
-    			List<String> aPrjcts = findProjectNames(activeProject);
+    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
     			for(String prjctName: aPrjcts)
     			{
     				JSONObject pJSON = projectMap.get(prjctName);
     				map.put(prjctName, pJSON);
     			}
 
-    			showProjectTable(map);
+    			showProjectMapAsTable(map);
     			
     			break;
     		}
@@ -440,7 +465,7 @@ public class GTDCLI implements Beholder<String>
     		case next_Step:
     		{
     			System.out.println("");
-    			List<String> aPrjcts = findProjectNames(activeProject);
+    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
     			if(aPrjcts.isEmpty())
     			{
     				System.out.println("Sorry no active Project!");
@@ -457,7 +482,7 @@ public class GTDCLI implements Beholder<String>
     		case list: 
     		{
     			System.out.println("");
-    			showProjectTable(knownProjects);
+    			showProjectMapAsTable(knownProjects);
     			break;
     		}
     	
@@ -494,39 +519,9 @@ public class GTDCLI implements Beholder<String>
     	
     	loopForCommands();
     }
-
-    public List<String> findActiveProjectsNames()
-    {
-    	
-    	List<String> activeProjectNames = new ArrayList<>();
-    	
-    	for(JSONObject jo: projectMap.values())
-    	{
-    		String name = jo.getString(ProjectJSONKeyz.nameKey);
-    		String status = (String) jo.getString(ProjectJSONKeyz.statusKey);
-    		
-    		if(!states.getStatesOfASet(StatusMGMT.terminalSetName).contains(status))
-    		{
-    			activeProjectNames.add(name);
-    		}
-    	}
-
-    	return activeProjectNames;
-    }
     
-    public void listActiveProjectNames()
-    {
-		
-    	int i = 1;
-    	
-    	for(String projectName: findActiveProjectsNames())
-    	{
-    		System.out.println(i + ".)" + projectName);
-    		i++;
-    	}
-    }
-       
-    public List<String> findProjectNames(Predicate<String> condition)
+
+    public List<String> findProjectNamesByCondition(Predicate<String> condition)
     {
     	List<String> output = new ArrayList<>();
     	
@@ -535,7 +530,17 @@ public class GTDCLI implements Beholder<String>
     	return output;
     }
     
-    public void showProjectTable(Map<String, JSONObject> map) throws JSONException
+    public List<JSONObject> findProjectsByCondition(Predicate<JSONObject> condition)
+    {
+    	
+    	List<JSONObject> output = new ArrayList<>();
+    	
+    	for(JSONObject pJSON: knownProjects.values())if(condition.test(pJSON))output.add(pJSON);
+    	
+    	return output;
+    }
+
+    public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException
     {
 		List<String> headers = columnList;
 		List<List<String>> rows = new ArrayList<>();
