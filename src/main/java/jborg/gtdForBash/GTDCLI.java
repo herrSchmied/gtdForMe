@@ -47,6 +47,8 @@ public class GTDCLI implements Beholder<String>
 	private Map<String, JSONObject> knownProjects = new HashMap<>();
 
 	public final static String newPrjctStgClsd = "New Project Stage closed.";
+	public final static String tdtNoteStpDLDTAbuse = "Step Deadline abuse!";
+	public final static String tdtNotePrjctDLDTAbuse = "Project Deadline abuse!";
 
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
 	
@@ -647,49 +649,47 @@ public class GTDCLI implements Beholder<String>
     private void checkForDeadlineAbuse()
     {
     	
-    	for(JSONObject jo: projectMap.values())
+    	for(JSONObject pJSON: projectMap.values())
     	{
     		
     		StatusMGMT sm = StatusMGMT.getInstance();
 
-    		String prjctStatus = jo.getString(ProjectJSONKeyz.statusKey);
+    		String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
     		Set<String> terminalSet = sm.getStatesOfASet(StatusMGMT.terminalSetName);
     		
     		if(terminalSet.contains(prjctStatus))continue;
 
     		LocalDateTime jetzt = LocalDateTime.now();
-    		String deadLineStr = jo.getString(ProjectJSONKeyz.DLDTKey);
-    		LocalDateTime deadLine = LittleTimeTools.LDTfromTimeString(deadLineStr);
 			
-			JSONObject step = getLastStep(jo);
+			JSONObject step = getLastStep(pJSON);
+			
+    		String stepStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
+    		
+    		String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
+    		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
+    			
+    		if(dldt.isBefore(jetzt)&&!terminalSet.contains(stepStatus))//Is Step DLDT abused?
+    		{
+        		step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
+        		pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
+        			
+        		step.put(StepJSONKeyz.TDTKey, dldtStr);
+        		step.put(StepJSONKeyz.TDTNoteKey, tdtNoteStpDLDTAbuse);    
+    		}   					
 
-			if(deadLine.isBefore(jetzt))
+    		String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
+    		LocalDateTime projectDLDT = LittleTimeTools.LDTfromTimeString(projectDLDTStr);
+
+    		if(projectDLDT.isBefore(jetzt))//Is Project DLDT abused?
     		{
     			step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-    			jo.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
+    			pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
+    			step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
+    			pJSON.put(ProjectJSONKeyz.TDTKey, projectDLDTStr);
     			
-    			step.put(StepJSONKeyz.TDTNoteKey, "Project Deadline abuse!");
-    			jo.put(ProjectJSONKeyz.TDTNoteKey, "Project Deadline abuse!");
-    			
-    			continue;
+    			step.put(StepJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
+    			pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
     		}
-			
-    		String stepStatus = jo.getString(ProjectJSONKeyz.statusKey);
-    		
-    		if(terminalSet.contains(stepStatus))continue;
-    		else
-    		{
-    			String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
-    			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-    			
-    			if(dldt.isBefore(jetzt))
-    			{
-        			step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-        			jo.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
-        			
-        			step.put(StepJSONKeyz.TDTNoteKey, "Step Deadline abuse!");    
-    			}
-    		}    					
     	}
     }
 
