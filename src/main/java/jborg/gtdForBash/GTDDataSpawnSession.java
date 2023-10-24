@@ -30,6 +30,8 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	
 	
 	//TODO:->Eliminate rest of Literals in Code.		<-
+	public static final int minMinutesInFutureDLDT = 5;
+	public static final int maxYearsInFutureDLDT = 100;
 	
 	public static final int firstStepIndex = 0;
 	
@@ -163,8 +165,9 @@ public class GTDDataSpawnSession implements Subjekt<String>
 				
 				
 				System.out.println("");
+				System.out.println("Project Deadline. Min.: " + minMinutesInFutureDLDT + " Minutes in Future. Max.: " + maxYearsInFutureDLDT + " Years in Future.");
 				//Deadline should be at least five Minutes in the Future. But not more than 20 Years.
-				dldt = iss.getDateTime(dldtQ, LocalDateTime.now().plusMinutes(5), LocalDateTime.now().plusYears(20));
+				dldt = iss.getDateTime(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
 				String deadLineStr = LittleTimeTools.timeString(dldt);
 				pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 				
@@ -257,7 +260,11 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		{
 			steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
 			oldStep = steps.getJSONObject(index-1);
-			terminateStep(pJson);
+			String oldStepStatus = oldStep.getString(StepJSONKeyz.statusKey);
+			String tSetName = StatusMGMT.terminalSetName;
+			StatusMGMT statusMGMT = StatusMGMT.getInstance();
+			Set<String> tSet = statusMGMT.getStatesOfASet(tSetName);
+			if(!tSet.contains(oldStepStatus))terminateStep(pJson);
 		}
 		
 		LocalDateTime nddtOfStep = LocalDateTime.now();

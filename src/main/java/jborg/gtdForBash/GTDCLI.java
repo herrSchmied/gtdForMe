@@ -234,10 +234,8 @@ public class GTDCLI implements Beholder<String>
     					prjctList.add(prjctName);
     					dauerList.clear();
     					dauerList.add(dauer); 
-    					System.out.println("Hello " + dauerList.get(0));
     				}
     			}
-    			for(String z: dauerList)System.out.println("Hi " + z);
     			
     			List<List<String>> rows = new ArrayList<>();
     			
