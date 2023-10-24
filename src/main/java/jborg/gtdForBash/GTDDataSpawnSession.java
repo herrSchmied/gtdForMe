@@ -264,7 +264,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			String tSetName = StatusMGMT.terminalSetName;
 			StatusMGMT statusMGMT = StatusMGMT.getInstance();
 			Set<String> tSet = statusMGMT.getStatesOfASet(tSetName);
-			if(!tSet.contains(oldStepStatus))terminateStep(pJson);
+			if(!tSet.contains(oldStepStatus))terminateStep(pJson);    //Just in case
 		}
 		
 		LocalDateTime nddtOfStep = LocalDateTime.now();
