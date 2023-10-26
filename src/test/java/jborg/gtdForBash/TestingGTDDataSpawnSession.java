@@ -186,9 +186,9 @@ public class TestingGTDDataSpawnSession
 		String changeStpTDT = "No\n";
 		
 		String projectSuccess= "Yes\n";
-		String changePrjctTDT = "No\n";
 		String makeTDTNote = "Yes\n";
 		String tdtNote = "Ich habe Fertig!\n";
+		String changePrjctTDT = "No\n";
 		
 		String data = setUpDataNewProject(prjctName, ldtPrjctDLDT, ldtStpDLDT);
 		
@@ -197,9 +197,9 @@ public class TestingGTDDataSpawnSession
 				+ makeStpTerminalNote
 				+ changeStpTDT
 				+ projectSuccess
-				+ changePrjctTDT
 				+ makeTDTNote
-				+ tdtNote;
+				+ tdtNote
+				+ changePrjctTDT;
 		
 		return data;
 	}

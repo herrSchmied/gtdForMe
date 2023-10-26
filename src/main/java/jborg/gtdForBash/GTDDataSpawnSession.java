@@ -494,9 +494,11 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	}
 	
 	//Can only terminate last Step of Project JSONObject.
-	public boolean terminateStep(JSONObject pJson) throws IOException
+	public void terminateStep(JSONObject pJson) throws IOException
 	{
 		
+		LocalDateTime jetzt = LocalDateTime.now();
+		String jetztStr = LittleTimeTools.timeString(jetzt);
 		JSONArray steps = (JSONArray) pJson.get(ProjectJSONKeyz.stepArrayKey);
 		int index = steps.length();
 		
@@ -505,93 +507,100 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		LocalDateTime nddtOfStep = LittleTimeTools.LDTfromTimeString(nddtOfStepStr);
 		
 		boolean wasItASuccess = iss.getYesOrNo(stepSuccesQstn);
-		if(wasItASuccess||!wasItASuccess)
+
+		String stepStatus;
+		if(wasItASuccess)stepStatus = StatusMGMT.success;
+		else stepStatus = StatusMGMT.failed;
+		
+		try
 		{
-			
-			int tdtYearRangeMax = 20;
-			String stepStatus = "";
-			if(wasItASuccess)stepStatus = StatusMGMT.success;
-			else stepStatus = StatusMGMT.failed;
-			
 			String terminalNote = "";
 			boolean thereIsATerminalNote = iss.getYesOrNo("want to make a Terminal note?");
 			if(thereIsATerminalNote)terminalNote = iss.getString(stepTerminationNotePhrase);
 			
 			LocalDateTime tdt = LocalDateTime.now();
-			boolean wantToChangeTDTOfStep = iss.getYesOrNo(wantToChangeTDTOfStepQstn);	
-			if(wantToChangeTDTOfStep)tdt = iss.getDateTime(stepWhenTDTQstn, nddtOfStep, LocalDateTime.now().plusYears(tdtYearRangeMax));
+			boolean wantToChangeTDTOfStep = iss.getYesOrNo(wantToChangeTDTOfStepQstn);
+			if(wantToChangeTDTOfStep)
+			{
+				System.out.println("TDT must be between " + nddtOfStepStr + " and " + jetztStr);
+				tdt = iss.getDateTime(stepWhenTDTQstn, nddtOfStep, jetzt);
+			}
 			
 			step.put(StepJSONKeyz.statusKey, stepStatus);//Project Status ain't bothered!!
 			String when = LittleTimeTools.timeString(tdt);
 			step.put(StepJSONKeyz.TDTKey, when);
 			if(!terminalNote.trim().equals(""))step.put(StepJSONKeyz.TDTNoteKey, terminalNote);
-			
-			return true;
 		}
-		else return false;
+		catch(IllegalArgumentException exc)
+		{
+			System.out.println("IllegalArgument!!!" + exc);
+			terminateStep(pJson);
+		}
+		catch(JSONException jsonExc)
+		{
+			System.out.println("JSON macht Probleme");
+		}
+	
 	}
 	
-	public boolean terminateProject(JSONObject pJson) throws InputMismatchException, JSONException, IOException
+	public void terminateProject(JSONObject pJson) throws InputMismatchException, JSONException, IOException
 	{
 		
 		System.out.println(infoAlertTxtPhrase);
 		
-		if(terminateStep(pJson))
-		{
+		terminateStep(pJson);
+		
+		LocalDateTime jetzt = LocalDateTime.now();
+		
+		String prjctStatus = "";
+		boolean success = iss.getYesOrNo(prjctSuccessQstn);
 			
-			String prjctStatus = "";
-			boolean success = iss.getYesOrNo(prjctSuccessQstn);
-			
-			if(success)prjctStatus = StatusMGMT.success;
-			else prjctStatus = StatusMGMT.failed;
-			
-			boolean wantChangeTDTQuestion = iss.getYesOrNo(wantToChangeTDTOfPrjctQstn);
-			LocalDateTime tdt = LocalDateTime.now();
-			if(wantChangeTDTQuestion)tdt = iss.getDateTime(prjctWhenTDTQstn,ancient, LocalDateTime.now());
-			
-			String terminalNote = "";
-			boolean wantToMakeTDTNoteQuestion = iss.getYesOrNo(wantToMakeTDTNoteQstn);
-			if(wantToMakeTDTNoteQuestion) terminalNote = iss.getString(prjctTDTNoteQstn);
-				
-			String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
-			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-				
-			if(tdt.isAfter(dldt))
-			{
-				System.out.println("Termination can't be after Deadline.");
-				return false;
-			}
-				
-			String nddtStr = pJson.getString(ProjectJSONKeyz.NDDTKey);
-			LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
-				
-			if(tdt.isBefore(nddt))
-			{
-				System.out.println("Termination can't be before Note-Down-Date-Time");
-				return false;
-			}
-			
-			LocalDateTime jetzt = LocalDateTime.now();
-			if(tdt.isAfter(jetzt))
-			{
-				System.out.println("TDT can't be after now.");
-				return false;
-			}
-				
-			pJson.put(ProjectJSONKeyz.statusKey, prjctStatus);
-				
-			String tdtStr = LittleTimeTools.timeString(tdt);
-			pJson.put(ProjectJSONKeyz.TDTKey, tdtStr);
+		if(success)prjctStatus = StatusMGMT.success;
+		else prjctStatus = StatusMGMT.failed;
 
-			if(!terminalNote.trim().equals(""))pJson.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);
 			
-			return true;
-		}
-		else
+		String terminalNote = "";
+		boolean wantToMakeTDTNoteQuestion = iss.getYesOrNo(wantToMakeTDTNoteQstn);
+		if(wantToMakeTDTNoteQuestion) terminalNote = iss.getString(prjctTDTNoteQstn);
+				
+		boolean wantChangeTDTQuestion = iss.getYesOrNo(wantToChangeTDTOfPrjctQstn);
+		LocalDateTime tdt = jetzt;
+		if(wantChangeTDTQuestion)tdt = iss.getDateTime(prjctWhenTDTQstn,ancient, jetzt);
+
+		String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
+		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
+				
+		if(tdt.isAfter(dldt))
 		{
-			System.out.println("Can't Terminate last Step.");
-			return false;
+			System.out.println("Termination can't be after Deadline.");
+			terminateProject(pJson);
+			return;
 		}
+				
+		String nddtStr = pJson.getString(ProjectJSONKeyz.NDDTKey);
+		LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
+				
+		if(tdt.isBefore(nddt))
+		{
+			System.out.println("Termination can't be before Note-Down-Date-Time");
+			terminateProject(pJson);
+			return;
+		}
+			
+		if(tdt.isAfter(jetzt))
+		{
+			System.out.println("TDT can't be after now.");
+			terminateProject(pJson);
+			return;
+		}
+				
+		pJson.put(ProjectJSONKeyz.statusKey, prjctStatus);
+				
+		String tdtStr = LittleTimeTools.timeString(tdt);
+		pJson.put(ProjectJSONKeyz.TDTKey, tdtStr);
+
+		if(!terminalNote.trim().equals(""))pJson.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);
+			
 	}
 	
 	@Override
