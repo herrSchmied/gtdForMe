@@ -42,7 +42,7 @@ public class TestingGTDDataSpawnSession
 	String noticeOne = "Note1";
 	String noticeTwo = "Note2";
 	
-	public Pair<GTDDataSpawnSession, JSONObject> arrangeWakeMODPrjct()
+	public Pair<GTDDataSpawnSession, JSONObject> arrangeWakeMODPrjct() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 				
 		LocalDateTime jetzt = LocalDateTime.now();
@@ -58,13 +58,13 @@ public class TestingGTDDataSpawnSession
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSON);
 	}
 	
-	public Pair<GTDDataSpawnSession, JSONObject> arrangeNewPrjct()
+	public Pair<GTDDataSpawnSession, JSONObject> arrangeNewPrjct() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 				
 		LocalDateTime jetzt = LocalDateTime.now();
 		
 
-		String data = setUpDataNewProject(newPrjctName, jetzt.plusMinutes(10), jetzt.plusMinutes(9));
+		String data = setUpDataNewProject(newPrjctName, jetzt.plusHours(10), jetzt.plusHours(9));
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -74,7 +74,7 @@ public class TestingGTDDataSpawnSession
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSON);
 	}
 	
-	public Pair<GTDDataSpawnSession, JSONObject> arrangeAppendStepPrjct()
+	public Pair<GTDDataSpawnSession, JSONObject> arrangeAppendStepPrjct() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException, StepTerminationException
 	{
 				
 		LocalDateTime jetzt = LocalDateTime.now();	
@@ -85,11 +85,14 @@ public class TestingGTDDataSpawnSession
 		InputStreamSession iss = new InputStreamSession(bais);
 		GTDDataSpawnSession gdss = new GTDDataSpawnSession(iss);
 		JSONObject pJSON = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
+		JSONObject sJson = gdss.getLastStepOfProject(pJSON);
+		
+		gdss.terminateStep(sJson);
 		
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSON);
 	}
 	
-	public Pair<GTDDataSpawnSession, JSONObject> arrangeMODPrjct()
+	public Pair<GTDDataSpawnSession, JSONObject> arrangeMODPrjct() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 		
 		LocalDateTime jetzt = LocalDateTime.now();
@@ -106,7 +109,7 @@ public class TestingGTDDataSpawnSession
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSONMod);
 	}
 	
-	public Pair<GTDDataSpawnSession, JSONObject> arrangeTerminatePrjct()
+	public Pair<GTDDataSpawnSession, JSONObject> arrangeTerminatePrjct() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 		
 		LocalDateTime jetzt = LocalDateTime.now();
@@ -123,7 +126,7 @@ public class TestingGTDDataSpawnSession
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSONMod);
 	}
 	
-	public Pair<GTDDataSpawnSession, JSONObject> arrangeAddNotePrjct()
+	public Pair<GTDDataSpawnSession, JSONObject> arrangeAddNotePrjct() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 		
 		LocalDateTime jetzt = LocalDateTime.now();
@@ -150,15 +153,15 @@ public class TestingGTDDataSpawnSession
 		String terminalNote = "I'm Thru wit it.\n";
 		String wantToChangeTDT = "No\n";
 		String specialStpBDT2 = "No\n";
-		String step2DLDT = translateTimeToAnswerString(ldtPrjctDLDT.minusSeconds(1));
+		String step2DLDT = translateTimeToAnswerString(ldtStpDLDT.minusMinutes(2));
 
 		String step2WasSuccess = "No\n";
 		String wantToMakeTerminalNote2 = "No\n";
 		String wantToChangeTDT2 = "No\n";
 		String specialStpBDT3 = "No\n";
-		String step3DLDT = translateTimeToAnswerString(ldtPrjctDLDT.minusSeconds(2));
+		String step3DLDT = translateTimeToAnswerString(ldtStpDLDT.minusMinutes(1));
 
-		String data = setUpDataNewProject(prjctName, ldtPrjctDLDT, ldtPrjctDLDT) 
+		String data = setUpDataNewProject(prjctName, ldtPrjctDLDT, ldtStpDLDT) 
 				+ oldStepWasSuccess
 				+ wantToMakeTerminalNote
 				+ terminalNote
@@ -287,7 +290,7 @@ public class TestingGTDDataSpawnSession
 	}
 	
 	@Test
-	public void testSpawnNewProject() 
+	public void testSpawnNewProject() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 		JSONObject pJSON = arrangeNewPrjct().getValue();
 		String name = pJSON.getString(ProjectJSONKeyz.nameKey);
@@ -312,7 +315,7 @@ public class TestingGTDDataSpawnSession
 		assert(goal.equals(newPrjctGoal.substring(0,l)));
 	}
 
-	public void testSpawnMODProject()
+	public void testSpawnMODProject() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 		
 		JSONObject modJSON = arrangeMODPrjct().getValue();
@@ -328,20 +331,19 @@ public class TestingGTDDataSpawnSession
 		assert(goal.equals(modPrjctGoal.substring(0,l)));
 	}
 	
-	public void testWakeMOD() 
-	{
-		//fail("Not yet implemented");
-	}
-	
 	@Test
-	public void testAppendStep() throws IOException 
+	public void testAppendStep() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException, StepTerminationException
 	{
+		
+		//Testing to append 2 Steps.
 		Pair<GTDDataSpawnSession, JSONObject> pair = arrangeAppendStepPrjct();
 		
 		JSONObject asJSON = pair.getValue();
 		GTDDataSpawnSession gdss = pair.getKey();
 		
-		gdss.appendStep(asJSON);
+		gdss.spawnStep(asJSON);
+		JSONObject sJSON = gdss.getLastStepOfProject(asJSON);
+		gdss.terminateStep(sJSON);
 		
 		JSONArray jArray = asJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 		assert(jArray.length()==2);
@@ -351,13 +353,13 @@ public class TestingGTDDataSpawnSession
 		int l = this.stepDesc2.length()-1;
 		assert(desc2.equals(this.stepDesc2.substring(0, l)));
 		
-		gdss.appendStep(asJSON);
+		gdss.spawnStep(asJSON);
 		assert(jArray.length()==3);
 	}
 
 	
 	@Test
-	public void testTerminateProject() throws InputMismatchException, JSONException, IOException
+	public void testTerminateProject() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException, JSONException, ProjectTerminationException
 	{
 
 
@@ -375,7 +377,7 @@ public class TestingGTDDataSpawnSession
 	}
 
 	@Test
-	public void testAddNote() 
+	public void testAddNote() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException 
 	{
 		
 		Pair<GTDDataSpawnSession, JSONObject> pair = arrangeAddNotePrjct();
@@ -399,7 +401,7 @@ public class TestingGTDDataSpawnSession
 	}
 	
 	@Test
-	public void testWakeProject() throws IOException 
+	public void testWakeProject() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 		
 		Pair<GTDDataSpawnSession, JSONObject> pair = arrangeWakeMODPrjct();

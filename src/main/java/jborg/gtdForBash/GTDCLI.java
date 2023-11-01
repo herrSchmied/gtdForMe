@@ -127,7 +127,7 @@ public class GTDCLI implements Beholder<String>
 
 	private final InputStreamSession iss;
 		
-    public GTDCLI(InputStreamSession iss) throws ClassNotFoundException, IOException, URISyntaxException
+    public GTDCLI(InputStreamSession iss) throws Exception
 	{
     	
     	this.iss = iss;
@@ -162,7 +162,7 @@ public class GTDCLI implements Beholder<String>
 		}
 	}
     
-    private void boot() throws IOException, URISyntaxException
+    private void boot() throws Exception
     {
     	
 		loadProjects();
@@ -172,17 +172,17 @@ public class GTDCLI implements Beholder<String>
 		knownProjects.putAll(modProjectMap);
 
 		//states = loadStates();
-		checkForDeadlineAbuse();
+		checkAllForDLDTAbuse();
 	
 		loopForCommands();
     }
     
-    public static void main(String... args) throws ClassNotFoundException, IOException, URISyntaxException
+    public static void main(String... args) throws Exception
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
     
-    public void loopForCommands() throws JSONException, IOException, URISyntaxException
+    public void loopForCommands() throws Exception
     {
     	
     	String px = BashSigns.boldBBCPX;
@@ -362,6 +362,7 @@ public class GTDCLI implements Beholder<String>
     			if(aPrjcts.contains(pName))
     			{
     				JSONObject pJSON = projectMap.get(pName);
+    				checkForDeadlineAbuse(pJSON);
     				ds.addNote(pJSON);
     			}
     			break;
@@ -408,6 +409,9 @@ public class GTDCLI implements Beholder<String>
     			if(aPrjcts.contains(pName))
     			{
     				JSONObject pJSON = projectMap.get(pName);
+    				checkForDeadlineAbuse(pJSON);
+    				JSONObject sJSON = ds.getLastStepOfProject(pJSON);
+    				ds.terminateStep(sJSON);  				
     				ds.terminateProject(pJSON);
     			}
     			break;
@@ -473,7 +477,12 @@ public class GTDCLI implements Beholder<String>
     			}
     			String choosenOne = iss.getAnswerOutOfList("Which one?", aPrjcts);
     			String prjct = choosenOne.trim();
-    			if(aPrjcts.contains(prjct))nxtStp(prjct);
+    			if(aPrjcts.contains(prjct))
+    			{
+    				JSONObject pJSON = knownProjects.get(prjct);
+    				checkForDeadlineAbuse(pJSON);
+    				nxtStp(pJSON);
+    			}
     			else System.out.println("Please choose more wise. Because '" + choosenOne + "' is not"
     					+ " on the List!");
     			break;
@@ -617,10 +626,9 @@ public class GTDCLI implements Beholder<String>
     	
     }
     
-	public void nxtStp(String projectName) throws IOException
+	public void nxtStp(JSONObject pJSON) throws Exception
     {
-		JSONObject jo = projectMap.get(projectName);
-    	ds.appendStep(jo);
+    	ds.spawnStep(pJSON);
     }
   
     private String getPathToDataFolder()
@@ -646,50 +654,54 @@ public class GTDCLI implements Beholder<String>
           }
     }
     
-    private void checkForDeadlineAbuse()
+    private void checkAllForDLDTAbuse()
     {
-    	
     	for(JSONObject pJSON: projectMap.values())
     	{
+    		checkForDeadlineAbuse(pJSON);
+    	}
+    }
+    
+    private void checkForDeadlineAbuse(JSONObject pJSON)
+    {
     		
-    		StatusMGMT sm = StatusMGMT.getInstance();
+    	StatusMGMT sm = StatusMGMT.getInstance();
 
-    		String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
-    		Set<String> terminalSet = sm.getStatesOfASet(StatusMGMT.terminalSetName);
+    	String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
+    	Set<String> terminalSet = sm.getStatesOfASet(StatusMGMT.terminalSetName);
     		
-    		if(terminalSet.contains(prjctStatus))continue;
+    	if(terminalSet.contains(prjctStatus))return;
 
-    		LocalDateTime jetzt = LocalDateTime.now();
+    	LocalDateTime jetzt = LocalDateTime.now();
 			
-			JSONObject step = getLastStep(pJSON);
+		JSONObject step = getLastStep(pJSON);
 			
-    		String stepStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
+    	String stepStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
     		
-    		String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
-    		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
+    	String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
+    	LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
     			
-    		if(dldt.isBefore(jetzt)&&!terminalSet.contains(stepStatus))//Is Step DLDT abused?
-    		{
-        		step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-        		pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
+    	if(dldt.isBefore(jetzt)&&!terminalSet.contains(stepStatus))//Is Step DLDT abused?
+    	{
+        	step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
+        	pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
         			
-        		step.put(StepJSONKeyz.TDTKey, dldtStr);
-        		step.put(StepJSONKeyz.TDTNoteKey, tdtNoteStpDLDTAbuse);    
-    		}   					
+        	step.put(StepJSONKeyz.TDTKey, dldtStr);
+        	step.put(StepJSONKeyz.TDTNoteKey, tdtNoteStpDLDTAbuse);    
+    	}   					
 
-    		String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
-    		LocalDateTime projectDLDT = LittleTimeTools.LDTfromTimeString(projectDLDTStr);
+    	String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
+    	LocalDateTime projectDLDT = LittleTimeTools.LDTfromTimeString(projectDLDTStr);
 
-    		if(projectDLDT.isBefore(jetzt))//Is Project DLDT abused?
-    		{
-    			step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-    			pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
-    			step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
-    			pJSON.put(ProjectJSONKeyz.TDTKey, projectDLDTStr);
+    	if(projectDLDT.isBefore(jetzt))//Is Project DLDT abused?
+    	{
+    		step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
+    		pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
+    		step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
+    		pJSON.put(ProjectJSONKeyz.TDTKey, projectDLDTStr);
     			
-    			step.put(StepJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
-    			pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
-    		}
+    		step.put(StepJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
+    		pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
     	}
     }
 
