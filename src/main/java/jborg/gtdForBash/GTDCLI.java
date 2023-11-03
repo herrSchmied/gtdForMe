@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.InputMismatchException;
 import java.util.function.Predicate;
 import java.util.HashMap;
 
@@ -35,8 +36,53 @@ public class GTDCLI implements Beholder<String>
 {
 	
 	private static final String statesFileName = "statusMGMT.states";
-	private StatusMGMT states;
+	private static final StatusMGMT states = loadStates();
 	
+	private static final String sayGoodBye = "Bye!";
+	
+	private static final String unknownCmdStr = "Unknown command!";
+	private static final String dataFolderFound = "Data Folder found.";
+	private static final String thereIsNoDataFolder = "There is no Data Folder";
+	private static final String dataFolderCreated = "Data Folder created successfully.";
+	private static final String failedToCreateDirectory = "Failed to create the directory.";
+	
+	private static final String projectStr = "Project";
+	private static final String noPrjctStr = "No Project.";
+	private static final String nearestDeadlineStr = "nearest Deadline of Last Steps.";
+	private static final String descStr = "Desc";
+	private static final String statusStr = "Status";
+	private static final String deadlineStr = "Deadline";
+	
+	private static final String prjctNameStr = "Project Name";
+	private static final String bdtStr = "BDT";
+	private static final String nddtStr = "NDDT";
+	private static final String goalStr = "Goal";
+	private static final String stepsStr = "Steps";
+	private static final String notesStr = "Notes";
+	
+	private static final String whichOnePhrase = "Which one?";
+	private static final String notesOfWhichPrjctPhrase = "Notes of which Project?";
+
+	
+	private static final String chooseMoreWiselyPreFix = "Please choose more wisely. Because '";
+	private static final String itsNotOnTheListSuffix = "' is not on the List!";
+	private static final String hasNoNotesSuffix = " has no Notes.";
+	
+	private static final String nrOfPrjctsStr = "Nr. of Projects: ";
+	private static final String nrOfActivePrjctsStr = "Nr. of active Projects: ";
+	private static final String nrOfMODPrjctsStr = "Nr. of Mod Projects: ";
+	private static final String nrOfSuccessStpsStr = "Nr. of Success Steps: ";
+	private static final String nrOfSuccessPrjctsStr = "Nr. of Success Projects: ";
+	private static final String noActivePrjctsStr = "No active Projects.";
+	
+	
+	private static final String projectDataFolderRelativePath = "projectDATA/";
+	
+	private static final String thereIsAStatesFileLoading = "There is a States File. Trying to Load it";
+	private static final String somethinWrongStates = "Something is wrong. Using default States.";
+	private static final String thereAreNoStates = "There is no States File using default States.";
+	
+	private static final char wallOfTableChr = '|';
 	public final static int jsonPrintStyle = 4;
 	public final static String fileMarker = ".prjct";
 	public final static String modPrjctMarker = ".MODPrjct";
@@ -129,26 +175,23 @@ public class GTDCLI implements Beholder<String>
 
 	private final InputStreamSession iss;
 		
-    public GTDCLI(InputStreamSession iss) throws Exception
+    public GTDCLI(InputStreamSession iss) throws IOException, URISyntaxException, InputMismatchException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
     	
     	this.iss = iss;
 
     	ds = new GTDDataSpawnSession(this.iss);
     	
-		//states = loadStates();
-		if(states==null)states = StatusMGMT.getInstance();
-		
 		boolean isThereDataFolder = SearchOrEraseFilesOrFolders.isThereThisFolder(getPathToDataFolder());
 
 		if(isThereDataFolder)
 		{
-			System.out.println("\nData Folder found.\n");
+			System.out.println(dataFolderFound);
 			boot();
 		}
 		else 
 		{
-			System.out.println("\nThere is no Data Folder\n");
+			System.out.println(thereIsNoDataFolder);
 			String directoryPath = getPathToDataFolder();
 
 	        File directory = new File(directoryPath);
@@ -156,18 +199,18 @@ public class GTDCLI implements Beholder<String>
 	        // Create the directory
 	        if (directory.mkdir())
 	        {
-	            System.out.println("\nData Folder created successfully.\n");
+	            System.out.println(dataFolderCreated);
 	            boot();
 	        }
 	        else
 	        {
-	            System.out.println("\nFailed to create the directory.\n");
-	            System.out.println("Bye!");
+	            System.out.println(failedToCreateDirectory);
+	            System.out.println(sayGoodBye);
 	        }
 		}
 	}
     
-    private void boot() throws Exception
+    private void boot() throws IOException, URISyntaxException, InputMismatchException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
     {
     	
 		loadProjects();
@@ -175,24 +218,16 @@ public class GTDCLI implements Beholder<String>
 	
 		knownProjects.putAll(projectMap);
 		knownProjects.putAll(modProjectMap);
-
-		//states = loadStates();
+		
 		checkAllForDLDTAbuse();
 	
+		greetings();
+		
 		loopForCommands();
     }
     
-    public static void main(String... args) throws Exception
+    public void greetings()
     {
-    	new GTDCLI(new InputStreamSession(System.in));
-    }
-    
-    public void loopForCommands() throws Exception
-    {
-    	
-    	String px = BashSigns.boldBBCPX;
-    	String sx = BashSigns.boldBBCSX;
-    	
     	LocalDateTime inTheMoment = LocalDateTime.now();
     	String day = inTheMoment.getDayOfWeek().toString();
     	int day2 = inTheMoment.getDayOfMonth();
@@ -201,6 +236,18 @@ public class GTDCLI implements Beholder<String>
     	
     	System.out.println("Hello, it is " + day + " the " + day2 + " in the Year "+year);
     	System.out.println("Time: " + time + '\n');
+    }
+    
+    public static void main(String... args) throws IOException, URISyntaxException, InputMismatchException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    {
+    	new GTDCLI(new InputStreamSession(System.in));
+    }
+    
+    public void loopForCommands() throws InputMismatchException, IOException, JSONException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    {
+    	
+    	String px = BashSigns.boldBBCPX;
+    	String sx = BashSigns.boldBBCSX;
     	
     	String command = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	command = command.trim();
@@ -263,7 +310,7 @@ public class GTDCLI implements Beholder<String>
     				rows.add(row);
     			}
 
-    			List<String> headers = new ArrayList<>(Arrays.asList("Project", "nearest Deadline of Last Steps."));
+    			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestDeadlineStr));
     			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
     			System.out.println(ttd);
     			
@@ -273,7 +320,7 @@ public class GTDCLI implements Beholder<String>
     		case view_last_steps_of_Projects:
     		{
     			
-    			List<String> headers = new ArrayList<>(Arrays.asList("Project", "Desc", "Status", "Deadline"));
+    			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
     			List<List<String>> rows = new ArrayList<>();
 
     			for(JSONObject pJSON: projectMap.values())
@@ -308,11 +355,10 @@ public class GTDCLI implements Beholder<String>
     			List<String> names = new ArrayList<>();
     			names.addAll(knownProjects.keySet());
  
-    			String choosenOne = iss.getAnswerOutOfList("Which one?", names);
+    			String choosenOne = iss.getAnswerOutOfList(whichOnePhrase, names);
     			String prjct = choosenOne.trim();
     			if(knownProjects.keySet().contains(prjct))showProjectDetail(knownProjects.get(prjct));
-    			else System.out.println("Please choose more wise. Because '" + choosenOne + "' is not"
-    					+ " on the List!");
+    			else System.out.println(chooseMoreWiselyPreFix + choosenOne + itsNotOnTheListSuffix);
     			break;
 
     		}
@@ -342,12 +388,11 @@ public class GTDCLI implements Beholder<String>
     				}
     			}
     			
-    			System.out.println("Nr. of Projects: "+ nrOfPrjcts);
-    			System.out.println("Nr. of active Projects: " + nrOfActivePrjcts);
-    			System.out.println("Nr. of Mod Projects: " + nrOfModPrjcts);
-    			
-    			System.out.println("Nr. of Success Steps: " + nrOfSuccessfulSteps);
-    			System.out.println("Nr. of Success Projects: " + nrOfSuccessfulPrjcts);
+    			System.out.println(nrOfPrjctsStr + nrOfPrjcts);
+    			System.out.println(nrOfActivePrjctsStr + nrOfActivePrjcts);
+    			System.out.println(nrOfMODPrjctsStr + nrOfModPrjcts);
+    			System.out.println(nrOfSuccessStpsStr + nrOfSuccessfulSteps);
+    			System.out.println(nrOfSuccessPrjctsStr + nrOfSuccessfulPrjcts);
     		}
     		
     		case save:
@@ -365,11 +410,11 @@ public class GTDCLI implements Beholder<String>
     			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
     			if(aPrjcts.isEmpty())
     			{
-    				System.out.println("No active Projects.");
+    				System.out.println(noActivePrjctsStr);
     				break;
     			}
     			
-    			String pName = iss.getAnswerOutOfList("Which one?", aPrjcts);
+    			String pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
     			if(aPrjcts.contains(pName))
     			{
     				JSONObject pJSON = projectMap.get(pName);
@@ -385,7 +430,7 @@ public class GTDCLI implements Beholder<String>
     			List<String> names = new ArrayList<>();
     			names.addAll(knownProjects.keySet());
  
-    			String choosenOne = iss.getAnswerOutOfList("Notes of which Project?", names);
+    			String choosenOne = iss.getAnswerOutOfList(notesOfWhichPrjctPhrase, names);
     			
     			JSONObject pJSON = knownProjects.get(choosenOne);
     			
@@ -400,7 +445,7 @@ public class GTDCLI implements Beholder<String>
     					System.out.println("--> " + noteArr.get(n));
     				}
     			}
-    			else System.out.println("Project " + choosenOne + " has no Notes.");
+    			else System.out.println(projectStr + " " + choosenOne + hasNoNotesSuffix);
     			
     			break;
     		}
@@ -412,11 +457,11 @@ public class GTDCLI implements Beholder<String>
     			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
     			if(aPrjcts.isEmpty())
     			{
-    				System.out.println("No active Projects.");
+    				System.out.println(noActivePrjctsStr);
     				break;
     			}
     			
-    			String pName = iss.getAnswerOutOfList("Which one?", aPrjcts);
+    			String pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
     			if(aPrjcts.contains(pName))
     			{
     				JSONObject pJSON = projectMap.get(pName);
@@ -483,10 +528,10 @@ public class GTDCLI implements Beholder<String>
     			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
     			if(aPrjcts.isEmpty())
     			{
-    				System.out.println("Sorry no active Project!");
+    				System.out.println(noActivePrjctsStr);
     				break;
     			}
-    			String choosenOne = iss.getAnswerOutOfList("Which one?", aPrjcts);
+    			String choosenOne = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
     			String prjct = choosenOne.trim();
     			if(aPrjcts.contains(prjct))
     			{
@@ -494,8 +539,7 @@ public class GTDCLI implements Beholder<String>
     				checkForDeadlineAbuse(pJSON);
     				nxtStp(pJSON);
     			}
-    			else System.out.println("Please choose more wise. Because '" + choosenOne + "' is not"
-    					+ " on the List!");
+    			else System.out.println(chooseMoreWiselyPreFix + choosenOne + itsNotOnTheListSuffix);
     			break;
     		}
     
@@ -509,7 +553,7 @@ public class GTDCLI implements Beholder<String>
     		case help: 
     		{
     			System.out.println("");
-    			System.out.println("Not yet Installed.");
+    			System.out.println("Not yet Installed.");//TODO:
     			break;
     		}
     		
@@ -534,12 +578,12 @@ public class GTDCLI implements Beholder<String>
 					}
     				else projectMap.put(name, pJson);
     			}
-    			else System.out.println("No Project.");
+    			else System.out.println(noPrjctStr);
     			break;
     		}    		
     		default:
     		{
-    			System.out.println("Unknown command!");
+    			System.out.println(unknownCmdStr);
     		}
     	}
     	
@@ -590,7 +634,7 @@ public class GTDCLI implements Beholder<String>
     		rows.add(row);
     	}
     	
-		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 20);
+		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
 		System.out.println(ttd);
     }
     
@@ -629,28 +673,26 @@ public class GTDCLI implements Beholder<String>
     	
     	
     	String dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
-    	
-    	
-    	System.out.println("");
-    	System.out.println(gpx + "Project Name:" + gsx + " "+ name);
-    	System.out.println(gpx + "Status:" + gsx + " " + status);
-    	System.out.println(gpx + "BDT:" + gsx + " " + bdt);
-    	System.out.println(gpx + "NDDT:" + gsx + " " + nddt);
-    	System.out.println(gpx + "Deadline:" + gsx + " " + dldtStr);
-    	System.out.println(gpx + "Goal:" + gsx + " " + goal);
-    	System.out.println(gpx + "Steps:" + gsx + " " + stpNr);
-    	System.out.println(gpx + "Notes:" + gsx + " " + noteNr);
+
+    	System.out.println(gpx + prjctNameStr + ":" + gsx + " "+ name);
+    	System.out.println(gpx + statusStr + ":" + gsx + " " + status);
+    	System.out.println(gpx + bdtStr + ":" + gsx + " " + bdt);
+    	System.out.println(gpx + nddtStr + ":" + gsx + " " + nddt);
+    	System.out.println(gpx + deadlineStr + ":" + gsx + " " + dldtStr);
+    	System.out.println(gpx + goalStr + ":" + gsx + " " + goal);
+    	System.out.println(gpx + stepsStr + ":" + gsx + " " + stpNr);
+    	System.out.println(gpx + notesStr + ":" + gsx + " " + noteNr);
     	
     }
     
-	public void nxtStp(JSONObject pJSON) throws Exception
+	public void nxtStp(JSONObject pJSON) throws InputMismatchException, SpawnStepException, IOException
     {
     	ds.spawnStep(pJSON);
     }
   
-    private String getPathToDataFolder()
+    private static String getPathToDataFolder()
     {
-    	return "projectDATA/";
+    	return projectDataFolderRelativePath;
     }
        
     private void checkAllForDLDTAbuse()
@@ -741,22 +783,32 @@ public class GTDCLI implements Beholder<String>
     }
     
     
-    private StatusMGMT loadStates() throws ClassNotFoundException, IOException
+    private static StatusMGMT loadStates()
     {
     	
-    	File[] listOfFiles = getListOfFilesFromDataFolder();
-
-    	for(File file: listOfFiles)
+    	boolean thereAreStates = (SearchOrEraseFilesOrFolders.isThereThisFile(getPathToDataFolder()+statesFileName));
+    	StatusMGMT tmpStates;
+    	
+    	if(thereAreStates)
     	{
-    		String name = file.getName();
-    		if(file.isFile()&&name.equals(statesFileName))
+    		
+    		System.out.println(thereIsAStatesFileLoading);
+    		
+    		try
     		{
-    			
-    	    	return (StatusMGMT) LoadAndSave.loadObject(getPathToDataFolder()+statesFileName);
-    		}
+				tmpStates =(StatusMGMT) LoadAndSave.loadObject(getPathToDataFolder()+statesFileName);
+				return tmpStates;
+			}
+    		catch (ClassNotFoundException | IOException e)
+    		{
+				e.printStackTrace();
+				System.out.println(somethinWrongStates);
+				return StatusMGMT.getInstance();
+			}
     	}
-
-    	return (StatusMGMT) null;
+    	
+    	System.out.println(thereAreNoStates);
+    	return StatusMGMT.getInstance();
     }
 
     private void loadProjects() throws IOException, URISyntaxException
@@ -828,7 +880,7 @@ public class GTDCLI implements Beholder<String>
     {
 
     	saveAll();
-    	System.out.println("Bye!");
+    	System.out.println(sayGoodBye);
     	System.exit(0);
     }
 
@@ -838,5 +890,4 @@ public class GTDCLI implements Beholder<String>
 		// TODO Auto-generated method stub
 		
 	}
-    
 }
