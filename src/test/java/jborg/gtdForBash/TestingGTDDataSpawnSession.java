@@ -4,7 +4,8 @@ package jborg.gtdForBash;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.HashSet;
+
 import java.util.InputMismatchException;
 import java.util.Set;
 import javafx.util.Pair;
@@ -30,7 +31,7 @@ public class TestingGTDDataSpawnSession
 	
 	
 	String modPrjctName = "Maybe Baby\n";
-	String modPrjctGoal = "Limbo.\n";
+	String modPrjctGoal = "MOD-Project Test.\n";
 	
 	String newPrjctName = "Project Nuovo\n";
 	String newPrjctGoal = "Testing this here.\n";
@@ -53,7 +54,8 @@ public class TestingGTDDataSpawnSession
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 		GTDDataSpawnSession gdss = new GTDDataSpawnSession(iss);
-		JSONObject pJSON = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
+		Set<String> knownProjectsNames = new HashSet<>();
+		JSONObject pJSON = gdss.spawnMODProject(knownProjectsNames, StatusMGMT.getInstance());
 
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSON);
 	}
@@ -69,7 +71,8 @@ public class TestingGTDDataSpawnSession
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 		GTDDataSpawnSession gdss = new GTDDataSpawnSession(iss);
-		JSONObject pJSON = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
+		Set<String> knownProjectsNames = new HashSet<>();
+		JSONObject pJSON = gdss.spawnNewProject(knownProjectsNames, StatusMGMT.getInstance());
 		
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSON);
 	}
@@ -84,7 +87,8 @@ public class TestingGTDDataSpawnSession
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 		GTDDataSpawnSession gdss = new GTDDataSpawnSession(iss);
-		JSONObject pJSON = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
+		Set<String> knownProjectsNames = new HashSet<>();
+		JSONObject pJSON = gdss.spawnNewProject(knownProjectsNames, StatusMGMT.getInstance());
 		JSONObject sJson = gdss.getLastStepOfProject(pJSON);
 		
 		gdss.terminateStep(sJson);
@@ -104,7 +108,8 @@ public class TestingGTDDataSpawnSession
 		ByteArrayInputStream bais = new ByteArrayInputStream(prjctMODData.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 		GTDDataSpawnSession gdss = new GTDDataSpawnSession(iss);
-		JSONObject pJSONMod = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
+		Set<String> knownProjectsNames = new HashSet<>();
+		JSONObject pJSONMod = gdss.spawnMODProject(knownProjectsNames, StatusMGMT.getInstance());
 		
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSONMod);
 	}
@@ -121,7 +126,8 @@ public class TestingGTDDataSpawnSession
 		ByteArrayInputStream bais = new ByteArrayInputStream(prjctTerminateData.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 		GTDDataSpawnSession gdss = new GTDDataSpawnSession(iss);
-		JSONObject pJSONMod = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
+		Set<String> knownProjectsNames = new HashSet<>();
+		JSONObject pJSONMod = gdss.spawnNewProject(knownProjectsNames, StatusMGMT.getInstance());
 		
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSONMod);
 	}
@@ -138,7 +144,8 @@ public class TestingGTDDataSpawnSession
 		ByteArrayInputStream bais = new ByteArrayInputStream(prjctTerminateData.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 		GTDDataSpawnSession gdss = new GTDDataSpawnSession(iss);
-		JSONObject pJSONMod = gdss.spawnNewProject(new HashMap<String, JSONObject>(), StatusMGMT.getInstance());
+		Set<String> knownProjectsNames = new HashSet<>();
+		JSONObject pJSONMod = gdss.spawnNewProject(knownProjectsNames, StatusMGMT.getInstance());
 		
 		return new Pair<GTDDataSpawnSession, JSONObject>(gdss, pJSONMod);
 	}
@@ -210,7 +217,6 @@ public class TestingGTDDataSpawnSession
 	public String setUpDataNewProject(String prjctName, LocalDateTime ldtPrjctDLDT, LocalDateTime ldtStpDLDT)
 	{
 		
-		String modPrjct= "No\n";
 		String changePrjctBDT = "No\n";
 		String prjctDLDT = translateTimeToAnswerString(ldtPrjctDLDT);
 		String changeStepBDT = "No\n";
@@ -218,7 +224,6 @@ public class TestingGTDDataSpawnSession
 		String stepDLDT = translateTimeToAnswerString(ldtStpDLDT);
 		
 		String data = prjctName
-				+ modPrjct
 				+ newPrjctGoal
 				+ changePrjctBDT
 				+ prjctDLDT
@@ -233,12 +238,10 @@ public class TestingGTDDataSpawnSession
 	public String setupMODProject(String prjctName, LocalDateTime ldtPrjctDLDT, LocalDateTime ldtStpDLDT)
 	{
 		
-		String modPrjct= "Yes\n";
-		String prjctGoal = "MOD-Project Test.\n";
+		String prjctGoal = modPrjctGoal;
 		String changePrjctBDT = "No\n";
 		
 		String data = prjctName
-				+ modPrjct
 				+ prjctGoal
 				+ changePrjctBDT;
 				
@@ -288,7 +291,7 @@ public class TestingGTDDataSpawnSession
 		return hour + "\n" + minute +"\n" + year + "\n" + month + "\n" + day +"\n";
 
 	}
-	
+		
 	@Test
 	public void testSpawnNewProject() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
@@ -315,6 +318,7 @@ public class TestingGTDDataSpawnSession
 		assert(goal.equals(newPrjctGoal.substring(0,l)));
 	}
 
+	@Test
 	public void testSpawnMODProject() throws InputMismatchException, SpawnProjectException, TimeGoalOfProjectException, SpawnStepException, IOException
 	{
 		

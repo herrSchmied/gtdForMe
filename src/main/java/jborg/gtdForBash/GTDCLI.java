@@ -4,9 +4,7 @@ package jborg.gtdForBash;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -30,6 +28,7 @@ import allgemein.LittleTimeTools;
 import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
 import fileShortCuts.LoadAndSave;
+import fileShortCuts.SearchOrEraseFilesOrFolders;
 
 
 public class GTDCLI implements Beholder<String>
@@ -46,6 +45,9 @@ public class GTDCLI implements Beholder<String>
 	private Map<String, JSONObject> modProjectMap = new HashMap<>();
 	private Map<String, JSONObject> knownProjects = new HashMap<>();
 
+	public static final String isModProjectQ = "Maybe one Day-Project?(yes) or are we actually try "
+			+ "to do it soon enough?(no): ";
+
 	public final static String newPrjctStgClsd = "New Project Stage closed.";
 	public final static String tdtNoteStpDLDTAbuse = "Step Deadline abuse!";
 	public final static String tdtNotePrjctDLDTAbuse = "Project Deadline abuse!";
@@ -60,7 +62,7 @@ public class GTDCLI implements Beholder<String>
 	//private static final String correct_last_step = "correct last step";//TODO
 	private static final String view_Project = "view Project";
 	private static final String view_last_steps_of_Projects = "last steps";
-	private static final String view_most_near_Deadline = "most near deadline";
+	private static final String view_nearest_Deadline = "nearest deadline";
 	private static final String view_statistics = "view stats";
 	private static final String next_Step = "next step";
 	private static final String list = "list";
@@ -73,7 +75,7 @@ public class GTDCLI implements Beholder<String>
 	
 	private static final Set<String> commands = new HashSet<>(Arrays.asList(save, exit, list, help, 
 			list_active_ones, list_mod_Projects,/* correct_last_step, */ view_Project, view_last_steps_of_Projects, 
-			view_most_near_Deadline, view_statistics, list_not_active_ones, new_Project, next_Step, list_commands, 
+			view_nearest_Deadline, view_statistics, list_not_active_ones, new_Project, next_Step, list_commands, 
 			terminate_Project, add_Note, view_Notes));
 
 
@@ -137,13 +139,16 @@ public class GTDCLI implements Beholder<String>
 		//states = loadStates();
 		if(states==null)states = StatusMGMT.getInstance();
 		
-		if(isThereADataFolder())
+		boolean isThereDataFolder = SearchOrEraseFilesOrFolders.isThereThisFolder(getPathToDataFolder());
+
+		if(isThereDataFolder)
 		{
+			System.out.println("\nData Folder found.\n");
 			boot();
 		}
 		else 
 		{
-			System.out.println("There is no DataFolder");
+			System.out.println("\nThere is no Data Folder\n");
 			String directoryPath = getPathToDataFolder();
 
 	        File directory = new File(directoryPath);
@@ -151,12 +156,12 @@ public class GTDCLI implements Beholder<String>
 	        // Create the directory
 	        if (directory.mkdir())
 	        {
-	            System.out.println("Directory created successfully.");
+	            System.out.println("\nData Folder created successfully.\n");
 	            boot();
 	        }
 	        else
 	        {
-	            System.out.println("Failed to create the directory.");
+	            System.out.println("\nFailed to create the directory.\n");
 	            System.out.println("Bye!");
 	        }
 		}
@@ -187,17 +192,23 @@ public class GTDCLI implements Beholder<String>
     	
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
-    	    	
-    	System.out.println("");
+    	
+    	LocalDateTime inTheMoment = LocalDateTime.now();
+    	String day = inTheMoment.getDayOfWeek().toString();
+    	int day2 = inTheMoment.getDayOfMonth();
+    	int year = inTheMoment.getYear();
+    	String time = LittleTimeTools.timeString(inTheMoment.toLocalTime());
+    	
+    	System.out.println("Hello, it is " + day + " the " + day2 + " in the Year "+year);
+    	System.out.println("Time: " + time + '\n');
+    	
     	String command = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	command = command.trim();
-    	
-    	System.out.println("Trying to excecute: '" + command.trim() + "'");
     	
     	switch(command)
     	{
     	
-    		case view_most_near_Deadline:
+    		case view_nearest_Deadline:
     		{
     			LocalDateTime jetzt = LocalDateTime.now();
     			long newMinutes = 1000000;
@@ -252,7 +263,7 @@ public class GTDCLI implements Beholder<String>
     				rows.add(row);
     			}
 
-    			List<String> headers = new ArrayList<>(Arrays.asList("Project", "Most near Deadline of Last Steps."));
+    			List<String> headers = new ArrayList<>(Arrays.asList("Project", "nearest Deadline of Last Steps."));
     			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
     			System.out.println(ttd);
     			
@@ -504,8 +515,14 @@ public class GTDCLI implements Beholder<String>
     		
     		case new_Project:
     		{
-    			System.out.println(""); 			
-    			JSONObject pJson = ds.spawnNewProject(knownProjects, states);
+    			System.out.println("");
+    			boolean isModProject = iss.getYesOrNo(isModProjectQ);		
+
+    			
+    			JSONObject pJson;
+    			if(isModProject)pJson= ds.spawnMODProject(knownProjects.keySet(), states);
+    			pJson= ds.spawnNewProject(knownProjects.keySet(), states);
+    			
     			if(pJson!=null)
     			{
     				String name = pJson.getString(ProjectJSONKeyz.nameKey);
@@ -635,25 +652,7 @@ public class GTDCLI implements Beholder<String>
     {
     	return "projectDATA/";
     }
-    
-    private boolean isThereADataFolder()
-    {
-    	  String folderPath = getPathToDataFolder();
-
-          Path path = Paths.get(folderPath);
-
-          if (Files.exists(path) && Files.isDirectory(path))
-          {
-              System.out.println("The folder exists.");
-              return true;
-          }
-          else 
-          {
-              System.out.println("The folder does not exist.");
-              return false;
-          }
-    }
-    
+       
     private void checkAllForDLDTAbuse()
     {
     	for(JSONObject pJSON: projectMap.values())
