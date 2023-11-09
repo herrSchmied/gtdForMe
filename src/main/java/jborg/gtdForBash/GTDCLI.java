@@ -26,10 +26,10 @@ import org.json.JSONObject;
 import allgemein.Beholder;
 
 import allgemein.LittleTimeTools;
+import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
-import fileShortCuts.LoadAndSave;
-import fileShortCuts.SearchOrEraseFilesOrFolders;
+import static fileShortCuts.FileCRUD.*;
 
 
 public class GTDCLI implements Beholder<String>
@@ -182,7 +182,7 @@ public class GTDCLI implements Beholder<String>
 
     	ds = new GTDDataSpawnSession(this.iss);
     	
-		boolean isThereDataFolder = SearchOrEraseFilesOrFolders.isThereThisFolder(getPathToDataFolder());
+		boolean isThereDataFolder = isThereThisFolder(getPathToDataFolder());
 
 		if(isThereDataFolder)
 		{
@@ -747,6 +747,7 @@ public class GTDCLI implements Beholder<String>
     }
 
 
+    /* TODO
     private void eraseMODProjectFile(String prjctName)
     {
 
@@ -759,6 +760,7 @@ public class GTDCLI implements Beholder<String>
     			file.delete();
     	}
     }
+    */
     
     private void loadMODProjects() throws IOException
     {
@@ -773,7 +775,7 @@ public class GTDCLI implements Beholder<String>
     		if(file.isFile()&&name.endsWith(modPrjctMarker))
     		{
     			
-    			String joText = LoadAndSave.loadText(path, name);
+    			String joText = loadText(path + name);
     			
     			JSONObject jo = new JSONObject(joText);
     			
@@ -782,11 +784,10 @@ public class GTDCLI implements Beholder<String>
     	}
     }
     
-    
     private static StatusMGMT loadStates()
     {
     	
-    	boolean thereAreStates = (SearchOrEraseFilesOrFolders.isThereThisFile(getPathToDataFolder()+statesFileName));
+    	boolean thereAreStates = (isThereThisFile(getPathToDataFolder()+statesFileName));
     	StatusMGMT tmpStates;
     	
     	if(thereAreStates)
@@ -796,7 +797,7 @@ public class GTDCLI implements Beholder<String>
     		
     		try
     		{
-				tmpStates =(StatusMGMT) LoadAndSave.loadObject(getPathToDataFolder()+statesFileName);
+				tmpStates =(StatusMGMT) loadObject(getPathToDataFolder()+statesFileName);
 				return tmpStates;
 			}
     		catch (ClassNotFoundException | IOException e)
@@ -824,7 +825,7 @@ public class GTDCLI implements Beholder<String>
     		if(file.isFile()&&name.endsWith(fileMarker))
     		{
     			
-    			String joText = LoadAndSave.loadText(path, name);
+    			String joText = loadText(path + name);
     			
     			JSONObject jo = new JSONObject(joText);
     			
@@ -851,7 +852,7 @@ public class GTDCLI implements Beholder<String>
     	for(JSONObject jo: modProjectMap.values())
     	{
     		String path = getPathToDataFolder();
-    		LoadAndSave.saveText(path, jo.getString(ProjectJSONKeyz.nameKey)+modPrjctMarker, jo.toString(jsonPrintStyle));
+    		saveText(path + jo.getString(ProjectJSONKeyz.nameKey)+modPrjctMarker, jo.toString(jsonPrintStyle));
     	}
     }
     
@@ -860,13 +861,13 @@ public class GTDCLI implements Beholder<String>
     	for(JSONObject jo: projectMap.values())
     	{
     		String path = getPathToDataFolder();
-    		LoadAndSave.saveText(path, jo.getString(ProjectJSONKeyz.nameKey)+fileMarker, jo.toString(jsonPrintStyle));
+    		saveText(path + jo.getString(ProjectJSONKeyz.nameKey)+fileMarker, jo.toString(jsonPrintStyle));
     	}
     }
      
     private void saveStatusMGMT() throws IOException
     {
-    	LoadAndSave.saveObject(getPathToDataFolder()+statesFileName, StatusMGMT.getInstance());
+    	saveObject(getPathToDataFolder()+statesFileName, StatusMGMT.getInstance());
     }
 
     public void saveAll() throws JSONException, IOException, URISyntaxException
