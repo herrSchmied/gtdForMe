@@ -4,7 +4,8 @@ package jborg.gtdForBash;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -181,8 +182,9 @@ public class GTDCLI implements Beholder<String>
     	this.iss = iss;
 
     	ds = new GTDDataSpawnSession(this.iss);
+    	Path p = Path.of(getPathToDataFolder());
     	
-		boolean isThereDataFolder = isThereThisFolder(getPathToDataFolder());
+		boolean isThereDataFolder = Files.exists(p)&&Files.isDirectory(p);
 
 		if(isThereDataFolder)
 		{
@@ -787,7 +789,9 @@ public class GTDCLI implements Beholder<String>
     private static StatusMGMT loadStates()
     {
     	
-    	boolean thereAreStates = (isThereThisFile(getPathToDataFolder()+statesFileName));
+    	Path p = Path.of(getPathToDataFolder()+statesFileName);
+    	
+    	boolean thereAreStates = (Files.exists(p));
     	StatusMGMT tmpStates;
     	
     	if(thereAreStates)
