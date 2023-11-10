@@ -30,7 +30,7 @@ import allgemein.LittleTimeTools;
 import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
-import static fileShortCuts.FileCRUD.*;
+import static fileShortCuts.TextAndObjSaveAndLoad.*;
 
 
 public class GTDCLI implements Beholder<String>
@@ -801,7 +801,7 @@ public class GTDCLI implements Beholder<String>
     		
     		try
     		{
-				tmpStates =(StatusMGMT) loadObject(getPathToDataFolder()+statesFileName);
+				tmpStates =(StatusMGMT) loadObject(p);
 				return tmpStates;
 			}
     		catch (ClassNotFoundException | IOException e)
