@@ -453,9 +453,9 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		String bdtOfNewStepStr = newStep.getString(StepJSONKeyz.BDTKey);
 		LocalDateTime bdtOfNewStep = LittleTimeTools.LDTfromTimeString(bdtOfNewStepStr);
 		
-		if(bdtOfNewStep.isBefore(tdtOfOldStep))return stepIsViolatingTimeframeOfProjectMsg;
+		if(bdtOfNewStep.isBefore(tdtOfOldStep))return stepIsViolatingTimeframeOfFormerStepMsg;
 		
-		return stepIsNotViolatingTimeframeOfProjectMsg;
+		return stepIsNotViolatingTimeframeOfFormerStepMsg;
 	}
 	
 	public String stepIsOkToItsSelf(JSONObject step)
