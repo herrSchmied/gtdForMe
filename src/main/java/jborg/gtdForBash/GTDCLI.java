@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.InputMismatchException;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.HashMap;
 
@@ -49,57 +50,57 @@ import static fileShortCuts.TextAndObjSaveAndLoad.*;
 public class GTDCLI implements Beholder<String>
 {
 	
-	private static final String statesFileName = "statusMGMT.states";
-	private static final StatusMGMT states = loadStates();
+	private final String statesFileName = "statusMGMT.states";
+	private final StatusMGMT states = loadStates();
 	
-	private static final String sayGoodBye = "Bye!";
+	private final String sayGoodBye = "Bye!";
 	
-	private static final String unknownCmdStr = "Unknown command!";
-	private static final String dataFolderFound = "Data Folder found.";
-	private static final String thereIsNoDataFolder = "There is no Data Folder";
-	private static final String dataFolderCreated = "Data Folder created successfully.";
-	private static final String failedToCreateDirectory = "Failed to create the directory.";
+	private final String unknownCmdStr = "Unknown command!";
+	private final String dataFolderFound = "Data Folder found.";
+	private final String thereIsNoDataFolder = "There is no Data Folder";
+	private final String dataFolderCreated = "Data Folder created successfully.";
+	private final String failedToCreateDirectory = "Failed to create the directory.";
 	
-	private static final String projectStr = "Project";
-	private static final String noPrjctStr = "No Project.";
-	private static final String nearestDeadlineStr = "nearest Deadline of Last Steps.";
-	private static final String descStr = "Desc";
-	private static final String statusStr = "Status";
-	private static final String deadlineStr = "Deadline";
+	private final String projectStr = "Project";
+	private final String noPrjctStr = "No Project.";
+	private final String nearestDeadlineStr = "nearest Deadline of Last Steps.";
+	private final String descStr = "Desc";
+	private final String statusStr = "Status";
+	private final String deadlineStr = "Deadline";
 	
-	private static final String prjctNameStr = "Project Name";
-	private static final String bdtStr = "BDT";
-	private static final String nddtStr = "NDDT";
-	private static final String goalStr = "Goal";
-	private static final String stepsStr = "Steps";
-	private static final String notesStr = "Notes";
+	private final String prjctNameStr = "Project Name";
+	private final String bdtStr = "BDT";
+	private final String nddtStr = "NDDT";
+	private final String goalStr = "Goal";
+	private final String stepsStr = "Steps";
+	private final String notesStr = "Notes";
 	
-	private static final String whichOnePhrase = "Which one?";
-	private static final String notesOfWhichPrjctPhrase = "Notes of which Project?";
+	private final String whichOnePhrase = "Which one?";
+	private final String notesOfWhichPrjctPhrase = "Notes of which Project?";
 
 	
-	private static final String chooseMoreWiselyPreFix = "Please choose more wisely. Because '";
-	private static final String itsNotOnTheListSuffix = "' is not on the List!";
-	private static final String hasNoNotesSuffix = " has no Notes.";
+	private final String chooseMoreWiselyPreFix = "Please choose more wisely. Because '";
+	private final String itsNotOnTheListSuffix = "' is not on the List!";
+	private final String hasNoNotesSuffix = " has no Notes.";
 	
-	private static final String nrOfPrjctsStr = "Nr. of Projects: ";
-	private static final String nrOfActivePrjctsStr = "Nr. of active Projects: ";
-	private static final String nrOfMODPrjctsStr = "Nr. of Mod Projects: ";
-	private static final String nrOfSuccessStpsStr = "Nr. of Success Steps: ";
-	private static final String nrOfSuccessPrjctsStr = "Nr. of Success Projects: ";
-	private static final String noActivePrjctsStr = "No active Projects.";
+	private final String nrOfPrjctsStr = "Nr. of Projects: ";
+	private final String nrOfActivePrjctsStr = "Nr. of active Projects: ";
+	private final String nrOfMODPrjctsStr = "Nr. of Mod Projects: ";
+	private final String nrOfSuccessStpsStr = "Nr. of Success Steps: ";
+	private final String nrOfSuccessPrjctsStr = "Nr. of Success Projects: ";
+	private final String noActivePrjctsStr = "No active Projects.";
 	
 	
 	private static final String projectDataFolderRelativePath = "projectDATA/";
 	
-	private static final String thereIsAStatesFileLoading = "There is a States File. Trying to Load it";
-	private static final String somethinWrongStates = "Something is wrong. Using default States.";
-	private static final String thereAreNoStates = "There is no States File using default States.";
+	private final String thereIsAStatesFileLoading = "There is a States File. Trying to Load it";
+	private final String somethinWrongStates = "Something is wrong. Using default States.";
+	private final String thereAreNoStates = "There is no States File using default States.";
 	
-	private static final char wallOfTableChr = '|';
-	public final static int jsonPrintStyle = 4;
-	public final static String fileMarker = ".prjct";
-	public final static String modPrjctMarker = ".MODPrjct";
+	private final char wallOfTableChr = '|';
+	public final int jsonPrintStyle = 4;
+	public final String fileMarker = ".prjct";
+	public final String modPrjctMarker = ".MODPrjct";
 	
 	private Map<String, JSONObject> projectMap = new HashMap<>();
 	private Map<String, JSONObject> modProjectMap = new HashMap<>();
@@ -108,38 +109,57 @@ public class GTDCLI implements Beholder<String>
 	public static final String isModProjectQ = "Maybe one Day-Project?(yes) or are we actually try "
 			+ "to do it soon enough?(no): ";
 
-	public final static String newPrjctStgClsd = "New Project Stage closed.";
-	public final static String tdtNoteStpDLDTAbuse = "Step Deadline abuse!";
-	public final static String tdtNotePrjctDLDTAbuse = "Project Deadline abuse!";
+	public final String newPrjctStgClsd = "New Project Stage closed.";
+	public final String tdtNoteStpDLDTAbuse = "Step Deadline abuse!";
+	public final String tdtNotePrjctDLDTAbuse = "Project Deadline abuse!";
 
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
 	
-	private static final String save = "save";
-	private static final String exit = "exit";
-	private static final String list_not_active_ones = "list not active ones";
-	private static final String list_active_ones = "list active ones";
-	private static final String list_mod_Projects = "list mod projects";
+	private final String save = "save";
+	private final String exit = "exit";
+	private final String list_not_active_ones = "list not active ones";
+	private final String list_active_ones = "list active ones";
+	private final String list_mod_Projects = "list mod projects";
 	//private static final String correct_last_step = "correct last step";//TODO
-	private static final String view_Project = "view Project";
-	private static final String view_last_steps_of_Projects = "last steps";
-	private static final String view_nearest_Deadline = "nearest deadline";
-	private static final String view_statistics = "view stats";
-	private static final String next_Step = "next step";
-	private static final String list = "list";
-	private static final String help = "help";
-	private static final String new_Project ="new project";
-	private static final String list_commands = "list cmds";
-	private static final String terminate_Project = "terminate project";
-	private static final String add_Note = "add note";
-	private static final String view_Notes = "show Notes";
+	private final String view_Project = "view Project";
+	private final String view_last_steps_of_Projects = "last steps";
+	private final String view_nearest_Deadline = "nearest deadline";
+	private final String view_statistics = "view stats";
+	private final String next_Step = "next step";
+	private final String list = "list";
+	private final String help = "help";
+	private final String new_Project ="new project";
+	private final String list_commands = "list cmds";
+	private final String terminate_Project = "terminate project";
+	private final String add_Note = "add note";
+	private final String view_Notes = "show Notes";
 	
-	private static final Set<String> commands = new HashSet<>(Arrays.asList(save, exit, list, help, 
-			list_active_ones, list_mod_Projects,/* correct_last_step, */ view_Project, view_last_steps_of_Projects, 
-			view_nearest_Deadline, view_statistics, list_not_active_ones, new_Project, next_Step, list_commands, 
-			terminate_Project, add_Note, view_Notes));
+	private final Set<String> commands = new HashSet<>(Arrays.asList(save, exit, list, help, 
+			list_active_ones, list_mod_Projects,/* correct_last_step, */ view_Project, 
+			view_last_steps_of_Projects, view_nearest_Deadline, view_statistics, list_not_active_ones,
+			new_Project, next_Step, list_commands, terminate_Project, add_Note, view_Notes));
 
-
+	private final Set<String> prjctModifierCommands = new HashSet(Arrays.asList(new_Project, next_Step, 
+			terminate_Project, add_Note));
+	
+	private final Set<String> showDataCommands = new HashSet(Arrays.asList(list, list_active_ones,
+			list_mod_Projects, view_Project, view_last_steps_of_Projects, view_nearest_Deadline, view_statistics,
+			list_not_active_ones, list_commands, view_Notes));
+	
+	private final Set<String> otherCommands = new HashSet(Arrays.asList(save, exit, help));
+	
+	private final Map<String, CLICommand> commandMap = new HashMap<>();
+	
+	private CLICommand<String, JSONObject> np;
+	private CLICommand<String, String> byebye;
+	
 	/*TODO: some only need Testing.
+	 * 
+	 * 
+
+
+	 * 
+	 * 
 	stepsView -> show all Last Steps or all Steps of one Project
 	
 	JSONView -> View JSONObject of a Project.
@@ -227,7 +247,7 @@ public class GTDCLI implements Beholder<String>
     
     private void boot() throws IOException, URISyntaxException, InputMismatchException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
     {
-    	
+    	initComands();
 		loadProjects();
 		loadMODProjects();
 	
@@ -240,6 +260,97 @@ public class GTDCLI implements Beholder<String>
 		
 		loopForCommands();
     }
+    
+    /* TODO *///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    private void initComands()
+    {
+    
+    	Function<String, JSONObject> newProject = (s)->
+		{
+			
+			try
+			{
+				JSONObject pJSON = ds.spawnNewProject(knownProjects.keySet(), states);
+				
+				
+				String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+				knownProjects.put(name, pJSON);
+				projectMap.put(name, pJSON);
+				
+				return pJSON;
+
+				/*
+				if(pJSON.getString(ProjectJSONKeyz.statusKey).equals(StatusMGMT.mod))
+				{
+					modProjectMap.put(name, pJSON);
+				}
+				*/
+
+			} 
+			catch(InputMismatchException e) 
+			{
+				e.printStackTrace();
+			}
+			catch(SpawnProjectException e)
+			{
+				e.printStackTrace();
+			}
+			catch(TimeGoalOfProjectException e)
+			{
+				e.printStackTrace();
+			}
+			catch(SpawnStepException e)
+			{
+				e.printStackTrace();
+			}
+			catch(IOException e) 
+			{
+				e.printStackTrace();
+			}
+			
+			System.out.println(noPrjctStr);
+			return null;
+		};
+
+		boolean mustHaveArgument = false;
+		boolean canHaveArgument = false;
+		boolean mustHaveOutput = true;
+		boolean canHaveOutput = false;
+		
+		np = new CLICommand<String, JSONObject>(new_Project, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, newProject);
+		
+		commandMap.put(new_Project, np);
+		commands.add(new_Project);
+		prjctModifierCommands.add(new_Project);
+		
+		Function<String, String> leave = (s)->
+		{
+			try 
+			{
+				stop();
+			} 
+			catch (JSONException | IOException | URISyntaxException e)
+			{
+				System.out.println("Nothing saved!!\n" + e);
+				System.exit(0);
+			}
+			
+			return null;
+		};
+
+		mustHaveArgument = false;
+		canHaveArgument = false;
+		mustHaveOutput = false;
+		canHaveOutput = false;
+		
+		byebye = new CLICommand<String, String>(exit, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, leave);
+		
+		commandMap.put(exit, byebye);
+		commands.add(exit);
+		prjctModifierCommands.add(exit);
+    }
+
+
     
     public void greetings()
     {
@@ -267,345 +378,30 @@ public class GTDCLI implements Beholder<String>
     	String command = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	command = command.trim();
     	
-    	switch(command)
+    	for(String s: commandMap.keySet())
     	{
-    	
-    		case view_nearest_Deadline:
-    		{
-    			LocalDateTime jetzt = LocalDateTime.now();
-    			long newMinutes = 1000000;
-    			List<String> prjctList = new ArrayList<>();
-    			List<String> dauerList = new ArrayList<>();
-    			
-    			for(JSONObject pJSON: projectMap.values())
-    			{
-    				
-    				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
-    				
-    				JSONObject lastStep = getLastStep(pJSON);
-    				
-    				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
-    				LocalDateTime ldtDLDT = LittleTimeTools.LDTfromTimeString(dldt);
-    				
-    				String dauer = LittleTimeTools.fullLDTBetweenLDTs(ldtDLDT, jetzt);
-    				//if("".equals(dauer.trim()))dauer = LittleTimeTools.fullLDTBetweenLDTs(jetzt, ldtDLDT);
-    				
-    				long minutes = jetzt.until(ldtDLDT, ChronoUnit.MINUTES);
-    				boolean isNearer = (Math.abs(minutes)<Math.abs(newMinutes));
-    				boolean isEqual = Math.abs(minutes)==Math.abs(newMinutes);
-    				    				
-    				if(isEqual)
-    				{
-    					prjctList.add(prjctName);
-    					dauerList.add(dauer);
-    				}
-
-    				
-    				if(isNearer)
-    				{
-    					newMinutes=minutes;
-    					
-    					prjctList.clear();
-    					prjctList.add(prjctName);
-    					dauerList.clear();
-    					dauerList.add(dauer); 
-    				}
-    			}
-    			
-    			List<List<String>> rows = new ArrayList<>();
-    			
-    			int l = prjctList.size();
-    			for(int n=0;n<l;n++)
-    			{
-    				List<String> row = new ArrayList<>();
-
-    				row.add(prjctList.get(n));
-    				row.add(dauerList.get(n));
-    				
-    				rows.add(row);
-    			}
-
-    			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestDeadlineStr));
-    			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
-    			System.out.println(ttd);
-    			
-    			break;
-    		}
+    		if(command.startsWith(s));
+    		CLICommand clicmd = commandMap.get(s);
     		
-    		case view_last_steps_of_Projects:
-    		{
-    			
-    			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
-    			List<List<String>> rows = new ArrayList<>();
-
-    			for(JSONObject pJSON: projectMap.values())
-    			{
-    				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
-    				
-    				JSONObject lastStep = getLastStep(pJSON);
-    				String desc = lastStep.getString(StepJSONKeyz.descKey);
-    				String status = lastStep.getString(StepJSONKeyz.statusKey);
-    				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
-    				
-    				List<String> row = new ArrayList<>();
-    				row.add(prjctName);
-    				row.add(desc);
-    				row.add(status);
-    				row.add(dldt);
-    				
-    				rows.add(row);
-    			}
-    			
-    			
-    			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 12);
-    			System.out.println(ttd);
-    			
-    			break;
-
-    		}
-    		
-    		case view_Project:
-    		{
-    			System.out.println("");
-    			List<String> names = new ArrayList<>();
-    			names.addAll(knownProjects.keySet());
- 
-    			String choosenOne = iss.getAnswerOutOfList(whichOnePhrase, names);
-    			String prjct = choosenOne.trim();
-    			if(knownProjects.keySet().contains(prjct))showProjectDetail(knownProjects.get(prjct));
-    			else System.out.println(chooseMoreWiselyPreFix + choosenOne + itsNotOnTheListSuffix);
-    			break;
-
-    		}
-    		
-    		case view_statistics:
-    		{
-    			int nrOfPrjcts = knownProjects.size();
-    			int nrOfActivePrjcts = findProjectsByCondition(activeProject).size();
-    			int nrOfModPrjcts = modProjectMap.size();
-    			
-    			int nrOfSuccessfulSteps = 0;
-    			int nrOfSuccessfulPrjcts = 0;
-    			for(JSONObject pJSON: projectMap.values())
-    			{
-    				
-    				String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
-    				if(prjctStatus.equals(StatusMGMT.success))nrOfSuccessfulPrjcts++;
-    				
-    				JSONArray steps = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-    				int i = steps.length();
-    				for(int n=0;n<i;n++)
-    				{
-    					JSONObject step = steps.getJSONObject(n);
-    					String stepStatus = step.getString(StepJSONKeyz.statusKey);
-    					
-    					if(stepStatus.equals(StatusMGMT.success))nrOfSuccessfulSteps++;
-    				}
-    			}
-    			
-    			System.out.println(nrOfPrjctsStr + nrOfPrjcts);
-    			System.out.println(nrOfActivePrjctsStr + nrOfActivePrjcts);
-    			System.out.println(nrOfMODPrjctsStr + nrOfModPrjcts);
-    			System.out.println(nrOfSuccessStpsStr + nrOfSuccessfulSteps);
-    			System.out.println(nrOfSuccessPrjctsStr + nrOfSuccessfulPrjcts);
-    		}
-    		
-    		case save:
-    		{
-    			saveAll();
-    			break;
-    		}
-    			
-    		case exit: stop();//No break needed.
-    		
-    		case add_Note:
-    		{
-    			
-    			System.out.println("");
-    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    			if(aPrjcts.isEmpty())
-    			{
-    				System.out.println(noActivePrjctsStr);
-    				break;
-    			}
-    			
-    			String pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
-    			if(aPrjcts.contains(pName))
-    			{
-    				JSONObject pJSON = projectMap.get(pName);
-    				checkForDeadlineAbuse(pJSON);
-    				ds.addNote(pJSON);
-    			}
-    			break;
-    		}
-    		
-    		case view_Notes:
-    		{
-    			System.out.println("");
-    			List<String> names = new ArrayList<>();
-    			names.addAll(knownProjects.keySet());
- 
-    			String choosenOne = iss.getAnswerOutOfList(notesOfWhichPrjctPhrase, names);
-    			
-    			JSONObject pJSON = knownProjects.get(choosenOne);
-    			
-    			JSONArray noteArr;
-    			if(pJSON.has(ProjectJSONKeyz.noteArrayKey))
-    			{
-    				noteArr = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
-    				int l = noteArr.length();
-    				
-    				for(int n=0;n<l;n++)
-    				{
-    					System.out.println("--> " + noteArr.get(n));
-    				}
-    			}
-    			else System.out.println(projectStr + " " + choosenOne + hasNoNotesSuffix);
-    			
-    			break;
-    		}
-    		
-    		case terminate_Project:
-    		{
-    			
-    			System.out.println("");
-    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    			if(aPrjcts.isEmpty())
-    			{
-    				System.out.println(noActivePrjctsStr);
-    				break;
-    			}
-    			
-    			String pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
-    			if(aPrjcts.contains(pName))
-    			{
-    				JSONObject pJSON = projectMap.get(pName);
-    				checkForDeadlineAbuse(pJSON);
-    				JSONObject sJSON = ds.getLastStepOfProject(pJSON);
-    				ds.terminateStep(sJSON);  				
-    				ds.terminateProject(pJSON);
-    			}
-    			break;
-    		}
-    		
-    		case list_commands:
-    		{
-    			System.out.println("");
-    			for(String cmds: commands)System.out.println(cmds);
-    			System.out.println("");
-    			break;
-    		}
-    		
-    		case list_not_active_ones:
-    		{
-    			System.out.println("");
-    			
-    			Map<String, JSONObject> map = new HashMap<>();
-    			List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
-    			for(String prjctName: noAPrjcts)
-    			{
-    				JSONObject pJSON = knownProjects.get(prjctName);
-    				map.put(prjctName, pJSON);
-    			}
-    			showProjectMapAsTable(map);
-    			
-    			break;
-    		}
-    		
-    		case list_mod_Projects:
-    		{
-    			showProjectMapAsTable(modProjectMap);
-    			break;
-    		}
- 
-    		case list_active_ones:
-    		{
-    			System.out.println("");
-    			showProjectMapAsTable(projectMap);
-    			
-    			Map<String, JSONObject> map = new HashMap<>();
-    			
-    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    			for(String prjctName: aPrjcts)
-    			{
-    				JSONObject pJSON = projectMap.get(prjctName);
-    				map.put(prjctName, pJSON);
-    			}
-
-    			showProjectMapAsTable(map);
-    			
-    			break;
-    		}
-
-    		case next_Step:
-    		{
-    			System.out.println("");
-    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    			if(aPrjcts.isEmpty())
-    			{
-    				System.out.println(noActivePrjctsStr);
-    				break;
-    			}
-    			String choosenOne = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
-    			String prjct = choosenOne.trim();
-    			if(aPrjcts.contains(prjct))
-    			{
-    				JSONObject pJSON = knownProjects.get(prjct);
-    				checkForDeadlineAbuse(pJSON);
-    				nxtStp(pJSON);
-    			}
-    			else System.out.println(chooseMoreWiselyPreFix + choosenOne + itsNotOnTheListSuffix);
-    			break;
-    		}
-    
-    		case list: 
-    		{
-    			System.out.println("");
-    			showProjectMapAsTable(knownProjects);
-    			break;
-    		}
-    	
-    		case help: 
-    		{
-    			System.out.println("");
-    			System.out.println("Not yet Installed.");//TODO:
-    			break;
-    		}
-    		
-    		case new_Project:
-    		{
-    			System.out.println("");
-    			boolean isModProject = iss.getYesOrNo(isModProjectQ);		
-
-    			
-    			JSONObject pJson;
-    			if(isModProject)pJson= ds.spawnMODProject(knownProjects.keySet(), states);
-    			pJson= ds.spawnNewProject(knownProjects.keySet(), states);
-    			
-    			if(pJson!=null)
-    			{
-    				String name = pJson.getString(ProjectJSONKeyz.nameKey);
-    				knownProjects.put(name, pJson);
-    				
-    				if(pJson.getString(ProjectJSONKeyz.statusKey).equals(StatusMGMT.mod))
-					{
-    					modProjectMap.put(name, pJson);
-					}
-    				else projectMap.put(name, pJson);
-    			}
-    			else System.out.println(noPrjctStr);
-    			break;
-    		}    		
-    		default:
-    		{
-    			System.out.println(unknownCmdStr);
-    		}
+   			String argument = getArgumentOfCommand(command, s);
+   			if(!argument.trim().equals("")&&clicmd.cantHaveArgument)throw new IllegalArgumentException("This command can't have Arguments.");
+   			Object obj = clicmd.executeCmd(argument);
     	}
     	
     	loopForCommands();
     }
     
-
+    public String getArgumentOfCommand(String command, String prefix)
+    {
+    	
+    	String argument = "";
+    	
+   		int l = prefix.length();
+   		argument = command.substring(l);
+ 
+    	return argument;
+    }
+   
     public List<String> findProjectNamesByCondition(Predicate<String> condition)
     {
     	List<String> output = new ArrayList<>();
@@ -661,7 +457,7 @@ public class GTDCLI implements Beholder<String>
     	return stepArr.getJSONObject(l-1);
     }
     
-    public static void showProjectDetail(JSONObject pJSON)
+    public void showProjectDetail(JSONObject pJSON)
     {
     	String gpx = BashSigns.boldGBCPX;
     	String gsx = BashSigns.boldGBCSX;
@@ -799,7 +595,7 @@ public class GTDCLI implements Beholder<String>
     	}
     }
     
-    private static StatusMGMT loadStates()
+    private StatusMGMT loadStates()
     {
     	
     	Path p = Path.of(getPathToDataFolder()+statesFileName);
@@ -863,6 +659,48 @@ public class GTDCLI implements Beholder<String>
     	return listOfFiles;
     }
     
+    public boolean isOtherCommand(String command)
+    {
+    	
+    	for(String s: otherCommands)
+    	{
+    		if(command.startsWith(s))return true;
+    	}
+    	
+    	return false;
+    }
+    
+    public boolean isModifierCommand(String command)
+    {
+
+    	for(String s: prjctModifierCommands)
+    	{
+    		if(command.startsWith(s))return true;
+    	}
+    	
+    	return false;
+    }
+    
+    public boolean isShowDataCommand(String command)
+    {
+
+    	
+    	for(String s: showDataCommands)
+    	{
+    		if(command.startsWith(s))return true;
+    	}
+    	    	
+    	return false;
+    }
+    
+    private boolean isMODProject(JSONObject pJSON)
+    {
+    	
+    	String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+    	
+    	return status.equals(StatusMGMT.mod);
+    }
+
     private void saveMODProjects() throws JSONException, IOException
     {
     	
