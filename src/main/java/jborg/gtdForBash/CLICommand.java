@@ -82,68 +82,7 @@ public class CLICommand <I, O>
     	 *     	switch(command)
     	{
     	
-    		case view_nearest_Deadline:
-    		{
-    			LocalDateTime jetzt = LocalDateTime.now();
-    			long newMinutes = 1000000;
-    			List<String> prjctList = new ArrayList<>();
-    			List<String> dauerList = new ArrayList<>();
-    			
-    			for(JSONObject pJSON: projectMap.values())
-    			{
-    				
-    				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
-    				
-    				JSONObject lastStep = getLastStep(pJSON);
-    				
-    				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
-    				LocalDateTime ldtDLDT = LittleTimeTools.LDTfromTimeString(dldt);
-    				
-    				String dauer = LittleTimeTools.fullLDTBetweenLDTs(ldtDLDT, jetzt);
-    				//if("".equals(dauer.trim()))dauer = LittleTimeTools.fullLDTBetweenLDTs(jetzt, ldtDLDT);
-    				
-    				long minutes = jetzt.until(ldtDLDT, ChronoUnit.MINUTES);
-    				boolean isNearer = (Math.abs(minutes)<Math.abs(newMinutes));
-    				boolean isEqual = Math.abs(minutes)==Math.abs(newMinutes);
-    				    				
-    				if(isEqual)
-    				{
-    					prjctList.add(prjctName);
-    					dauerList.add(dauer);
-    				}
-
-    				
-    				if(isNearer)
-    				{
-    					newMinutes=minutes;
-    					
-    					prjctList.clear();
-    					prjctList.add(prjctName);
-    					dauerList.clear();
-    					dauerList.add(dauer); 
-    				}
-    			}
-    			
-    			List<List<String>> rows = new ArrayList<>();
-    			
-    			int l = prjctList.size();
-    			for(int n=0;n<l;n++)
-    			{
-    				List<String> row = new ArrayList<>();
-
-    				row.add(prjctList.get(n));
-    				row.add(dauerList.get(n));
-    				
-    				rows.add(row);
-    			}
-
-    			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestDeadlineStr));
-    			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
-    			System.out.println(ttd);
-    			
-    			break;
-    		}
-    		
+     		
     		case view_last_steps_of_Projects:
     		{
     			
@@ -299,13 +238,6 @@ public class CLICommand <I, O>
     			break;
     		}
     		
-    		case list_commands:
-    		{
-    			System.out.println("");
-    			for(String cmds: commands)System.out.println(cmds);
-    			System.out.println("");
-    			break;
-    		}
     		
     		case list_not_active_ones:
     		{
@@ -369,12 +301,6 @@ public class CLICommand <I, O>
     			break;
     		}
     
-    		case list: 
-    		{
-    			System.out.println("");
-    			showProjectMapAsTable(knownProjects);
-    			break;
-    		}
     	
     		case help: 
     		{

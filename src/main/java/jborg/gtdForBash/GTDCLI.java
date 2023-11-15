@@ -56,6 +56,7 @@ public class GTDCLI implements Beholder<String>
 	private final String sayGoodBye = "Bye!";
 	
 	private final String unknownCmdStr = "Unknown command!";
+	private final String hereAListOfCmds = "Here a list of Commands.";
 	private final String dataFolderFound = "Data Folder found.";
 	private final String thereIsNoDataFolder = "There is no Data Folder";
 	private final String dataFolderCreated = "Data Folder created successfully.";
@@ -115,10 +116,13 @@ public class GTDCLI implements Beholder<String>
 
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
 	
+	/* Remember: No command can be the beginning of another command.
+	 * Write a Method to check that!!!!!!
+	 * */
 	private final String save = "save";
 	private final String exit = "exit";
-	private final String list_not_active_ones = "list not active ones";
-	private final String list_active_ones = "list active ones";
+	private final String list_not_active_ones = "show not active ones";
+	private final String list_active_ones = "show active ones";
 	private final String list_mod_Projects = "list mod projects";
 	//private static final String correct_last_step = "correct last step";//TODO
 	private final String view_Project = "view Project";
@@ -129,26 +133,28 @@ public class GTDCLI implements Beholder<String>
 	private final String list = "list";
 	private final String help = "help";
 	private final String new_Project ="new project";
-	private final String list_commands = "list cmds";
+	private final String list_commands = "show cmds";
 	private final String terminate_Project = "terminate project";
 	private final String add_Note = "add note";
 	private final String view_Notes = "show Notes";
 	
-	private final Set<String> commands = new HashSet<>(Arrays.asList(save, exit, list, help, 
-			list_active_ones, list_mod_Projects,/* correct_last_step, */ view_Project, 
-			view_last_steps_of_Projects, view_nearest_Deadline, view_statistics, list_not_active_ones,
-			new_Project, next_Step, list_commands, terminate_Project, add_Note, view_Notes));
+	private final Set<String> commands = new HashSet<>();
 
-	private final Set<String> prjctModifierCommands = new HashSet(Arrays.asList(new_Project, next_Step, 
-			terminate_Project, add_Note));
+	private final Set<String> prjctModifierCommands = new HashSet();
 	
-	private final Set<String> showDataCommands = new HashSet(Arrays.asList(list, list_active_ones,
-			list_mod_Projects, view_Project, view_last_steps_of_Projects, view_nearest_Deadline, view_statistics,
-			list_not_active_ones, list_commands, view_Notes));
+	private final Set<String> showDataCommands = new HashSet();
 	
-	private final Set<String> otherCommands = new HashSet(Arrays.asList(save, exit, help));
+	private final Set<String> otherCommands = new HashSet();
 	
 	private final Map<String, CLICommand> commandMap = new HashMap<>();
+	
+	private final String pmcSetName = "Project_Modifier_Cmd_Set";
+	private final String sdcSetName = "Show_Data_Cmd_Set";
+	private final String ocSetName = "Other_Cmd_Set";
+	
+	private final Map<String, Set<String>> commandSetMap = Map.of(pmcSetName, prjctModifierCommands,
+																  sdcSetName, showDataCommands,
+																  ocSetName, otherCommands);
 	
 	private CLICommand<String, JSONObject> np;
 	private CLICommand<String, String> byebye;
@@ -265,6 +271,7 @@ public class GTDCLI implements Beholder<String>
     private void initComands()
     {
     
+    	
     	Function<String, JSONObject> newProject = (s)->
 		{
 			
@@ -278,14 +285,6 @@ public class GTDCLI implements Beholder<String>
 				projectMap.put(name, pJSON);
 				
 				return pJSON;
-
-				/*
-				if(pJSON.getString(ProjectJSONKeyz.statusKey).equals(StatusMGMT.mod))
-				{
-					modProjectMap.put(name, pJSON);
-				}
-				*/
-
 			} 
 			catch(InputMismatchException e) 
 			{
@@ -317,11 +316,7 @@ public class GTDCLI implements Beholder<String>
 		boolean mustHaveOutput = true;
 		boolean canHaveOutput = false;
 		
-		np = new CLICommand<String, JSONObject>(new_Project, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, newProject);
-		
-		commandMap.put(new_Project, np);
-		commands.add(new_Project);
-		prjctModifierCommands.add(new_Project);
+		registerCmd(new_Project, pmcSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, newProject);
 		
 		Function<String, String> leave = (s)->
 		{
@@ -342,15 +337,124 @@ public class GTDCLI implements Beholder<String>
 		canHaveArgument = false;
 		mustHaveOutput = false;
 		canHaveOutput = false;
+				
+		registerCmd(exit, ocSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, leave);
+    
+		Function<String, String> prjctList = (s)->
+		{
+			
+			System.out.println("");
+			return showProjectMapAsTable(knownProjects);
+		};
+
+		mustHaveArgument = false;
+		canHaveArgument = false;
+		mustHaveOutput = true;
+		canHaveOutput = false;
+				
+		registerCmd(list, sdcSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, prjctList);
+    
+    
+		Function<String, String> nearestDeadline = (s)->
+		{
+			LocalDateTime jetzt = LocalDateTime.now();
+    		long newMinutes = 1000000;
+    		List<String> pList = new ArrayList<>();
+    		List<String> dauerList = new ArrayList<>();
+    			
+    		for(JSONObject pJSON: projectMap.values())
+    		{
+    				
+    			String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
+    				
+    			JSONObject lastStep = getLastStep(pJSON);
+    				
+    			String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
+    			LocalDateTime ldtDLDT = LittleTimeTools.LDTfromTimeString(dldt);
+    				
+    			String dauer = LittleTimeTools.fullLDTBetweenLDTs(ldtDLDT, jetzt);
+    			//if("".equals(dauer.trim()))dauer = LittleTimeTools.fullLDTBetweenLDTs(jetzt, ldtDLDT);
+    				
+    			long minutes = jetzt.until(ldtDLDT, ChronoUnit.MINUTES);
+    			boolean isNearer = (Math.abs(minutes)<Math.abs(newMinutes));
+    			boolean isEqual = Math.abs(minutes)==Math.abs(newMinutes);
+    				    				
+    			if(isEqual)
+    			{
+    				pList.add(prjctName);
+    				dauerList.add(dauer);
+    			}
+
+    				
+    			if(isNearer)
+    			{
+    				newMinutes=minutes;
+    					
+    				pList.clear();
+    				pList.add(prjctName);
+    				dauerList.clear();
+    				dauerList.add(dauer); 
+    			}
+    		}
+    			
+    		List<List<String>> rows = new ArrayList<>();
+    			
+    		int l = pList.size();
+    		for(int n=0;n<l;n++)
+    		{
+    			List<String> row = new ArrayList<>();
+
+    			row.add(pList.get(n));
+    			row.add(dauerList.get(n));
+    				
+    			rows.add(row);
+    		}
+
+    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestDeadlineStr));
+    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+    		System.out.println(ttd);
+			
+    		return ttd.toString();
+		};
 		
-		byebye = new CLICommand<String, String>(exit, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, leave);
+		mustHaveArgument = false;
+		canHaveArgument = false;
+		mustHaveOutput = true;
+		canHaveOutput = false;
 		
-		commandMap.put(exit, byebye);
-		commands.add(exit);
-		prjctModifierCommands.add(exit);
+		registerCmd(view_nearest_Deadline, sdcSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, nearestDeadline);
+    
+		Function<String, String> listCmds = (s)->
+		{
+			String output = "";
+    		for(String cmds: commands)
+    		{
+    			output = "\n" + cmds +output;
+    		}
+    		
+    		System.out.println(output + "\n");
+    		
+    		return output;
+		};
+		
+		mustHaveArgument = false;
+		canHaveArgument = false;
+		mustHaveOutput = true;
+		canHaveOutput = false;
+
+		registerCmd(list_commands, sdcSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, listCmds);
+
     }
 
+    public <I, O> void registerCmd(String cmdName, String setName, boolean mustHaveArgument, boolean canHaveArgument, boolean mustHaveOutput, boolean canHaveOutput, Function<I,O>action)
+    {
 
+    	CLICommand<I, O> cliCmd = new CLICommand<I, O>(cmdName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, action);
+    	commandMap.put(cmdName, cliCmd);
+    	commands.add(cmdName);
+    	Set<String> cmdSet = commandSetMap.get(setName);
+    	cmdSet.add(cmdName);
+    }
     
     public void greetings()
     {
@@ -375,31 +479,42 @@ public class GTDCLI implements Beholder<String>
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
     	
-    	String command = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
-    	command = command.trim();
-    	
-    	for(String s: commandMap.keySet())
+    	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
+    	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
+    	int numberOfCmds = commandMap.size();
+    	int cmdCounter = 0;
+    	for(String commandKnown: commandMap.keySet())
     	{
-    		if(command.startsWith(s));
-    		CLICommand clicmd = commandMap.get(s);
+    		cmdCounter++;
+    		if(fullCmdWithOptArgTyped.startsWith(commandKnown))
+    		{
+    			CLICommand<String, ?> clicmd = commandMap.get(commandKnown);
     		
-   			String argument = getArgumentOfCommand(command, s);
-   			if(!argument.trim().equals("")&&clicmd.cantHaveArgument)throw new IllegalArgumentException("This command can't have Arguments.");
-   			Object obj = clicmd.executeCmd(argument);
+    			String argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
+    			if(!argument.trim().equals("")&&clicmd.cantHaveArgument)throw new IllegalArgumentException("This command can't have Arguments.");
+    			Object obj = clicmd.executeCmd(argument);
+    			break;
+    		}
+    	}
+    	if(cmdCounter==numberOfCmds)
+    	{
+    		System.out.println('\n'+unknownCmdStr);
+    		System.out.println(hereAListOfCmds);
+    		CLICommand<String, ?> clicmd = commandMap.get(list_commands);
+    		clicmd.executeCmd("");
     	}
     	
     	loopForCommands();
     }
     
-    public String getArgumentOfCommand(String command, String prefix)
+    public String getArgumentOfCommand(String commandTyped, String commandKnown)
     {
     	
     	String argument = "";
     	
-   		int l = prefix.length();
-   		argument = command.substring(l);
- 
-    	return argument;
+   		int l = commandKnown.length();
+   		argument = commandTyped.substring(l);
+   		return argument;
     }
    
     public List<String> findProjectNamesByCondition(Predicate<String> condition)
@@ -421,7 +536,7 @@ public class GTDCLI implements Beholder<String>
     	return output;
     }
 
-    public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException
+    public String showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException
     {
 		List<String> headers = columnList;
 		List<List<String>> rows = new ArrayList<>();
@@ -447,6 +562,7 @@ public class GTDCLI implements Beholder<String>
     	
 		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
 		System.out.println(ttd);
+		return ttd.toString();
     }
     
     public static JSONObject getLastStep(JSONObject pJSON)
