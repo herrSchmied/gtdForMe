@@ -156,9 +156,6 @@ public class GTDCLI implements Beholder<String>
 																  sdcSetName, showDataCommands,
 																  ocSetName, otherCommands);
 	
-	private CLICommand<String, JSONObject> np;
-	private CLICommand<String, String> byebye;
-	
 	/*TODO: some only need Testing.
 	 * 
 	 * 
@@ -310,13 +307,10 @@ public class GTDCLI implements Beholder<String>
 			System.out.println(noPrjctStr);
 			return null;
 		};
-
-		boolean mustHaveArgument = false;
-		boolean canHaveArgument = false;
-		boolean mustHaveOutput = true;
-		boolean canHaveOutput = false;
 		
-		registerCmd(new_Project, pmcSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, newProject);
+		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false,false,true,false));
+		
+		registerCmd(new_Project, pmcSetName, ioArray, newProject);
 		
 		Function<String, String> leave = (s)->
 		{
@@ -333,12 +327,10 @@ public class GTDCLI implements Beholder<String>
 			return null;
 		};
 
-		mustHaveArgument = false;
-		canHaveArgument = false;
-		mustHaveOutput = false;
-		canHaveOutput = false;
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, false, false));
 				
-		registerCmd(exit, ocSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, leave);
+		registerCmd(exit, ocSetName, ioArray, leave);
     
 		Function<String, String> prjctList = (s)->
 		{
@@ -347,12 +339,10 @@ public class GTDCLI implements Beholder<String>
 			return showProjectMapAsTable(knownProjects);
 		};
 
-		mustHaveArgument = false;
-		canHaveArgument = false;
-		mustHaveOutput = true;
-		canHaveOutput = false;
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
 				
-		registerCmd(list, sdcSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, prjctList);
+		registerCmd(list, sdcSetName, ioArray, prjctList);
     
     
 		Function<String, String> nearestDeadline = (s)->
@@ -417,12 +407,10 @@ public class GTDCLI implements Beholder<String>
     		return ttd.toString();
 		};
 		
-		mustHaveArgument = false;
-		canHaveArgument = false;
-		mustHaveOutput = true;
-		canHaveOutput = false;
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
-		registerCmd(view_nearest_Deadline, sdcSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, nearestDeadline);
+		registerCmd(view_nearest_Deadline, sdcSetName, ioArray, nearestDeadline);
     
 		Function<String, String> listCmds = (s)->
 		{
@@ -437,19 +425,91 @@ public class GTDCLI implements Beholder<String>
     		return output;
 		};
 		
-		mustHaveArgument = false;
-		canHaveArgument = false;
-		mustHaveOutput = true;
-		canHaveOutput = false;
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
 
-		registerCmd(list_commands, sdcSetName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, listCmds);
+		registerCmd(list_commands, sdcSetName, ioArray, listCmds);
+		
+		Function<String, String> lastSteps = (s)->
+		{
+			
+			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
+			List<List<String>> rows = new ArrayList<>();
 
+			for(JSONObject pJSON: projectMap.values())
+			{
+				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
+				
+				JSONObject lastStep = getLastStep(pJSON);
+				String desc = lastStep.getString(StepJSONKeyz.descKey);
+				String status = lastStep.getString(StepJSONKeyz.statusKey);
+				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
+				
+				List<String> row = new ArrayList<>();
+				row.add(prjctName);
+				row.add(desc);
+				row.add(status);
+				row.add(dldt);
+				
+				rows.add(row);
+			}
+			
+			
+			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 12);
+			System.out.println(ttd);
+			
+			return ttd.toString();
+		};
+
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, true, false));
+		
+		registerCmd(view_last_steps_of_Projects, sdcSetName, ioArray, lastSteps);
+		
+		Function<String, String> projectView = (s)->
+		{
+			String output = "";
+			
+   			System.out.println("");
+    		List<String> names = new ArrayList<>();
+    		names.addAll(knownProjects.keySet());
+ 
+    		String choosenOne;
+			try 
+			{
+				choosenOne = iss.getAnswerOutOfList(whichOnePhrase, names);
+	    		String prjct = choosenOne.trim();
+	    		if(knownProjects.keySet().contains(prjct))
+	    		{
+	    			output =showProjectDetail(knownProjects.get(prjct));
+	    			System.out.println(output);
+	    		}
+	    		else System.out.println(chooseMoreWiselyPreFix + choosenOne + itsNotOnTheListSuffix);
+
+			} 
+			catch (InputMismatchException | IOException e) 
+			{
+				e.printStackTrace();
+				return null;
+			}
+    		
+			return output;
+		};
+		
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, true, false));
+		
+		registerCmd(view_Project, sdcSetName, ioArray, projectView);
     }
 
-    public <I, O> void registerCmd(String cmdName, String setName, boolean mustHaveArgument, boolean canHaveArgument, boolean mustHaveOutput, boolean canHaveOutput, Function<I,O>action)
+	/** @param ioArray index 0 = mustHaveArgument	*
+	 *  @param ioArray index 1 = canHaveArgument	*
+	 *  @param ioArray index 2 = mustHaveOutput		*
+	 *  @param ioArray index 3 = canHaveOutput		*/
+    public <O> void registerCmd(String cmdName, String setName, List<Boolean>ioArray, Function<String, O>action)
     {
 
-    	CLICommand<I, O> cliCmd = new CLICommand<I, O>(cmdName, mustHaveArgument, canHaveArgument, mustHaveOutput, canHaveOutput, action);
+    	CLICommand<O> cliCmd = new CLICommand<O>(cmdName, ioArray.get(0), ioArray.get(1), ioArray.get(2), ioArray.get(3), action);
     	commandMap.put(cmdName, cliCmd);
     	commands.add(cmdName);
     	Set<String> cmdSet = commandSetMap.get(setName);
@@ -488,10 +548,14 @@ public class GTDCLI implements Beholder<String>
     		cmdCounter++;
     		if(fullCmdWithOptArgTyped.startsWith(commandKnown))
     		{
-    			CLICommand<String, ?> clicmd = commandMap.get(commandKnown);
+    			CLICommand<?> clicmd = commandMap.get(commandKnown);
     		
     			String argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
-    			if(!argument.trim().equals("")&&clicmd.cantHaveArgument)throw new IllegalArgumentException("This command can't have Arguments.");
+    			if(!argument.trim().equals("")&&clicmd.cantHaveArgument)
+    			{
+    				System.out.println(BashSigns.rBCPX + "This command can't have Arguments." + BashSigns.rBCSX);
+    				break;
+    			}
     			Object obj = clicmd.executeCmd(argument);
     			break;
     		}
@@ -500,7 +564,7 @@ public class GTDCLI implements Beholder<String>
     	{
     		System.out.println('\n'+unknownCmdStr);
     		System.out.println(hereAListOfCmds);
-    		CLICommand<String, ?> clicmd = commandMap.get(list_commands);
+    		CLICommand<?> clicmd = commandMap.get(list_commands);
     		clicmd.executeCmd("");
     	}
     	
@@ -573,7 +637,7 @@ public class GTDCLI implements Beholder<String>
     	return stepArr.getJSONObject(l-1);
     }
     
-    public void showProjectDetail(JSONObject pJSON)
+    public String showProjectDetail(JSONObject pJSON)
     {
     	String gpx = BashSigns.boldGBCPX;
     	String gsx = BashSigns.boldGBCSX;
@@ -600,16 +664,17 @@ public class GTDCLI implements Beholder<String>
     	
     	
     	String dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
-
-    	System.out.println(gpx + prjctNameStr + ":" + gsx + " "+ name);
-    	System.out.println(gpx + statusStr + ":" + gsx + " " + status);
-    	System.out.println(gpx + bdtStr + ":" + gsx + " " + bdt);
-    	System.out.println(gpx + nddtStr + ":" + gsx + " " + nddt);
-    	System.out.println(gpx + deadlineStr + ":" + gsx + " " + dldtStr);
-    	System.out.println(gpx + goalStr + ":" + gsx + " " + goal);
-    	System.out.println(gpx + stepsStr + ":" + gsx + " " + stpNr);
-    	System.out.println(gpx + notesStr + ":" + gsx + " " + noteNr);
     	
+    	String output = gpx + prjctNameStr + ":" + gsx + " "+ name + '\n' +
+    					gpx + statusStr + ":" + gsx + " " + status + '\n' +
+    					gpx + bdtStr + ":" + gsx + " " + bdt + '\n' +
+    					gpx + nddtStr + ":" + gsx + " " + nddt + '\n' +
+    					gpx + deadlineStr + ":" + gsx + " " + dldtStr + '\n' +
+    					gpx + goalStr + ":" + gsx + " " + goal + '\n' +
+    					gpx + stepsStr + ":" + gsx + " " + stpNr + '\n' +
+    					gpx + notesStr + ":" + gsx + " " + noteNr;
+    	
+    	return output;
     }
     
 	public void nxtStp(JSONObject pJSON) throws InputMismatchException, SpawnStepException, IOException

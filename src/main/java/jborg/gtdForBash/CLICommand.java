@@ -20,7 +20,7 @@ import consoleTools.TerminalTableDisplay;
 
 
 
-public class CLICommand <I, O>
+public class CLICommand <O>
 {
 
 	
@@ -37,12 +37,12 @@ public class CLICommand <I, O>
 	public final boolean canHaveOutput;
 	public final boolean cantHaveOutput;
 	
-	private final Function<I, O> action;
+	private final Function<String, O> action;
 	
 	private final String cmdName;
 	
 	public CLICommand(String command, boolean mustHaveArgument, boolean canHaveArgument, boolean mustHaveOutput,
-			boolean canHaveOutput, Function<I, O> action)
+			boolean canHaveOutput, Function<String, O> action)
 	{
 		/*
 		 * only one of the Argument booleans can be true!!
@@ -83,51 +83,7 @@ public class CLICommand <I, O>
     	{
     	
      		
-    		case view_last_steps_of_Projects:
-    		{
-    			
-    			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
-    			List<List<String>> rows = new ArrayList<>();
-
-    			for(JSONObject pJSON: projectMap.values())
-    			{
-    				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
-    				
-    				JSONObject lastStep = getLastStep(pJSON);
-    				String desc = lastStep.getString(StepJSONKeyz.descKey);
-    				String status = lastStep.getString(StepJSONKeyz.statusKey);
-    				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
-    				
-    				List<String> row = new ArrayList<>();
-    				row.add(prjctName);
-    				row.add(desc);
-    				row.add(status);
-    				row.add(dldt);
-    				
-    				rows.add(row);
-    			}
-    			
-    			
-    			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 12);
-    			System.out.println(ttd);
-    			
-    			break;
-
-    		}
     		
-    		case view_Project:
-    		{
-    			System.out.println("");
-    			List<String> names = new ArrayList<>();
-    			names.addAll(knownProjects.keySet());
- 
-    			String choosenOne = iss.getAnswerOutOfList(whichOnePhrase, names);
-    			String prjct = choosenOne.trim();
-    			if(knownProjects.keySet().contains(prjct))showProjectDetail(knownProjects.get(prjct));
-    			else System.out.println(chooseMoreWiselyPreFix + choosenOne + itsNotOnTheListSuffix);
-    			break;
-
-    		}
     		
     		case view_statistics:
     		{
@@ -322,8 +278,8 @@ public class CLICommand <I, O>
     	return cmdName;
     }
     
-    public O executeCmd(I i)
+    public O executeCmd(String argument)
     {
-    	return action.apply(i);
+    	return action.apply(argument);
     }
 }
