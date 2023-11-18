@@ -557,7 +557,6 @@ public class GTDCLI implements Beholder<String>
 		Function<String, String> showActivePrjcts = (s)->
 		{
 			System.out.println("");
-			showProjectMapAsTable(projectMap);
 			
 			Map<String, JSONObject> map = new HashMap<>();
 			
