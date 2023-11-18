@@ -666,7 +666,6 @@ public class GTDCLI implements Beholder<String>
 
         	for(String commandKnown: commandMap.keySet())
     		{
-    			cmdCounter++;
     			if(fullCmdWithOptArgTyped.startsWith(commandKnown))
     			{
     				CLICommand<?> clicmd = commandMap.get(commandKnown);
@@ -675,6 +674,7 @@ public class GTDCLI implements Beholder<String>
     				Object obj = clicmd.executeCmd(argument);
     				break;
     			}
+    			cmdCounter++;
     		}
 
     		if(cmdCounter==numberOfCmds)
