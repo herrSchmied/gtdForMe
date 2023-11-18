@@ -5,12 +5,10 @@ import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -167,22 +165,8 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	public static final String showDataSetName = "Data_view";
 	public static final String otherSetName = "other";
 
-	private static final Set<String> setNames = new HashSet<>(Arrays.asList(modifierSetName, showDataSetName,
-			otherSetName));
-	
-	
 	public static final Set<String> commands = new HashSet<>();
 
-	private static final Set<String> prjctModifierCommands = new HashSet<>();
-
-	private static final Set<String> showDataCommands = new HashSet<>();
-
-	private static final Set<String> otherCommands = new HashSet<>();
-	
-	private static final Map<String, Set<String>> commandSetMap = Map.of(modifierSetName, prjctModifierCommands, 
-			showDataSetName, showDataCommands, otherSetName, otherCommands);
-	
-	public static final Map<String, CLICommand> commandMap = new HashMap<>();
 
 	
 	final InputStreamSession iss;
@@ -205,7 +189,6 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		String status = StatusMGMT.mod;
 		LocalDateTime bdt = null;
 		LocalDateTime nddt = LocalDateTime.now();
-		LocalDateTime dldt = null;
 
 			
 		System.out.println("");
@@ -214,10 +197,11 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		System.out.println("");
 		boolean changeBDT = iss.getYesOrNo(changeBDTQ);
 
+		LocalDateTime jetzt = LocalDateTime.now();
 		if(changeBDT)
 		{
 			System.out.println("");
-			bdt = iss.getDateTime(bdtQ, ancient, LocalDateTime.now());//must be born before now.
+			bdt = iss.getDateTime(bdtQ, ancient, jetzt);//must be born before now.
 		}
 		else bdt = nddt;
 				

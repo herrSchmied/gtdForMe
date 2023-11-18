@@ -1,38 +1,19 @@
 package jborg.gtdForBash;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 import java.util.function.Function;
-import java.util.function.Supplier;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import allgemein.LittleTimeTools;
-import consoleTools.TerminalTableDisplay;
-
 
 
 public class CLICommand <O>
 {
 
+	public final static String mustHaveArgumentStr = "This command must have an Argument";
+	public final static String cantHaveArgumentStr = "This command can't have Arguments";
 	
-	public final static char optionA = 'a';
-	public final static char optionB = 'b';
-	public final static char optionC = 'c';
-	private final Set<Character> argumentSettings = new HashSet(Arrays.asList(optionA, optionB, optionC));	
 	public final boolean mustHaveArgument;
 	public final boolean canHaveArgument;
 	public final boolean cantHaveArgument;
 	
-	private final Set<Character> OutputSettings = new HashSet(Arrays.asList(optionA, optionB, optionC));
 	public final boolean mustHaveOutput;
 	public final boolean canHaveOutput;
 	public final boolean cantHaveOutput;
@@ -81,41 +62,7 @@ public class CLICommand <O>
     	/*
     	 *     	switch(command)
     	{
-    	
-     		
-    		
-    		
-    		case view_statistics:
-    		{
-    			int nrOfPrjcts = knownProjects.size();
-    			int nrOfActivePrjcts = findProjectsByCondition(activeProject).size();
-    			int nrOfModPrjcts = modProjectMap.size();
-    			
-    			int nrOfSuccessfulSteps = 0;
-    			int nrOfSuccessfulPrjcts = 0;
-    			for(JSONObject pJSON: projectMap.values())
-    			{
-    				
-    				String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
-    				if(prjctStatus.equals(StatusMGMT.success))nrOfSuccessfulPrjcts++;
-    				
-    				JSONArray steps = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-    				int i = steps.length();
-    				for(int n=0;n<i;n++)
-    				{
-    					JSONObject step = steps.getJSONObject(n);
-    					String stepStatus = step.getString(StepJSONKeyz.statusKey);
-    					
-    					if(stepStatus.equals(StatusMGMT.success))nrOfSuccessfulSteps++;
-    				}
-    			}
-    			
-    			System.out.println(nrOfPrjctsStr + nrOfPrjcts);
-    			System.out.println(nrOfActivePrjctsStr + nrOfActivePrjcts);
-    			System.out.println(nrOfMODPrjctsStr + nrOfModPrjcts);
-    			System.out.println(nrOfSuccessStpsStr + nrOfSuccessfulSteps);
-    			System.out.println(nrOfSuccessPrjctsStr + nrOfSuccessfulPrjcts);
-    		}
+
     		
     		case save:
     		{
@@ -195,46 +142,12 @@ public class CLICommand <O>
     		}
     		
     		
-    		case list_not_active_ones:
-    		{
-    			System.out.println("");
-    			
-    			Map<String, JSONObject> map = new HashMap<>();
-    			List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
-    			for(String prjctName: noAPrjcts)
-    			{
-    				JSONObject pJSON = knownProjects.get(prjctName);
-    				map.put(prjctName, pJSON);
-    			}
-    			showProjectMapAsTable(map);
-    			
-    			break;
-    		}
-    		
     		case list_mod_Projects:
     		{
     			showProjectMapAsTable(modProjectMap);
     			break;
     		}
- 
-    		case list_active_ones:
-    		{
-    			System.out.println("");
-    			showProjectMapAsTable(projectMap);
-    			
-    			Map<String, JSONObject> map = new HashMap<>();
-    			
-    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    			for(String prjctName: aPrjcts)
-    			{
-    				JSONObject pJSON = projectMap.get(prjctName);
-    				map.put(prjctName, pJSON);
-    			}
-
-    			showProjectMapAsTable(map);
-    			
-    			break;
-    		}
+    		 
 
     		case next_Step:
     		{
@@ -278,8 +191,17 @@ public class CLICommand <O>
     	return cmdName;
     }
     
-    public O executeCmd(String argument)
+    public O executeCmd(String argument) throws CLICMDException
     {
+    	
+    	if(mustHaveArgument&&argument.trim().equals("")) throw new CLICMDException(mustHaveArgumentStr);
+    	
+    	if(cantHaveArgument)
+    	{
+    		if(!argument.trim().equals("")) throw new CLICMDException(cantHaveArgumentStr);
+    		return action.apply("");
+    	}
+    	
     	return action.apply(argument);
     }
 }

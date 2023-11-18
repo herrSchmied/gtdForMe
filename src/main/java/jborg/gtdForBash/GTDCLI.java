@@ -89,7 +89,6 @@ public class GTDCLI implements Beholder<String>
 	private final String nrOfMODPrjctsStr = "Nr. of Mod Projects: ";
 	private final String nrOfSuccessStpsStr = "Nr. of Success Steps: ";
 	private final String nrOfSuccessPrjctsStr = "Nr. of Success Projects: ";
-	private final String noActivePrjctsStr = "No active Projects.";
 	
 	
 	private static final String projectDataFolderRelativePath = "projectDATA/";
@@ -125,10 +124,10 @@ public class GTDCLI implements Beholder<String>
 	private final String list_active_ones = "show active ones";
 	private final String list_mod_Projects = "list mod projects";
 	//private static final String correct_last_step = "correct last step";//TODO
-	private final String view_Project = "view Project";
+	private final String view_Project = "view project";
 	private final String view_last_steps_of_Projects = "last steps";
 	private final String view_nearest_Deadline = "nearest deadline";
-	private final String view_statistics = "view stats";
+	private final String view_statistics = "stats";
 	private final String next_Step = "next step";
 	private final String list = "list";
 	private final String help = "help";
@@ -312,6 +311,41 @@ public class GTDCLI implements Beholder<String>
 		
 		registerCmd(new_Project, pmcSetName, ioArray, newProject);
 		
+    	Function<String, JSONObject> newMODProject = (s)->
+		{
+			
+			try
+			{
+				JSONObject pJSON = ds.spawnMODProject(knownProjects.keySet(), states);
+				
+				
+				String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+				knownProjects.put(name, pJSON);
+				modProjectMap.put(name, pJSON);
+				return pJSON;
+			} 
+			catch(InputMismatchException e) 
+			{
+				e.printStackTrace();
+			}
+			catch(SpawnProjectException e)
+			{
+				e.printStackTrace();
+			}
+			catch(IOException e) 
+			{
+				e.printStackTrace();
+			}
+			
+			System.out.println(noPrjctStr);
+			return null;
+		};
+		
+		ioArray.clear();
+		ioArray = new ArrayList<>(Arrays.asList(false,false,true,false));
+		
+		registerCmd(new_Project, pmcSetName, ioArray, newMODProject);
+		
 		Function<String, String> leave = (s)->
 		{
 			try 
@@ -329,7 +363,7 @@ public class GTDCLI implements Beholder<String>
 
 		ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, false, false));
-				
+		
 		registerCmd(exit, ocSetName, ioArray, leave);
     
 		Function<String, String> prjctList = (s)->
@@ -500,6 +534,89 @@ public class GTDCLI implements Beholder<String>
 		ioArray.addAll(Arrays.asList(false, true, true, false));
 		
 		registerCmd(view_Project, sdcSetName, ioArray, projectView);
+		
+		Function<String, String> showNotActivePrjcts = (s)->
+		{
+
+    		Map<String, JSONObject> map = new HashMap<>();
+    		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
+    		for(String prjctName: noAPrjcts)
+    		{
+    			JSONObject pJSON = knownProjects.get(prjctName);
+    			map.put(prjctName, pJSON);
+    		}
+    		
+    		return showProjectMapAsTable(map);
+    	};
+
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
+		
+		registerCmd(list_not_active_ones, sdcSetName, ioArray, showNotActivePrjcts);
+		
+		Function<String, String> showActivePrjcts = (s)->
+		{
+			System.out.println("");
+			showProjectMapAsTable(projectMap);
+			
+			Map<String, JSONObject> map = new HashMap<>();
+			
+			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+			for(String prjctName: aPrjcts)
+			{
+				JSONObject pJSON = projectMap.get(prjctName);
+				map.put(prjctName, pJSON);
+			}
+			
+			return showProjectMapAsTable(map);
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
+		
+		registerCmd(list_active_ones, sdcSetName, ioArray, showActivePrjcts);
+		
+		Function<String, String> stats = (s)->
+		{
+			
+			int nrOfPrjcts = knownProjects.size();
+			int nrOfActivePrjcts = findProjectsByCondition(activeProject).size();
+			int nrOfModPrjcts = modProjectMap.size();
+			
+			int nrOfSuccessfulSteps = 0;
+			int nrOfSuccessfulPrjcts = 0;
+			for(JSONObject pJSON: projectMap.values())
+			{
+				
+				String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
+				if(prjctStatus.equals(StatusMGMT.success))nrOfSuccessfulPrjcts++;
+				
+				JSONArray steps = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+				int i = steps.length();
+				for(int n=0;n<i;n++)
+				{
+					JSONObject step = steps.getJSONObject(n);
+					String stepStatus = step.getString(StepJSONKeyz.statusKey);
+					
+					if(stepStatus.equals(StatusMGMT.success))nrOfSuccessfulSteps++;
+				}
+			}
+			
+			String output = nrOfPrjctsStr + nrOfPrjcts + '\n' +
+			nrOfActivePrjctsStr + nrOfActivePrjcts + '\n' +
+			nrOfMODPrjctsStr + nrOfModPrjcts  + '\n' +
+			nrOfSuccessStpsStr + nrOfSuccessfulSteps + '\n' +
+			nrOfSuccessPrjctsStr + nrOfSuccessfulPrjcts;
+
+			System.out.println(output);
+			
+			return output;
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
+		
+		registerCmd(view_statistics, sdcSetName, ioArray, stats);
     }
 
 	/** @param ioArray index 0 = mustHaveArgument	*
@@ -541,31 +658,36 @@ public class GTDCLI implements Beholder<String>
     	
     	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
-    	int numberOfCmds = commandMap.size();
-    	int cmdCounter = 0;
-    	for(String commandKnown: commandMap.keySet())
+    	
+    	try
     	{
-    		cmdCounter++;
-    		if(fullCmdWithOptArgTyped.startsWith(commandKnown))
+        	int numberOfCmds = commandMap.size();
+        	int cmdCounter = 0;
+
+        	for(String commandKnown: commandMap.keySet())
     		{
-    			CLICommand<?> clicmd = commandMap.get(commandKnown);
-    		
-    			String argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
-    			if(!argument.trim().equals("")&&clicmd.cantHaveArgument)
+    			cmdCounter++;
+    			if(fullCmdWithOptArgTyped.startsWith(commandKnown))
     			{
-    				System.out.println(BashSigns.rBCPX + "This command can't have Arguments." + BashSigns.rBCSX);
+    				CLICommand<?> clicmd = commandMap.get(commandKnown);
+    		
+    				String argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
+    				Object obj = clicmd.executeCmd(argument);
     				break;
     			}
-    			Object obj = clicmd.executeCmd(argument);
-    			break;
+    		}
+
+    		if(cmdCounter==numberOfCmds)
+    		{
+    			System.out.println('\n'+unknownCmdStr);
+    			System.out.println(hereAListOfCmds);
+    			CLICommand<?> clicmd = commandMap.get(list_commands);
+    			clicmd.executeCmd("");
     		}
     	}
-    	if(cmdCounter==numberOfCmds)
+    	catch(CLICMDException e)
     	{
-    		System.out.println('\n'+unknownCmdStr);
-    		System.out.println(hereAListOfCmds);
-    		CLICommand<?> clicmd = commandMap.get(list_commands);
-    		clicmd.executeCmd("");
+    		e.printStackTrace();
     	}
     	
     	loopForCommands();
