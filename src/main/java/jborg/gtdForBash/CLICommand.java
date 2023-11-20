@@ -62,62 +62,7 @@ public class CLICommand <O>
     	/*
     	 *     	switch(command)
     	{
-
-    		
-    		case save:
-    		{
-    			saveAll();
-    			break;
-    		}
-    			
-    		
-    		case add_Note:
-    		{
-    			
-    			System.out.println("");
-    			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    			if(aPrjcts.isEmpty())
-    			{
-    				System.out.println(noActivePrjctsStr);
-    				break;
-    			}
-    			
-    			String pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
-    			if(aPrjcts.contains(pName))
-    			{
-    				JSONObject pJSON = projectMap.get(pName);
-    				checkForDeadlineAbuse(pJSON);
-    				ds.addNote(pJSON);
-    			}
-    			break;
-    		}
-    		
-    		case view_Notes:
-    		{
-    			System.out.println("");
-    			List<String> names = new ArrayList<>();
-    			names.addAll(knownProjects.keySet());
- 
-    			String choosenOne = iss.getAnswerOutOfList(notesOfWhichPrjctPhrase, names);
-    			
-    			JSONObject pJSON = knownProjects.get(choosenOne);
-    			
-    			JSONArray noteArr;
-    			if(pJSON.has(ProjectJSONKeyz.noteArrayKey))
-    			{
-    				noteArr = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
-    				int l = noteArr.length();
-    				
-    				for(int n=0;n<l;n++)
-    				{
-    					System.out.println("--> " + noteArr.get(n));
-    				}
-    			}
-    			else System.out.println(projectStr + " " + choosenOne + hasNoNotesSuffix);
-    			
-    			break;
-    		}
-    		
+		
     		case terminate_Project:
     		{
     			

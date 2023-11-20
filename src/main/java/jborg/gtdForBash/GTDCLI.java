@@ -55,12 +55,14 @@ public class GTDCLI implements Beholder<String>
 	
 	private final String sayGoodBye = "Bye!";
 	
+	private final String noPrjctFound = "No Projects found.";
 	private final String unknownCmdStr = "Unknown command!";
 	private final String hereAListOfCmds = "Here a list of Commands.";
 	private final String dataFolderFound = "Data Folder found.";
 	private final String thereIsNoDataFolder = "There is no Data Folder";
 	private final String dataFolderCreated = "Data Folder created successfully.";
 	private final String failedToCreateDirectory = "Failed to create the directory.";
+	private final String noActivePrjctsStr = "";
 	
 	private final String projectStr = "Project";
 	private final String noPrjctStr = "No Project.";
@@ -129,13 +131,15 @@ public class GTDCLI implements Beholder<String>
 	private final String view_nearest_Deadline = "nearest deadline";
 	private final String view_statistics = "stats";
 	private final String next_Step = "next step";
-	private final String list = "list";
+	private final String tblList = "show projects";
+	private final String justPrjctNames = "names";
 	private final String help = "help";
 	private final String new_Project ="new project";
+	private final String new_MOD = "new mod";
 	private final String list_commands = "show cmds";
 	private final String terminate_Project = "terminate project";
 	private final String add_Note = "add note";
-	private final String view_Notes = "show Notes";
+	private final String view_Notes = "show notes";
 	
 	private final Set<String> commands = new HashSet<>();
 
@@ -282,29 +286,15 @@ public class GTDCLI implements Beholder<String>
 				
 				return pJSON;
 			} 
-			catch(InputMismatchException e) 
-			{
-				e.printStackTrace();
-			}
-			catch(SpawnProjectException e)
-			{
-				e.printStackTrace();
-			}
-			catch(TimeGoalOfProjectException e)
-			{
-				e.printStackTrace();
-			}
-			catch(SpawnStepException e)
-			{
-				e.printStackTrace();
-			}
-			catch(IOException e) 
+			catch(InputMismatchException | SpawnProjectException | TimeGoalOfProjectException 
+					| SpawnStepException | IOException e) 
 			{
 				e.printStackTrace();
 			}
 			
 			System.out.println(noPrjctStr);
-			return null;
+			
+			return new JSONObject();//Empty
 		};
 		
 		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false,false,true,false));
@@ -324,41 +314,34 @@ public class GTDCLI implements Beholder<String>
 				modProjectMap.put(name, pJSON);
 				return pJSON;
 			} 
-			catch(InputMismatchException e) 
-			{
-				e.printStackTrace();
-			}
-			catch(SpawnProjectException e)
-			{
-				e.printStackTrace();
-			}
-			catch(IOException e) 
+			catch(InputMismatchException | SpawnProjectException | IOException e) 
 			{
 				e.printStackTrace();
 			}
 			
 			System.out.println(noPrjctStr);
-			return null;
+			
+			return new JSONObject();//Empty
 		};
 		
 		ioArray.clear();
 		ioArray = new ArrayList<>(Arrays.asList(false,false,true,false));
 		
-		registerCmd(new_Project, pmcSetName, ioArray, newMODProject);
+		registerCmd(new_MOD, pmcSetName, ioArray, newMODProject);
 		
 		Function<String, String> leave = (s)->
 		{
 			try 
 			{
-				stop();
+				stop();//Save than exit.
 			} 
 			catch (JSONException | IOException | URISyntaxException e)
 			{
-				System.out.println("Nothing saved!!\n" + e);
-				System.exit(0);
+				System.out.println("something went wrong!!\n" + e);
+				System.exit(0);//Bye. Exit maybe without saving.
 			}
 			
-			return null;
+			return ""; //Unreachable!!!!
 		};
 
 		ioArray.clear();
@@ -376,7 +359,7 @@ public class GTDCLI implements Beholder<String>
 		ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 				
-		registerCmd(list, sdcSetName, ioArray, prjctList);
+		registerCmd(tblList, sdcSetName, ioArray, prjctList);
     
     
 		Function<String, String> nearestDeadline = (s)->
@@ -446,6 +429,28 @@ public class GTDCLI implements Beholder<String>
 		
 		registerCmd(view_nearest_Deadline, sdcSetName, ioArray, nearestDeadline);
     
+		Function<String, String> listNames = (s)->
+		{
+			
+			String output = "";
+			
+			if(knownProjects.isEmpty())
+			{
+				System.out.println(this.noPrjctFound);
+				return "";
+			}
+			for(String name: knownProjects.keySet())output = output + '\n' + name;
+			
+			System.out.println(output);
+			return output;
+		};
+		
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
+		
+		registerCmd(this.justPrjctNames, sdcSetName, ioArray, listNames);
+
+
 		Function<String, String> listCmds = (s)->
 		{
 			String output = "";
@@ -503,22 +508,28 @@ public class GTDCLI implements Beholder<String>
 		Function<String, String> projectView = (s)->
 		{
 			String output = "";
-			
+
    			System.out.println("");
     		List<String> names = new ArrayList<>();
     		names.addAll(knownProjects.keySet());
- 
-    		String choosenOne;
+    		if(names.isEmpty())
+    		{
+    			System.out.println(noPrjctFound);
+    			return "";
+    		}
+    		
 			try 
 			{
-				choosenOne = iss.getAnswerOutOfList(whichOnePhrase, names);
-	    		String prjct = choosenOne.trim();
+	    		String prjct;
+	    		if(s.trim().equals(""))prjct=  iss.getAnswerOutOfList(whichOnePhrase, names);
+	    		else prjct = s.trim();
+	    		
 	    		if(knownProjects.keySet().contains(prjct))
 	    		{
 	    			output =showProjectDetail(knownProjects.get(prjct));
 	    			System.out.println(output);
 	    		}
-	    		else System.out.println(chooseMoreWiselyPreFix + choosenOne + itsNotOnTheListSuffix);
+	    		else System.out.println(chooseMoreWiselyPreFix + prjct + itsNotOnTheListSuffix);
 
 			} 
 			catch (InputMismatchException | IOException e) 
@@ -616,6 +627,134 @@ public class GTDCLI implements Beholder<String>
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
 		registerCmd(view_statistics, sdcSetName, ioArray, stats);
+		
+		Function<String, String> save = (s)->
+		{
+			try 
+			{
+				saveAll();
+			}
+			catch (JSONException | IOException | URISyntaxException e) 
+			{
+				
+				System.out.println("Something went wrong.");
+				e.printStackTrace();
+			}
+			
+			return "";
+
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
+		
+		registerCmd(this.save, ocSetName, ioArray, save);
+		
+		Function<String, String> addNote = (s)->
+		{
+			
+   			System.out.println("");
+			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+			if(aPrjcts.isEmpty())
+			{
+				System.out.println(noActivePrjctsStr);
+				return "";
+			}
+			
+			
+			
+			try
+			{
+				
+				String pName;
+				if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
+				else pName = s.trim();
+				
+				if(aPrjcts.contains(pName))
+				{
+					JSONObject pJSON = projectMap.get(pName);
+					checkForDeadlineAbuse(pJSON);
+					ds.addNote(pJSON);
+				}
+				else 
+				{
+					System.out.println("No such Project.");
+					return "";
+				}
+			}
+			catch(InputMismatchException | IOException e)
+			{
+				e.printStackTrace();
+			}
+			
+			return "";
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, false, false));
+		
+		registerCmd(this.add_Note, ocSetName, ioArray, addNote);
+
+		Function<String, String> viewNotes = (s)->
+		{
+	    			
+			System.out.println("");
+			
+			if(knownProjects.isEmpty())
+			{
+				System.out.println(this.noPrjctFound);
+				return "";
+			}
+	    	List<String> names = new ArrayList<>();
+	    	names.addAll(knownProjects.keySet());
+	 
+	    	
+	    	String prjct;
+			try
+			{
+				if(s.trim().equals(""))prjct = iss.getAnswerOutOfList(notesOfWhichPrjctPhrase, names);
+				else prjct = s.trim();
+				
+				if(!knownProjects.keySet().contains(prjct))
+				{
+					System.out.println("No such Project.");
+					return "";
+				}
+				
+    			JSONObject pJSON = knownProjects.get(prjct);
+    			
+    			JSONArray noteArr;
+    			String output = "";
+    			if(pJSON.has(ProjectJSONKeyz.noteArrayKey))
+    			{
+    				noteArr = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
+    				int l = noteArr.length();
+    				
+    				for(int n=0;n<l;n++)
+    				{
+    					output = output + "--> " + noteArr.get(n);
+    				}
+    				
+    				System.out.println(output);
+    				return output;
+    			}
+    			else System.out.println(projectStr + " " + prjct + hasNoNotesSuffix);
+
+			}
+			catch (InputMismatchException | IOException e)
+			{
+				System.out.println("Something went wrong.");
+				e.printStackTrace();
+			}
+
+			return "";
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, true, false));
+		
+		registerCmd(this.view_Notes, ocSetName, ioArray, viewNotes);
+
     }
 
 	/** @param ioArray index 0 = mustHaveArgument	*
@@ -670,6 +809,7 @@ public class GTDCLI implements Beholder<String>
     				CLICommand<?> clicmd = commandMap.get(commandKnown);
     		
     				String argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
+    				
     				Object obj = clicmd.executeCmd(argument);
     				break;
     			}
@@ -696,9 +836,9 @@ public class GTDCLI implements Beholder<String>
     {
     	
     	String argument = "";
-    	
    		int l = commandKnown.length();
    		argument = commandTyped.substring(l);
+
    		return argument;
     }
    
