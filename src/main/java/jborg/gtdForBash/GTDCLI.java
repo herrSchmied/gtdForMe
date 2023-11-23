@@ -101,11 +101,9 @@ public class GTDCLI implements Beholder<String>
 	
 	private final char wallOfTableChr = '|';
 	public final int jsonPrintStyle = 4;
-	public final String fileMarker = ".prjct";
+	public static final String fileMarker = ".prjct";
 	public final String modPrjctMarker = ".MODPrjct";
 	
-	private Map<String, JSONObject> projectMap = new HashMap<>();
-	private Map<String, JSONObject> modProjectMap = new HashMap<>();
 	private Map<String, JSONObject> knownProjects = new HashMap<>();
 
 	public static final String isModProjectQ = "Maybe one Day-Project?(yes) or are we actually try "
@@ -143,13 +141,13 @@ public class GTDCLI implements Beholder<String>
 	
 	private final Set<String> commands = new HashSet<>();
 
-	private final Set<String> prjctModifierCommands = new HashSet();
+	private final Set<String> prjctModifierCommands = new HashSet<>();
 	
-	private final Set<String> showDataCommands = new HashSet();
+	private final Set<String> showDataCommands = new HashSet<>();
 	
-	private final Set<String> otherCommands = new HashSet();
+	private final Set<String> otherCommands = new HashSet<>();
 	
-	private final Map<String, CLICommand> commandMap = new HashMap<>();
+	private final Map<String, CLICommand<?>> commandMap = new HashMap<>();
 	
 	private final String pmcSetName = "Project_Modifier_Cmd_Set";
 	private final String sdcSetName = "Show_Data_Cmd_Set";
@@ -159,13 +157,10 @@ public class GTDCLI implements Beholder<String>
 																  sdcSetName, showDataCommands,
 																  ocSetName, otherCommands);
 	
+	boolean noMoreLoops = false;
+	
 	/*TODO: some only need Testing.
-	 * 
-	 * 
-
-
-	 * 
-	 * 
+ 
 	stepsView -> show all Last Steps or all Steps of one Project
 	
 	JSONView -> View JSONObject of a Project.
@@ -181,7 +176,7 @@ public class GTDCLI implements Beholder<String>
 	public final Predicate<JSONObject> activeProject = (jo)->
 	{
 		
-		if(!projectMap.containsValue(jo))return false;
+		if(!knownProjects.containsValue(jo))return false;
 		
 		String status = jo.getString(ProjectJSONKeyz.statusKey);
 		
@@ -192,23 +187,23 @@ public class GTDCLI implements Beholder<String>
 
 	public final Predicate<JSONObject> notActiveProject = (jo)-> 
 	{
-		if(!projectMap.containsValue(jo))return false;//Is a must!!
+		if(!knownProjects.containsValue(jo))return false;//Is a must!!
 		
 		return !activeProject.test(jo);
 	};
 	
 	public final Predicate<String> activePrjctName = (s)->
 	{
-		if(!projectMap.containsKey(s)) return false;
+		if(!knownProjects.containsKey(s)) return false;
 		
-		JSONObject pJSON = projectMap.get(s);
+		JSONObject pJSON = knownProjects.get(s);
 		
 		return activeProject.test(pJSON);
 	};
 	
 	public final Predicate<String> notActivePrjctName = (s)->
 	{
-		if(!projectMap.containsKey(s)) return false;//Is a must!!
+		if(!knownProjects.containsKey(s)) return false;//Is a must!!
 		
 		return !activePrjctName.test(s);
 	};
@@ -247,18 +242,22 @@ public class GTDCLI implements Beholder<String>
 	        {
 	            System.out.println(failedToCreateDirectory);
 	            System.out.println(sayGoodBye);
+	            System.exit(0);
 	        }
 		}
 	}
     
     private void boot() throws IOException, URISyntaxException, InputMismatchException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
     {
+    	
     	initComands();
-		loadProjects();
-		loadMODProjects();
-	
-		knownProjects.putAll(projectMap);
-		knownProjects.putAll(modProjectMap);
+    	
+		Set<JSONObject> prjctSet = loadProjects();
+		for(JSONObject json: prjctSet)
+		{
+			String pName = json.getString(ProjectJSONKeyz.nameKey);
+			knownProjects.put(pName, json);
+		}
 		
 		checkAllForDLDTAbuse();
 	
@@ -267,7 +266,6 @@ public class GTDCLI implements Beholder<String>
 		loopForCommands();
     }
     
-    /* TODO *///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     private void initComands()
     {
     
@@ -282,7 +280,6 @@ public class GTDCLI implements Beholder<String>
 				
 				String name = pJSON.getString(ProjectJSONKeyz.nameKey);
 				knownProjects.put(name, pJSON);
-				projectMap.put(name, pJSON);
 				
 				return pJSON;
 			} 
@@ -311,7 +308,7 @@ public class GTDCLI implements Beholder<String>
 				
 				String name = pJSON.getString(ProjectJSONKeyz.nameKey);
 				knownProjects.put(name, pJSON);
-				modProjectMap.put(name, pJSON);
+				
 				return pJSON;
 			} 
 			catch(InputMismatchException | SpawnProjectException | IOException e) 
@@ -338,7 +335,7 @@ public class GTDCLI implements Beholder<String>
 			catch (JSONException | IOException | URISyntaxException e)
 			{
 				System.out.println("something went wrong!!\n" + e);
-				System.exit(0);//Bye. Exit maybe without saving.
+				noMoreLoops = true;//Bye. Exit maybe without saving.
 			}
 			
 			return ""; //Unreachable!!!!
@@ -353,7 +350,10 @@ public class GTDCLI implements Beholder<String>
 		{
 			
 			System.out.println("");
-			return showProjectMapAsTable(knownProjects);
+			String output = showProjectMapAsTable(knownProjects);
+			
+			System.out.println(output);
+			return output;
 		};
 
 		ioArray.clear();
@@ -369,7 +369,7 @@ public class GTDCLI implements Beholder<String>
     		List<String> pList = new ArrayList<>();
     		List<String> dauerList = new ArrayList<>();
     			
-    		for(JSONObject pJSON: projectMap.values())
+    		for(JSONObject pJSON: knownProjects.values())
     		{
     				
     			String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
@@ -475,7 +475,7 @@ public class GTDCLI implements Beholder<String>
 			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
 			List<List<String>> rows = new ArrayList<>();
 
-			for(JSONObject pJSON: projectMap.values())
+			for(JSONObject pJSON: knownProjects.values())
 			{
 				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
 				
@@ -557,7 +557,10 @@ public class GTDCLI implements Beholder<String>
     			map.put(prjctName, pJSON);
     		}
     		
-    		return showProjectMapAsTable(map);
+    		String output = showProjectMapAsTable(map);
+    		System.out.println(output);
+    		
+    		return output;
     	};
 
     	ioArray.clear();
@@ -574,11 +577,14 @@ public class GTDCLI implements Beholder<String>
 			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
 			for(String prjctName: aPrjcts)
 			{
-				JSONObject pJSON = projectMap.get(prjctName);
+				JSONObject pJSON = knownProjects.get(prjctName);
 				map.put(prjctName, pJSON);
 			}
 			
-			return showProjectMapAsTable(map);
+			String output = showProjectMapAsTable(map);
+			System.out.println(output);
+			
+			return output;
 		};
 		
     	ioArray.clear();
@@ -591,12 +597,14 @@ public class GTDCLI implements Beholder<String>
 			
 			int nrOfPrjcts = knownProjects.size();
 			int nrOfActivePrjcts = findProjectsByCondition(activeProject).size();
-			int nrOfModPrjcts = modProjectMap.size();
+			int nrOfModPrjcts = 0;
+		
 			
 			int nrOfSuccessfulSteps = 0;
 			int nrOfSuccessfulPrjcts = 0;
-			for(JSONObject pJSON: projectMap.values())
+			for(JSONObject pJSON: knownProjects.values())
 			{
+				if(isMODProject(pJSON))nrOfModPrjcts++;
 				
 				String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
 				if(prjctStatus.equals(StatusMGMT.success))nrOfSuccessfulPrjcts++;
@@ -639,10 +647,11 @@ public class GTDCLI implements Beholder<String>
 				
 				System.out.println("Something went wrong.");
 				e.printStackTrace();
+				
+				return "";
 			}
 			
 			return "";
-
 		};
 		
     	ioArray.clear();
@@ -650,7 +659,7 @@ public class GTDCLI implements Beholder<String>
 		
 		registerCmd(this.save, ocSetName, ioArray, save);
 		
-		Function<String, String> addNote = (s)->
+		Function<String, JSONObject> addNote = (s)->
 		{
 			
    			System.out.println("");
@@ -658,10 +667,8 @@ public class GTDCLI implements Beholder<String>
 			if(aPrjcts.isEmpty())
 			{
 				System.out.println(noActivePrjctsStr);
-				return "";
+				return new JSONObject();
 			}
-			
-			
 			
 			try
 			{
@@ -672,14 +679,15 @@ public class GTDCLI implements Beholder<String>
 				
 				if(aPrjcts.contains(pName))
 				{
-					JSONObject pJSON = projectMap.get(pName);
+					JSONObject pJSON = knownProjects.get(pName);
 					checkForDeadlineAbuse(pJSON);
 					ds.addNote(pJSON);
+					return pJSON;
 				}
 				else 
 				{
 					System.out.println("No such Project.");
-					return "";
+					return new JSONObject();
 				}
 			}
 			catch(InputMismatchException | IOException e)
@@ -687,7 +695,7 @@ public class GTDCLI implements Beholder<String>
 				e.printStackTrace();
 			}
 			
-			return "";
+			return new JSONObject();
 		};
 		
     	ioArray.clear();
@@ -705,14 +713,11 @@ public class GTDCLI implements Beholder<String>
 				System.out.println(this.noPrjctFound);
 				return "";
 			}
-	    	List<String> names = new ArrayList<>();
-	    	names.addAll(knownProjects.keySet());
-	 
 	    	
 	    	String prjct;
 			try
 			{
-				if(s.trim().equals(""))prjct = iss.getAnswerOutOfList(notesOfWhichPrjctPhrase, names);
+				if(s.trim().equals(""))prjct = iss.getAnswerOutOfList(notesOfWhichPrjctPhrase, new ArrayList<String>(knownProjects.keySet()));
 				else prjct = s.trim();
 				
 				if(!knownProjects.keySet().contains(prjct))
@@ -755,6 +760,142 @@ public class GTDCLI implements Beholder<String>
 		
 		registerCmd(this.view_Notes, ocSetName, ioArray, viewNotes);
 
+		Function<String, String> listMODs = (s)->
+		{
+			Map<String, JSONObject> map = new HashMap<>();
+			
+			for(String prjctName: knownProjects.keySet())
+			{
+				JSONObject pJSON = knownProjects.get(prjctName);
+				
+				if(isMODProject(pJSON))map.put(prjctName, pJSON);
+			}
+			
+    		String output = showProjectMapAsTable(map);
+			
+    		System.out.println(output);
+    		return output;
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
+	
+		registerCmd(this.list_mod_Projects, sdcSetName, ioArray, listMODs);
+		
+		Function<String, JSONObject> nextStep = (s)->
+		{
+
+			System.out.println("");
+    		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+    		if(aPrjcts.isEmpty())
+    		{
+    			System.out.println(noActivePrjctsStr);
+    			return new JSONObject();
+    		}
+    		
+    		try
+    		{
+
+    			String prjct;
+    			if(s.trim().equals(""))prjct = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
+    			else prjct = s.trim();
+    		
+    			if(!knownProjects.keySet().contains(prjct))
+    			{
+    				System.out.println("No such Project.");
+    				return new JSONObject();
+    			}
+
+    			if(aPrjcts.contains(prjct))
+    			{
+    				JSONObject pJSON = knownProjects.get(prjct);
+    				checkForDeadlineAbuse(pJSON);
+    				ds.spawnStep(pJSON);
+    				return pJSON;
+    			}
+    			else
+    			{
+    				System.out.println("Project is not active.");
+    				return new JSONObject();
+    			}
+    		}
+			catch(SpawnStepException | InputMismatchException | IOException e)
+    		{
+				System.out.println("Something went wrong.");
+    		}
+			
+    		return new JSONObject();
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, false, false));
+	
+		registerCmd(this.next_Step, pmcSetName, ioArray, nextStep);
+
+		Function<String, JSONObject> killPrjct = (s)->
+		{
+				
+    		System.out.println("");
+    		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+    		if(aPrjcts.isEmpty())
+    		{
+    			System.out.println(noActivePrjctsStr);
+    			return new JSONObject();
+    		}
+    		try
+    		{
+    			
+    			String pName;
+    			if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
+    			else pName = s.trim();
+    			
+    			if(!knownProjects.keySet().contains(pName))
+    			{
+    				System.out.println("No such Project.");
+    				return new JSONObject();
+    			}
+    			
+    			if(aPrjcts.contains(pName))
+    			{
+    				JSONObject pJSON = knownProjects.get(pName);
+    				checkForDeadlineAbuse(pJSON);
+    				JSONObject sJSON = ds.getLastStepOfProject(pJSON);
+    				ds.terminateStep(sJSON);  				
+    				ds.terminateProject(pJSON);
+    				return pJSON;
+    			}
+    			else
+    			{
+    				System.out.println("Project is not active.");
+    				return new JSONObject();
+    			}
+    		}
+    		catch(InputMismatchException | IOException | JSONException | ProjectTerminationException | StepTerminationException e)
+    		{
+    			System.out.println("Something went wrong.");
+    		}
+    		
+			return new JSONObject();
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, false, false));
+	
+		registerCmd(this.terminate_Project, pmcSetName, ioArray, killPrjct);
+
+		Function<String, String> hilfe = (s)->
+		{
+			String output = "Not yet Installed.";//TODO:;
+			System.out.println(output);
+			
+			return output;
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, true, false));
+	
+		registerCmd(this.help, ocSetName, ioArray, hilfe);
+
     }
 
 	/** @param ioArray index 0 = mustHaveArgument	*
@@ -771,7 +912,7 @@ public class GTDCLI implements Beholder<String>
     	cmdSet.add(cmdName);
     }
     
-    public void greetings()
+    public void greetings() throws IOException
     {
     	LocalDateTime inTheMoment = LocalDateTime.now();
     	String day = inTheMoment.getDayOfWeek().toString();
@@ -810,7 +951,7 @@ public class GTDCLI implements Beholder<String>
     		
     				String argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
     				
-    				Object obj = clicmd.executeCmd(argument);
+    				/*Object obj = */ clicmd.executeCmd(argument);
     				break;
     			}
     			cmdCounter++;
@@ -829,7 +970,7 @@ public class GTDCLI implements Beholder<String>
     		e.printStackTrace();
     	}
     	
-    	loopForCommands();
+    	if(!noMoreLoops)loopForCommands();
     }
     
     public String getArgumentOfCommand(String commandTyped, String commandKnown)
@@ -886,7 +1027,7 @@ public class GTDCLI implements Beholder<String>
     	}
     	
 		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
-		System.out.println(ttd);
+		
 		return ttd.toString();
     }
     
@@ -950,7 +1091,7 @@ public class GTDCLI implements Beholder<String>
        
     private void checkAllForDLDTAbuse()
     {
-    	for(JSONObject pJSON: projectMap.values())
+    	for(JSONObject pJSON: knownProjects.values())
     	{
     		checkForDeadlineAbuse(pJSON);
     	}
@@ -998,45 +1139,7 @@ public class GTDCLI implements Beholder<String>
     		pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
     	}
     }
-
-
-    /* TODO
-    private void eraseMODProjectFile(String prjctName)
-    {
-
-    	File[] listOfFiles = getListOfFilesFromDataFolder();
-    	
-    	for(File file: listOfFiles)
-    	{
-    		
-    		if(file.isFile()&&file.getName().equals(prjctName+modPrjctMarker))
-    			file.delete();
-    	}
-    }
-    */
-    
-    private void loadMODProjects() throws IOException
-    {
-    	
-    	String path = getPathToDataFolder();
-
-    	File[] listOfFiles = getListOfFilesFromDataFolder();
-
-    	for(File file: listOfFiles)
-    	{
-    		String name = file.getName();
-    		if(file.isFile()&&name.endsWith(modPrjctMarker))
-    		{
-    			
-    			String joText = loadText(path + name);
-    			
-    			JSONObject jo = new JSONObject(joText);
-    			
-    			modProjectMap.put(jo.getString(ProjectJSONKeyz.nameKey), jo);
-    		}
-    	}
-    }
-    
+        
     private StatusMGMT loadStates()
     {
     	
@@ -1067,8 +1170,10 @@ public class GTDCLI implements Beholder<String>
     	return StatusMGMT.getInstance();
     }
 
-    private void loadProjects() throws IOException, URISyntaxException
+    public static Set<JSONObject> loadProjects() throws IOException, URISyntaxException
     {
+    	
+    	Set<JSONObject> prjctSet = new HashSet<>();
     	
     	String path = getPathToDataFolder();
 
@@ -1084,12 +1189,14 @@ public class GTDCLI implements Beholder<String>
     			
     			JSONObject jo = new JSONObject(joText);
     			
-    			projectMap.put(jo.getString(ProjectJSONKeyz.nameKey), jo);
+    			prjctSet.add(jo);
     		}
     	}
+    	
+    	return prjctSet;
     }
     
-    private File[] getListOfFilesFromDataFolder()
+    public static File[] getListOfFilesFromDataFolder()
     {
     	
     	String path = getPathToDataFolder();
@@ -1142,20 +1249,10 @@ public class GTDCLI implements Beholder<String>
     	
     	return status.equals(StatusMGMT.mod);
     }
-
-    private void saveMODProjects() throws JSONException, IOException
-    {
-    	
-    	for(JSONObject jo: modProjectMap.values())
-    	{
-    		String path = getPathToDataFolder();
-    		saveText(path + jo.getString(ProjectJSONKeyz.nameKey)+modPrjctMarker, jo.toString(jsonPrintStyle));
-    	}
-    }
     
     private void saveProjects() throws JSONException, IOException, URISyntaxException
     {
-    	for(JSONObject jo: projectMap.values())
+    	for(JSONObject jo: knownProjects.values())
     	{
     		String path = getPathToDataFolder();
     		saveText(path + jo.getString(ProjectJSONKeyz.nameKey)+fileMarker, jo.toString(jsonPrintStyle));
@@ -1170,7 +1267,6 @@ public class GTDCLI implements Beholder<String>
     public void saveAll() throws JSONException, IOException, URISyntaxException
     { 	
     	saveProjects();
-    	saveMODProjects();
     	saveStatusMGMT();
     }
     
@@ -1179,7 +1275,7 @@ public class GTDCLI implements Beholder<String>
 
     	saveAll();
     	System.out.println(sayGoodBye);
-    	System.exit(0);
+    	noMoreLoops = true;
     }
 
 	@Override
@@ -1187,5 +1283,10 @@ public class GTDCLI implements Beholder<String>
 	{
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public Map<String, JSONObject> getProjectMap()
+	{
+		return knownProjects;
 	}
 }
