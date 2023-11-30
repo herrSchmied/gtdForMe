@@ -1,7 +1,10 @@
 package jborg.gtdForBash;
 
 
+import java.io.IOException;
 import java.util.function.Function;
+
+import someMath.InterfaceNumberException;
 
 
 public class CLICommand <O>
@@ -18,12 +21,12 @@ public class CLICommand <O>
 	public final boolean canHaveOutput;
 	public final boolean cantHaveOutput;
 	
-	private final Function<String, O> action;
+	private final MeatOfCLICmd<O> action;
 	
 	private final String cmdName;
 	
 	public CLICommand(String command, boolean mustHaveArgument, boolean canHaveArgument, boolean mustHaveOutput,
-			boolean canHaveOutput, Function<String, O> action)
+			boolean canHaveOutput, MeatOfCLICmd<O> action)
 	{
 		/*
 		 * only one of the Argument booleans can be true!!
@@ -71,7 +74,7 @@ public class CLICommand <O>
     	return cmdName;
     }
     
-    public O executeCmd(String argument) throws CLICMDException
+    public O executeCmd(String argument) throws CLICMDException, InterfaceNumberException, SpawnProjectException, SpawnStepException, ProjectTerminationException, StepTerminationException, IOException, TimeGoalOfProjectException
     {
     	
     	if(mustHaveArgument&&argument.trim().equals("")) throw new CLICMDException(mustHaveArgumentStr);
@@ -79,9 +82,9 @@ public class CLICommand <O>
     	if(cantHaveArgument)
     	{
     		if(!argument.trim().equals("")) throw new CLICMDException(cantHaveArgumentStr);
-    		return action.apply("");
+    		return action.execute("");
     	}
     	
-    	return action.apply(argument);
+    	return action.execute(argument);
     }
 }
