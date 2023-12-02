@@ -2,7 +2,7 @@ package jborg.gtdForBash;
 
 
 import java.io.IOException;
-import java.util.function.Function;
+
 
 import someMath.InterfaceNumberException;
 

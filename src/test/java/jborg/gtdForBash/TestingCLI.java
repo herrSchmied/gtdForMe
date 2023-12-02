@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
-import java.util.HashSet;
+
 import java.util.InputMismatchException;
 import java.util.Set;
 
@@ -60,22 +60,21 @@ class TestingCLI
     	}
 	}
 
-	/*
 	public String setupNewProject(String prjctName, LocalDateTime ldtPrjctDLDT, LocalDateTime ldtStpDLDT)
 	{
 		
-		String changePrjctBDT = "No\n";
+		String changePrjctBDT = "No";
 		String prjctDLDT = translateTimeToAnswerString(ldtPrjctDLDT);
-		String changeStepBDT = "No\n";
+		String changeStepBDT = "No";
 		String chosenFromStatieList = "1";//ATBD
 		String stepDLDT = translateTimeToAnswerString(ldtStpDLDT);
 		
 		String data = GTDCLI.new_Project + '\n'
 				+ prjctName + '\n'
 				+ newPrjctGoal + '\n'
-				+ changePrjctBDT
+				+ changePrjctBDT + '\n'
 				+ prjctDLDT
-				+ changeStepBDT
+				+ changeStepBDT + '\n'
 				+ chosenFromStatieList + '\n'
 				+ stepDesc + '\n'
 				+ stepDLDT;
@@ -95,36 +94,21 @@ class TestingCLI
 				
 		return data;
 	}
-	*/
 	
 	public String setupAddNote(String prjctName, LocalDateTime ldtPrjctDLDT, LocalDateTime ldtStpDLDT)
 	{
-		
-		String changePrjctBDT = "No\n";
-		String prjctDLDT = translateTimeToAnswerString(ldtPrjctDLDT);
-		String changeStepBDT = "No\n";
-		String chosenFromStatieList = "1";//ATBD
-		String stepDLDT = translateTimeToAnswerString(ldtStpDLDT);
 
-		String data = GTDCLI.new_Project + '\n'
-				+ prjctName + '\n'
-				+ newPrjctGoal + "\n"
-				+ "No\n"
-				+ prjctDLDT
-				+ changeStepBDT
-				+ chosenFromStatieList + '\n'
-				+ stepDesc + '\n'
-				+ stepDLDT
-				+ GTDCLI.list_active_ones + '\n';
-				/*
+		String data = setupNewProject(prjctName, ldtPrjctDLDT, ldtStpDLDT);
+				
+		data = data
 				+ GTDCLI.add_Note + " " + prjctName + '\n'
 				+ noticeOne + "\n"
 				+ GTDCLI.add_Note + " " + prjctName + '\n'
 				+ noticeTwo + "\n";
-				*/
+				
 		return data;
 	}
-	/*
+	
 	@Test
 	public void testNewPrjct() throws Exception
 	{
@@ -214,7 +198,6 @@ class TestingCLI
 		
 		assert(projects.size()==1);
 	}
-	*/
 	
 	@Test
 	public void testAddNoteToProject() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException

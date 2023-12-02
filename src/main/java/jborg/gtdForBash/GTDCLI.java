@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.InputMismatchException;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.HashMap;
 
@@ -66,7 +65,7 @@ public class GTDCLI implements Beholder<String>
 	private final String noActivePrjctsStr = "";
 	
 	private final String projectStr = "Project";
-	private final String noPrjctStr = "No Project.";
+	//private final String noPrjctStr = "No Project.";//TODO: I think i will put this to use later...
 	private final String nearestDeadlineStr = "nearest Deadline of Last Steps.";
 	private final String descStr = "Desc";
 	private final String statusStr = "Status";
@@ -161,13 +160,9 @@ public class GTDCLI implements Beholder<String>
 	
 	/*TODO: some only need Testing.
  
-	stepsView -> show all Last Steps or all Steps of one Project
+	stepsView -> show all Last Steps of all Projects or all Steps of one Project
 	
 	JSONView -> View JSONObject of a Project.
-		
-	noteView -> view Notes of a Prjct.
-    	
-    Statistics -> Think about Stats.
 	 */
 
 	private final GTDDataSpawnSession ds;
@@ -417,7 +412,7 @@ public class GTDCLI implements Beholder<String>
 		ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
-		registerCmd(this.justPrjctNames, sdcSetName, ioArray, listNames);
+		registerCmd(GTDCLI.justPrjctNames, sdcSetName, ioArray, listNames);
 
 
 		MeatOfCLICmd<String> listCmds = (s)->
@@ -609,7 +604,7 @@ public class GTDCLI implements Beholder<String>
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
-		registerCmd(this.save, ocSetName, ioArray, save);
+		registerCmd(GTDCLI.save, ocSetName, ioArray, save);
 		
 		MeatOfCLICmd<JSONObject> addNote = (s)->
 		{
@@ -644,7 +639,7 @@ public class GTDCLI implements Beholder<String>
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, true, false, false));
 		
-		registerCmd(this.add_Note, pmcSetName, ioArray, addNote);
+		registerCmd(GTDCLI.add_Note, pmcSetName, ioArray, addNote);
 
 		MeatOfCLICmd<String> viewNotes = (s)->
 		{
@@ -693,7 +688,7 @@ public class GTDCLI implements Beholder<String>
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, true, true, false));
 		
-		registerCmd(this.view_Notes, ocSetName, ioArray, viewNotes);
+		registerCmd(GTDCLI.view_Notes, ocSetName, ioArray, viewNotes);
 
 		MeatOfCLICmd<String> listMODs = (s)->
 		{
@@ -715,7 +710,7 @@ public class GTDCLI implements Beholder<String>
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 	
-		registerCmd(this.list_mod_Projects, sdcSetName, ioArray, listMODs);
+		registerCmd(GTDCLI.list_mod_Projects, sdcSetName, ioArray, listMODs);
 		
 		MeatOfCLICmd<JSONObject> nextStep = (s)->
 		{
@@ -755,7 +750,7 @@ public class GTDCLI implements Beholder<String>
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, true, false, false));
 	
-		registerCmd(this.next_Step, pmcSetName, ioArray, nextStep);
+		registerCmd(GTDCLI.next_Step, pmcSetName, ioArray, nextStep);
 
 		MeatOfCLICmd<JSONObject> killPrjct = (s)->
 		{
@@ -798,7 +793,7 @@ public class GTDCLI implements Beholder<String>
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, true, false, false));
 	
-		registerCmd(this.terminate_Project, pmcSetName, ioArray, killPrjct);
+		registerCmd(GTDCLI.terminate_Project, pmcSetName, ioArray, killPrjct);
 
 		MeatOfCLICmd<String> hilfe = (s)->
 		{
@@ -811,7 +806,7 @@ public class GTDCLI implements Beholder<String>
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, true, true, false));
 	
-		registerCmd(this.help, ocSetName, ioArray, hilfe);
+		registerCmd(GTDCLI.help, ocSetName, ioArray, hilfe);
 
     }
 
