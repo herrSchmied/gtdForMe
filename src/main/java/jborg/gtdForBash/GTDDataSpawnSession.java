@@ -307,7 +307,6 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		return true;
 	};
 
-	
 	public void spawnStep(JSONObject pJson) throws SpawnStepException, InputMismatchException, IOException
 	{
 

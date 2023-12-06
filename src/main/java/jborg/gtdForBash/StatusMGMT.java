@@ -55,10 +55,13 @@ public class StatusMGMT implements Serializable
 
 		addState(atStartSetName, atbd, true, true);
 		addState(atStartSetName, mod, true, false);//is not a Step Status.
+		addState(atStartSetName, waiting, true, true);
 		
 		Set<String> onTheWaySet = new HashSet<>();
 		addNewStateSet(onTheWaySetName, onTheWaySet);
 
+		addState(onTheWaySetName, atbd, true, true);
+		addState(onTheWaySetName, mod, true, false);//is not a Step Status.
 		addState(onTheWaySetName, waiting, true, true);
 		addState(onTheWaySetName, needsNewStep, true, false);
 	}
