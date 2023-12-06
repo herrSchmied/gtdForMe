@@ -135,6 +135,7 @@ public class GTDCLI implements Beholder<String>
 	public static final String new_MOD = "new mod";
 	public static final String list_commands = "show cmds";
 	public static final String terminate_Project = "terminate project";
+	public static final String terminate_Step = "terminate step";
 	public static final String add_Note = "add note";
 	public static final String view_Notes = "show notes";
 	
@@ -625,7 +626,11 @@ public class GTDCLI implements Beholder<String>
 			if(aPrjcts.contains(pName))
 			{
 				JSONObject pJSON = knownProjects.get(pName);
-				checkForDeadlineAbuse(pJSON);
+				if(checkStepForDeadlineAbuse(pJSON)||checkProjectForDeadlineAbuse(pJSON))
+				{
+					System.out.println("Sorry Deadline abuse.");
+					return new JSONObject();
+				}
 				ds.addNote(pJSON);
 				return pJSON;
 			}
@@ -736,7 +741,12 @@ public class GTDCLI implements Beholder<String>
     		if(aPrjcts.contains(prjct))
     		{
     			JSONObject pJSON = knownProjects.get(prjct);
-    			checkForDeadlineAbuse(pJSON);
+    			if(checkProjectForDeadlineAbuse(pJSON)||checkStepForDeadlineAbuse(pJSON))
+    			{
+    				System.out.println("Sorry Deadline abuse.");
+    				return new JSONObject();
+    			}
+ 
     			ds.spawnStep(pJSON);
     			return pJSON;
     		}
@@ -754,7 +764,7 @@ public class GTDCLI implements Beholder<String>
 
 		MeatOfCLICmd<JSONObject> killPrjct = (s)->
 		{
-				
+
     		System.out.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
     		if(aPrjcts.isEmpty())
@@ -777,9 +787,12 @@ public class GTDCLI implements Beholder<String>
     		if(aPrjcts.contains(pName))
     		{
     			JSONObject pJSON = knownProjects.get(pName);
-    			checkForDeadlineAbuse(pJSON);
-    			JSONObject sJSON = ds.getLastStepOfProject(pJSON);
-    			ds.terminateStep(sJSON);  				
+    			if(checkProjectForDeadlineAbuse(pJSON)||checkStepForDeadlineAbuse(pJSON))
+    			{
+    				System.out.println("Sorry Deadline abuse.");
+    				return new JSONObject();
+    			};
+
     			ds.terminateProject(pJSON);
     			return pJSON;
     		}
@@ -794,7 +807,44 @@ public class GTDCLI implements Beholder<String>
 		ioArray.addAll(Arrays.asList(false, true, false, false));
 	
 		registerCmd(GTDCLI.terminate_Project, pmcSetName, ioArray, killPrjct);
+		
+		MeatOfCLICmd<JSONObject> killStep = (s)->
+		{
+    		System.out.println("");
+    		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
 
+    		String pName;
+    		if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
+    		else pName = s.trim();
+    			
+    			
+    		if(aPrjcts.contains(pName))
+    		{
+    			JSONObject pJSON = knownProjects.get(pName);
+    			JSONObject sJSON = ds.getLastStepOfProject(pJSON);
+    			
+    			if(checkProjectForDeadlineAbuse(pJSON)||checkStepForDeadlineAbuse(pJSON))
+    			{
+    				System.out.println("Sorry Deadline abuse.");
+    				return new JSONObject();
+    			}
+    			
+    			ds.terminateStep(pJSON);  				
+   
+    			return pJSON;
+    		}
+    		else
+    		{
+    			System.out.println("Project is not active or doesn't exist.");
+    			return new JSONObject();
+    		}
+		};
+
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, true, false));
+		
+		registerCmd(GTDCLI.terminate_Step, pmcSetName, ioArray, killStep);
+		
 		MeatOfCLICmd<String> hilfe = (s)->
 		{
 			String output = "Not yet Installed.";//TODO:;
@@ -1005,11 +1055,47 @@ public class GTDCLI implements Beholder<String>
     {
     	for(JSONObject pJSON: knownProjects.values())
     	{
-    		checkForDeadlineAbuse(pJSON);
+    		checkStepForDeadlineAbuse(pJSON);
+    		checkProjectForDeadlineAbuse(pJSON);
     	}
     }
     
-    private void checkForDeadlineAbuse(JSONObject pJSON)
+    private boolean checkStepForDeadlineAbuse(JSONObject pJSON)
+    {
+    		
+    	StatusMGMT sm = StatusMGMT.getInstance();
+
+    	String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
+    	Set<String> terminalSet = sm.getStatesOfASet(StatusMGMT.terminalSetName);
+
+    	if(terminalSet.contains(prjctStatus))return false;
+    	
+    	LocalDateTime jetzt = LocalDateTime.now();
+			
+		JSONObject step = getLastStep(pJSON);
+			
+    	String stepStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
+
+    	if(terminalSet.contains(stepStatus))return false;
+    	
+    	String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
+    	LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
+    			
+    	if(dldt.isBefore(jetzt))//Is Step DLDT abused?
+    	{
+        	step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
+        	pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
+        			
+        	step.put(StepJSONKeyz.TDTKey, dldtStr);
+        	step.put(StepJSONKeyz.TDTNoteKey, tdtNoteStpDLDTAbuse);
+        	
+        	return true;
+    	}
+    	
+    	return false;
+    }
+        
+    private boolean checkProjectForDeadlineAbuse(JSONObject pJSON)
     {
     		
     	StatusMGMT sm = StatusMGMT.getInstance();
@@ -1017,7 +1103,7 @@ public class GTDCLI implements Beholder<String>
     	String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
     	Set<String> terminalSet = sm.getStatesOfASet(StatusMGMT.terminalSetName);
     		
-    	if(terminalSet.contains(prjctStatus))return;
+    	if(terminalSet.contains(prjctStatus))return false;
 
     	LocalDateTime jetzt = LocalDateTime.now();
 			
@@ -1027,31 +1113,30 @@ public class GTDCLI implements Beholder<String>
     		
     	String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
     	LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-    			
-    	if(dldt.isBefore(jetzt)&&!terminalSet.contains(stepStatus))//Is Step DLDT abused?
-    	{
-        	step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-        	pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
-        			
-        	step.put(StepJSONKeyz.TDTKey, dldtStr);
-        	step.put(StepJSONKeyz.TDTNoteKey, tdtNoteStpDLDTAbuse);    
-    	}   					
 
     	String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
     	LocalDateTime projectDLDT = LittleTimeTools.LDTfromTimeString(projectDLDTStr);
 
     	if(projectDLDT.isBefore(jetzt))//Is Project DLDT abused?
     	{
-    		step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
     		pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
-    		step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
     		pJSON.put(ProjectJSONKeyz.TDTKey, projectDLDTStr);
-    			
-    		step.put(StepJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
     		pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
+    		
+    		if(!terminalSet.contains(stepStatus))
+    		{
+    			
+        		step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
+        		step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
+        		step.put(StepJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
+    		}
+    		
+    		return true;
     	}
+    	
+    	return false;
     }
-        
+    
     private StatusMGMT loadStates()
     {
     	

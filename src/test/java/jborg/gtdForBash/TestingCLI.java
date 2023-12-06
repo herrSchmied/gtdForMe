@@ -32,6 +32,8 @@ class TestingCLI
 	
 	String appendStpPrjctName = "Appending Steps Project\n";
 	
+	String killStepPrjctName = "Killing this Step.";
+	
 	
 	String modPrjctName = "Maybe Baby";
 	String modPrjctGoal = "MOD-Project Test";
@@ -58,6 +60,41 @@ class TestingCLI
     		
     		if(file.isFile())file.delete();
     	}
+	}
+
+	public String setupAddSteps(String prjctName, LocalDateTime ldtPrjctDLDT, LocalDateTime ldtStpDLDT)
+	{
+	/*	String prjctDLDT = translateTimeToAnswerString(ldtPrjctDLDT);
+		String changeStepBDT = "No";
+		String chosenFromStatieList = "1";//ATBD
+		String stepDLDT = translateTimeToAnswerString(ldtStpDLDT);
+
+		String data = setupNewProject(prjctName, ldtPrjctDLDT, ldtStpDLDT);
+		data = data
+				+ GTDCLI.next_Step
+				+ changeStepBDT + '\n'
+				+ chosenFromStatieList + '\n'
+				+ stepDesc2 + '\n'
+				+ stepDLDT;
+		*/
+		return "";
+	}
+	
+	public String setupKillStep(String prjctName, LocalDateTime ldtPrjctDLDT, LocalDateTime ldtStpDLDT)
+	{
+	
+		String stepWasSuccessQstn  = "No";
+		String wantToMakeTDTNote = "No";
+		String wantToChangeTDT = "No";
+		
+		String data = setupNewProject(prjctName, ldtPrjctDLDT, ldtStpDLDT);
+		
+		data = data + GTDCLI.terminate_Step + prjctName + '\n'
+					+ stepWasSuccessQstn + '\n'
+					+ wantToMakeTDTNote + '\n'
+					+ wantToChangeTDT + '\n';
+		
+		return data;
 	}
 
 	public String setupNewProject(String prjctName, LocalDateTime ldtPrjctDLDT, LocalDateTime ldtStpDLDT)
@@ -217,7 +254,42 @@ class TestingCLI
 		
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 		System.out.println(projects.size());
-		//assert(projects.size()==1);
+		
+		JSONObject project = CollectionManipulation.catchRandomElementOfSet(projects);
+		JSONArray notesArr = project.getJSONArray(ProjectJSONKeyz.noteArrayKey);
+		String note1 = notesArr.getString(0);
+		String note2 = notesArr.getString(1);
+		assert(note1.equals(this.noticeOne));
+		assert(note2.equals(this.noticeTwo));
+		
+		assert(projects.size()==1);
+	}
+	
+	@Test
+	public void testKillStep() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	{
+		LocalDateTime jetzt = LocalDateTime.now();
+		
+		String data = setupKillStep(killStepPrjctName, jetzt.plusHours(1), jetzt.plusMinutes(3));
+		data = data + GTDCLI.exit + '\n';
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
+		InputStreamSession iss = new InputStreamSession(bais);
+		
+		clearFolder();
+		gtdCli = new GTDCLI(iss);
+		System.out.println(data);
+		
+		Set<JSONObject> projects = GTDCLI.loadProjects();
+		System.out.println(projects.size());
+
+		JSONObject project = CollectionManipulation.catchRandomElementOfSet(projects);
+		
+		JSONObject step = GTDCLI.getLastStep(project);
+		StatusMGMT statusMGMT = StatusMGMT.getInstance();
+		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
+		assert(terminalSet.contains(step.getString(StepJSONKeyz.statusKey)));
+
 	}
 
 	public String translateTimeToAnswerString(LocalDateTime ldt)

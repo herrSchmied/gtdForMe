@@ -544,11 +544,11 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		
 		return false;
 	}
-	
-	
-	public void terminateStep(JSONObject sJson) throws IOException, StepTerminationException
+
+	public void terminateStep(JSONObject pJson) throws IOException, StepTerminationException
 	{
-		
+
+		JSONObject sJson = getLastStepOfProject(pJson);
 		
 		if(stepIsAlreadyTerminated(sJson))throw new StepTerminationException(stpTerminationExceptionMsg);
 
@@ -578,7 +578,8 @@ public class GTDDataSpawnSession implements Subjekt<String>
 				tdt = iss.getDateTime(stepWhenTDTQstn, nddtOfStep, jetzt);
 			}
 			
-			sJson.put(StepJSONKeyz.statusKey, stepStatus);//Project Status ain't bothered!!
+			sJson.put(StepJSONKeyz.statusKey, stepStatus);
+			pJson.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
 			String when = LittleTimeTools.timeString(tdt);
 			sJson.put(StepJSONKeyz.TDTKey, when);
 			if(!terminalNote.trim().equals(""))sJson.put(StepJSONKeyz.TDTNoteKey, terminalNote);
@@ -586,7 +587,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		catch(IllegalArgumentException exc) { throw new StepTerminationException(stepTExcIllglArmntPrefix + exc); }
 		catch(JSONException jsonExc) { throw new StepTerminationException(stepTExcJSONErrorMsg); }
 	}
-	
+
 	public boolean projectIsAlreadyTerminated(JSONObject pJson)
 	{
 		
