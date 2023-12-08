@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.HashMap;
 
 
@@ -62,7 +63,8 @@ public class GTDCLI implements Beholder<String>
 	private final String thereIsNoDataFolder = "There is no Data Folder";
 	private final String dataFolderCreated = "Data Folder created successfully.";
 	private final String failedToCreateDirectory = "Failed to create the directory.";
-	private final String noActivePrjctsStr = "";
+	private final String noActivePrjctsStr = "No active Projects.";
+	private final String noMODPrjctsStr = "No MOD Projects.";
 	
 	private final String projectStr = "Project";
 	//private final String noPrjctStr = "No Project.";//TODO: I think i will put this to use later...
@@ -132,6 +134,7 @@ public class GTDCLI implements Beholder<String>
 	public static final String help = "help";
 	public static final String new_Project ="new project";
 	public static final String new_MOD = "new mod";
+	public static final String wake_MOD = "wake mod";
 	public static final String list_commands = "show cmds";
 	public static final String terminate_Project = "terminate project";
 	public static final String terminate_Step = "terminate step";
@@ -173,11 +176,9 @@ public class GTDCLI implements Beholder<String>
 		
 		if(!knownProjects.containsValue(jo))return false;
 		
-		String status = jo.getString(ProjectJSONKeyz.statusKey);
+		if(projectIsTerminated(jo))return false;
 		
-		if(states.getStatesOfASet(StatusMGMT.terminalSetName).contains(status))return false;
-		
-		if(status.equals(StatusMGMT.mod))return false;
+		if(isMODProject(jo))return false;
 		
 		return true;
 	};
@@ -501,15 +502,13 @@ public class GTDCLI implements Beholder<String>
     			map.put(prjctName, pJSON);
     		}
     		
-    		String output = showProjectMapAsTable(map);
+    		showProjectMapAsTable(map);
     		
-    		System.out.println(output);
-    		
-    		return output;
-    	};
+    		return "";
+       	};
 
     	ioArray.clear();
-		ioArray.addAll(Arrays.asList(false, false, true, false));
+		ioArray.addAll(Arrays.asList(false, false, false, false));
 		
 		registerCmd(list_not_active_ones, sdcSetName, ioArray, showNotActivePrjcts);
 		
@@ -527,14 +526,13 @@ public class GTDCLI implements Beholder<String>
 				map.put(prjctName, pJSON);
 			}
 			
-			String output = showProjectMapAsTable(map);
-			System.out.println(output);
+			showProjectMapAsTable(map);
 			
-			return output;
+			return "";
 		};
 		
     	ioArray.clear();
-		ioArray.addAll(Arrays.asList(false, false, true, false));
+		ioArray.addAll(Arrays.asList(false, false, false, false));
 		
 		registerCmd(list_active_ones, sdcSetName, ioArray, showActivePrjcts);
 		
@@ -685,21 +683,39 @@ public class GTDCLI implements Beholder<String>
 		
 		registerCmd(GTDCLI.view_Notes, ocSetName, ioArray, viewNotes);
 
-		MeatOfCLICmd<String> listMODs = (s)->
+		Supplier<List<String>> listOfMODs = ()->
 		{
-			Map<String, JSONObject> map = new HashMap<>();
+			
+			List<String> modNames = new ArrayList<>();
+			
+			
 			
 			for(String prjctName: knownProjects.keySet())
 			{
 				JSONObject pJSON = knownProjects.get(prjctName);
 				
-				if(isMODProject(pJSON))map.put(prjctName, pJSON);
+				if(isMODProject(pJSON))modNames.add(prjctName);
 			}
 			
-    		String output  = showProjectMapAsTable(map);
-    		    		
-    		System.out.println(output);
-    		return output;
+			return modNames;
+
+		};
+		
+		MeatOfCLICmd<String> listMODs = (s)->
+		{
+			
+			Map<String, JSONObject> map = new HashMap<>();
+    		
+    		List<String>modNames = listOfMODs.get();
+    		
+    		for(String prjctName: modNames)
+    		{
+    			JSONObject pJSON = knownProjects.get(prjctName);
+    			map.put(prjctName, pJSON);
+    		}
+    		
+    		showProjectMapAsTable(map);
+    		return "";
 		};
 		
     	ioArray.clear();
@@ -707,6 +723,44 @@ public class GTDCLI implements Beholder<String>
 	
 		registerCmd(GTDCLI.list_mod_Projects, sdcSetName, ioArray, listMODs);
 		
+		MeatOfCLICmd<String> wakeMOD = (s)->
+		{
+			
+			System.out.println("");
+    		List<String> modPrjcts = listOfMODs.get();
+    		if(modPrjcts.isEmpty())
+    		{
+    			System.out.println(noMODPrjctsStr);
+    			return "";
+    		}
+    		
+    		String prjctName;
+    		if(s.trim().equals(""))prjctName = iss.getAnswerOutOfList(whichOnePhrase, modPrjcts);
+    		else prjctName = s.trim();
+
+			if(modPrjcts.contains(prjctName))
+			{
+				
+				JSONObject pJSON = knownProjects.get(prjctName);
+				knownProjects.remove(prjctName);
+				ds.wakeMODProject(pJSON);
+				knownProjects.put(prjctName, pJSON);
+				
+			}
+			else
+			{
+				System.out.println("No such Project.");
+				return "";
+			}
+			
+			return "";
+		};
+		
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, false, false));
+	
+		registerCmd(GTDCLI.wake_MOD, pmcSetName, ioArray, wakeMOD);
+
 		MeatOfCLICmd<JSONObject> nextStep = (s)->
 		{
 
@@ -964,7 +1018,7 @@ public class GTDCLI implements Beholder<String>
     	return output;
     }
 
-    public String showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, InterfaceNumberException
+    public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, InterfaceNumberException
     {
 		List<String> headers = columnList;
 		List<List<String>> rows = new ArrayList<>();
@@ -990,7 +1044,7 @@ public class GTDCLI implements Beholder<String>
     	
 		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
 		
-		return ttd.toString();
+		System.out.println(ttd.toString());
     }
     
     public static JSONObject getLastStep(JSONObject pJSON)
@@ -1013,7 +1067,7 @@ public class GTDCLI implements Beholder<String>
     	String goal = pJSON.getString(ProjectJSONKeyz.goalKey);
 
     	int stpNr = 0;
-    	if(!status.equals(StatusMGMT.mod))
+    	if(!isMODProject(pJSON))
     	{
     		JSONArray jArray = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
     		stpNr = jArray.length();
@@ -1069,21 +1123,14 @@ public class GTDCLI implements Beholder<String>
     
     private boolean checkStepForDeadlineAbuse(JSONObject pJSON)
     {
-    		
-    	StatusMGMT sm = StatusMGMT.getInstance();
 
-    	String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
-    	Set<String> terminalSet = sm.getStatesOfASet(StatusMGMT.terminalSetName);
-
-    	if(terminalSet.contains(prjctStatus))return false;
+    	if(projectIsTerminated(pJSON))return false;
     	
     	LocalDateTime jetzt = LocalDateTime.now();
 			
 		JSONObject step = getLastStep(pJSON);
-			
-    	String stepStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
 
-    	if(terminalSet.contains(stepStatus))return false;
+    	if(stepIsTerminated(step))return false;
     	
     	String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
     	LocalDateTime stepDLDT = LittleTimeTools.LDTfromTimeString(dldtStr);
@@ -1096,12 +1143,7 @@ public class GTDCLI implements Beholder<String>
     private boolean checkProjectForDeadlineAbuse(JSONObject pJSON)
     {
     		
-    	StatusMGMT sm = StatusMGMT.getInstance();
-
-    	String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
-    	Set<String> terminalSet = sm.getStatesOfASet(StatusMGMT.terminalSetName);
-    		
-    	if(terminalSet.contains(prjctStatus))return false;
+    	if(projectIsTerminated(pJSON))return false;
 
     	LocalDateTime jetzt = LocalDateTime.now();
 
@@ -1116,8 +1158,6 @@ public class GTDCLI implements Beholder<String>
     public void alterProjectAfterDLDTAbuse(JSONObject pJSON, boolean stepDidIt, boolean projectDidIt)
     {
     	
-    	StatusMGMT statusMGMT = StatusMGMT.getInstance();
-    	Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
     	JSONObject step = getLastStep(pJSON);
     	
     	
@@ -1135,13 +1175,12 @@ public class GTDCLI implements Beholder<String>
     	{
     		
         	String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
-        	String stepStatus = step.getString(StepJSONKeyz.statusKey);
         	
     		pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
     		pJSON.put(ProjectJSONKeyz.TDTKey, projectDLDTStr);
     		pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
     		
-    		if(!terminalSet.contains(stepStatus))//if step is not already Terminal alter step status and TDT(Note) too.
+    		if(!stepIsTerminated(step))//if step is not already Terminal alter step status and TDT(Note) too.
     		{
     			
         		step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
@@ -1259,6 +1298,25 @@ public class GTDCLI implements Beholder<String>
     	String status = pJSON.getString(ProjectJSONKeyz.statusKey);
     	
     	return status.equals(StatusMGMT.mod);
+    }
+    
+    private boolean projectIsTerminated(JSONObject pJSON)
+    {
+    	String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+   
+    	Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
+    	
+    	return terminalSet.contains(status);
+    }
+    
+    private boolean stepIsTerminated(JSONObject sJSON)
+    {
+    	
+    	String status = sJSON.getString(StepJSONKeyz.statusKey);
+    	   
+    	Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
+    	
+    	return terminalSet.contains(status);
     }
     
     private void saveProjects() throws JSONException, IOException

@@ -519,15 +519,20 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		LocalDateTime dldt = null;
 				
 		String nddtStr = LittleTimeTools.timeString(nddt);
-		pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 
 		System.out.println("");
 		dldt = iss.getDateTime(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
 		String deadLineStr = LittleTimeTools.timeString(dldt);
-		pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 
 		String goal = pJson.getString(ProjectJSONKeyz.goalKey);
-		if(timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))spawnStep(pJson);//Here status will be overwritten.;
+		if(timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))
+		{
+			
+			pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
+			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
+
+			spawnStep(pJson);//Here status will be overwritten.;
+		}
 		else throw new TimeGoalOfProjectException(prjctTimeOrGoalNotValide);
 	}
 	

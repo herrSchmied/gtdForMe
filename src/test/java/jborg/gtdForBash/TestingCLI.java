@@ -82,6 +82,7 @@ class TestingCLI
 		
 		return data;
 	}
+	
 	public String killStepSequenz(String prjctName)
 	{
 	
@@ -140,6 +141,25 @@ class TestingCLI
 				+ GTDCLI.add_Note + " " + prjctName + '\n'
 				+ noticeTwo + "\n";
 				
+		return data;
+	}
+	
+	public String wakeMODProjectSequenz(String prjctName)
+	{
+		
+		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
+		String changeStepBDT = "No";
+		String chosenFromStatieList = "1";
+		String stepDesc = "All righty let's go!";
+		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
+
+		String data = GTDCLI.wake_MOD + prjctName + '\n'
+					+ prjctDLDTStr
+					+ changeStepBDT + '\n'
+					+ chosenFromStatieList + '\n'
+					+ stepDesc + '\n'
+					+ stepDLDTStr;
+		
 		return data;
 	}
 
@@ -202,6 +222,23 @@ class TestingCLI
 		assert(stepDesc.equals(this.stepDesc));
 	}
 	
+	@Test
+	public void testWakeMOD() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	{
+		String data = modProjectSequenz(wakeProjectName);
+		data = data + wakeMODProjectSequenz(wakeProjectName);
+		data = data + GTDCLI.exit + '\n';
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
+		InputStreamSession iss = new InputStreamSession(bais);
+
+        gtdCli = new GTDCLI(iss);				
+		
+		Set<JSONObject> projects = GTDCLI.loadProjects();
+		
+		JSONObject project = pickProjectByName(wakeProjectName, projects);
+		assert(project!=null);
+	}
 	@Test
 	public void testNewMODProject() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
