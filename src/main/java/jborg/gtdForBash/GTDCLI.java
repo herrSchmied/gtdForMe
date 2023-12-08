@@ -981,9 +981,9 @@ public class GTDCLI implements Beholder<String>
     			clicmd.executeCmd("");
     		}
     	}
-    	catch(CLICMDException | InterfaceNumberException e)
+    	catch(CLICMDException | InterfaceNumberException | IllegalArgumentException e)
     	{
-    		e.printStackTrace();
+    		System.out.println(e);
     	}
     	
     	if(!noMoreLoops)loopForCommands();

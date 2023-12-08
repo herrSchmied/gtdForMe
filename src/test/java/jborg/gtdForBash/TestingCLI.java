@@ -150,14 +150,13 @@ class TestingCLI
 		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
 		String changeStepBDT = "No";
 		String chosenFromStatieList = "1";
-		String stepDesc = "All righty let's go!";
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 
 		String data = GTDCLI.wake_MOD + prjctName + '\n'
 					+ prjctDLDTStr
 					+ changeStepBDT + '\n'
 					+ chosenFromStatieList + '\n'
-					+ stepDesc + '\n'
+					+ stepDesc3 + '\n'
 					+ stepDLDTStr;
 		
 		return data;
@@ -238,7 +237,14 @@ class TestingCLI
 		
 		JSONObject project = pickProjectByName(wakeProjectName, projects);
 		assert(project!=null);
+		
+		String prjctStatus = project.getString(ProjectJSONKeyz.statusKey);
+		assert(!prjctStatus.equals(StatusMGMT.mod));
+		
+		String goal = project.getString(ProjectJSONKeyz.goalKey);
+		assert(goal.equals(modPrjctGoal));
 	}
+
 	@Test
 	public void testNewMODProject() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
