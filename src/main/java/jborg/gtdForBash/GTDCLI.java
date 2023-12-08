@@ -55,6 +55,8 @@ public class GTDCLI implements Beholder<String>
 	
 	private final String sayGoodBye = "Bye!";
 	
+	private final String projectIsNotActive = "Project is not active.";
+	private final String sorryDeadlineAbuse = "Sorry Deadline Abuse.";
 	private final String noPrjctFound = "No Projects found.";
 	private final String unknownCmdStr = "Unknown command!";
 	private final String hereAListOfCmds = "Here a list of Commands.";
@@ -62,11 +64,15 @@ public class GTDCLI implements Beholder<String>
 	private final String thereIsNoDataFolder = "There is no Data Folder";
 	private final String dataFolderCreated = "Data Folder created successfully.";
 	private final String failedToCreateDirectory = "Failed to create the directory.";
-	private final String noActivePrjctsStr = "No active Projects.";
-	private final String noMODPrjctsStr = "No MOD Projects.";
+	private final String noMODProjects = "No MOD Projects.";
+	private final String noActiveProjects = "No active Projects!";
+	private final String noNotActiveProjects = "No not active Projects!";
+	private final String noSuchProject = "No such Project: ";
+	public final String newPrjctStgClsd = "New Project Stage closed.";
+	public final String tdtNoteStpDLDTAbuse = "Step Deadline abuse!";
+	public final String tdtNotePrjctDLDTAbuse = "Project Deadline abuse!";
 	
 	private final String projectStr = "Project";
-	//private final String noPrjctStr = "No Project.";//TODO: I think i will put this to use later...
 	private final String nearestDeadlineStr = "nearest Deadline of Last Steps.";
 	private final String descStr = "Desc";
 	private final String statusStr = "Status";
@@ -82,9 +88,6 @@ public class GTDCLI implements Beholder<String>
 	private final String whichOnePhrase = "Which one?";
 	private final String notesOfWhichPrjctPhrase = "Notes of which Project?";
 
-	
-	private final String chooseMoreWiselyPreFix = "Please choose more wisely. Because '";
-	private final String itsNotOnTheListSuffix = "' is not on the List!";
 	private final String hasNoNotesSuffix = " has no Notes.";
 	
 	private final String nrOfPrjctsStr = "Nr. of Projects: ";
@@ -108,11 +111,7 @@ public class GTDCLI implements Beholder<String>
 
 	public static final String isModProjectQ = "Maybe one Day-Project?(yes) or are we actually try "
 			+ "to do it soon enough?(no): ";
-
-	public final String newPrjctStgClsd = "New Project Stage closed.";
-	public final String tdtNoteStpDLDTAbuse = "Step Deadline abuse!";
-	public final String tdtNotePrjctDLDTAbuse = "Project Deadline abuse!";
-
+	
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
 	
 	/* Remember: No command can be the beginning of another command.
@@ -277,7 +276,7 @@ public class GTDCLI implements Beholder<String>
 			return pJSON;
 		};
 		
-		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false,false,true,false));
+		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
 		
 		registerCmd(new_Project, pmcSetName, ioArray, newProject);
 		
@@ -318,22 +317,21 @@ public class GTDCLI implements Beholder<String>
     		List<String> pList = new ArrayList<>();
     		List<String> dauerList = new ArrayList<>();
     			
-    		for(JSONObject pJSON: knownProjects.values())
+			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
+
+			for(JSONObject pJSON: knownProjects.values())
     		{
     				
     			String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
     				
     			JSONObject lastStep = getLastStep(pJSON);
     				
-    			String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
-    			LocalDateTime ldtDLDT = LittleTimeTools.LDTfromTimeString(dldt);
+    			String stepDLDTStr = lastStep.getString(StepJSONKeyz.DLDTKey);
+    			LocalDateTime stepDLDT = LittleTimeTools.LDTfromTimeString(stepDLDTStr);
     				
-    			String dauer = new ExactPeriode(ldtDLDT, jetzt).toString();
-
-    			
-    			//if("".equals(dauer.trim()))dauer = LittleTimeTools.fullLDTBetweenLDTs(jetzt, ldtDLDT);
+    			String dauer = new ExactPeriode(jetzt, stepDLDT).toString();
     				
-    			long minutes = jetzt.until(ldtDLDT, ChronoUnit.MINUTES);
+    			long minutes = jetzt.until(stepDLDT, ChronoUnit.MINUTES);
     			boolean isNearer = (Math.abs(minutes)<Math.abs(newMinutes));
     			boolean isEqual = Math.abs(minutes)==Math.abs(newMinutes);
     				    				
@@ -385,11 +383,8 @@ public class GTDCLI implements Beholder<String>
 			
 			String output = "";
 			
-			if(knownProjects.isEmpty())
-			{
-				System.out.println(this.noPrjctFound);
-				return "";
-			}
+			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
+
 			for(String name: knownProjects.keySet())output = output + '\n' + name;
 			
 			System.out.println(output);
@@ -405,7 +400,8 @@ public class GTDCLI implements Beholder<String>
 		MeatOfCLICmd<String> listCmds = (s)->
 		{
 			String output = "";
-    		for(String cmds: commands)
+
+			for(String cmds: commands)
     		{
     			output = "\n" + cmds +output;
     		}
@@ -425,6 +421,8 @@ public class GTDCLI implements Beholder<String>
 			
 			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
 			List<List<String>> rows = new ArrayList<>();
+
+			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
 
 			for(JSONObject pJSON: knownProjects.values())
 			{
@@ -459,27 +457,23 @@ public class GTDCLI implements Beholder<String>
 		MeatOfCLICmd<String> projectView = (s)->
 		{
 			
+			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
+
 			String output = "";
 
    			System.out.println("");
     		List<String> names = new ArrayList<>();
     		names.addAll(knownProjects.keySet());
-    		if(names.isEmpty())
-    		{
-    			System.out.println(noPrjctFound);
-    			return "";
-    		}
+
     		
 	    	String prjct;
 	    	if(s.trim().equals(""))prjct=  iss.getAnswerOutOfList(whichOnePhrase, names);
 	    	else prjct = s.trim();
 	    		
-	    	if(knownProjects.keySet().contains(prjct))
-	    	{
-	    		output =showProjectDetail(knownProjects.get(prjct));
-	    		System.out.println(output);
-	    	}
-	    	else System.out.println(chooseMoreWiselyPreFix + prjct + itsNotOnTheListSuffix);
+	    	if(!knownProjects.keySet().contains(prjct))throw new CLICMDException(noSuchProject+prjct);
+
+	    	output =showProjectDetail(knownProjects.get(prjct));
+	    	System.out.println(output);
 
 
 			return output;
@@ -495,6 +489,9 @@ public class GTDCLI implements Beholder<String>
 
     		Map<String, JSONObject> map = new HashMap<>();
     		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
+    		
+    		if(noAPrjcts.isEmpty()) throw new CLICMDException(noNotActiveProjects);
+
     		for(String prjctName: noAPrjcts)
     		{
     			JSONObject pJSON = knownProjects.get(prjctName);
@@ -519,6 +516,8 @@ public class GTDCLI implements Beholder<String>
 			Map<String, JSONObject> map = new HashMap<>();
 			
 			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+			if(aPrjcts.isEmpty())throw new CLICMDException(noActiveProjects);
+			
 			for(String prjctName: aPrjcts)
 			{
 				JSONObject pJSON = knownProjects.get(prjctName);
@@ -538,6 +537,8 @@ public class GTDCLI implements Beholder<String>
 		MeatOfCLICmd<String> stats = (s)->
 		{
 			
+			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
+
 			int nrOfPrjcts = knownProjects.size();
 			int nrOfActivePrjcts = findProjectsByCondition(activeProject).size();
 			int nrOfModPrjcts = 0;
@@ -595,37 +596,27 @@ public class GTDCLI implements Beholder<String>
 			
    			System.out.println("");
 			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-			if(aPrjcts.isEmpty())
-			{
-				System.out.println(noActivePrjctsStr);
-				return new JSONObject();
-			}
+			if(aPrjcts.isEmpty())throw new CLICMDException(noActiveProjects);
 			
 				
 			String pName;
 			if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
 			else pName = s.trim();
 				
-			if(aPrjcts.contains(pName))
-			{
-				JSONObject pJSON = knownProjects.get(pName);
-				boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
-				boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
+			if(!aPrjcts.contains(pName))throw new CLICMDException(noSuchProject + pName);
+
+			JSONObject pJSON = knownProjects.get(pName);
+			boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
+			boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
 				
-				if(stepDidIt||projectDidIt)
-				{
-					System.out.println("Sorry Deadline abuse.");
-					alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
-					return new JSONObject();
-				}
-				ds.addNote(pJSON);
-				return pJSON;
-			}
-			else 
+			if(stepDidIt||projectDidIt)
 			{
-				System.out.println("No such Project.");
+				System.out.println("Sorry Deadline abuse.");
+				alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
 				return new JSONObject();
 			}
+			ds.addNote(pJSON);
+			return pJSON;
 		};
 		
     	ioArray.clear();
@@ -638,43 +629,31 @@ public class GTDCLI implements Beholder<String>
 	    			
 			System.out.println("");
 			
-			if(knownProjects.isEmpty())
-			{
-				System.out.println(this.noPrjctFound);
-				return "";
-			}
+			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
 	    	
 	    	String prjct;
 
 	    	if(s.trim().equals(""))prjct = iss.getAnswerOutOfList(notesOfWhichPrjctPhrase, new ArrayList<String>(knownProjects.keySet()));
 			else prjct = s.trim();
 				
-			if(!knownProjects.keySet().contains(prjct))
-			{
-				System.out.println("No such Project.");
-				return "";
-			}
-				
+			if(!knownProjects.keySet().contains(prjct))throw new CLICMDException(noSuchProject+prjct);
+			
     		JSONObject pJSON = knownProjects.get(prjct);
     			
     		JSONArray noteArr;
     		String output = "";
-    		if(pJSON.has(ProjectJSONKeyz.noteArrayKey))
+    		if(!pJSON.has(ProjectJSONKeyz.noteArrayKey))throw new CLICMDException(projectStr + " " + prjct + hasNoNotesSuffix);
+    		
+    		noteArr = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
+    		int l = noteArr.length();
+    				
+    		for(int n=0;n<l;n++)
     		{
-    			noteArr = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
-    			int l = noteArr.length();
-    				
-    			for(int n=0;n<l;n++)
-    			{
-    				output = output + "--> " + noteArr.get(n);
-    			}
-    				
-    			System.out.println(output);
-    			return output;
+    			output = output + "--> " + noteArr.get(n);
     		}
-    		else System.out.println(projectStr + " " + prjct + hasNoNotesSuffix);
-
-			return "";
+    				
+    		System.out.println(output);
+    		return output;
 		};
 		
     	ioArray.clear();
@@ -706,6 +685,7 @@ public class GTDCLI implements Beholder<String>
 			Map<String, JSONObject> map = new HashMap<>();
     		
     		List<String>modNames = listOfMODs.get();
+    		if(modNames.isEmpty())throw new CLICMDException(noMODProjects);
     		
     		for(String prjctName: modNames)
     		{
@@ -727,30 +707,19 @@ public class GTDCLI implements Beholder<String>
 			
 			System.out.println("");
     		List<String> modPrjcts = listOfMODs.get();
-    		if(modPrjcts.isEmpty())
-    		{
-    			System.out.println(noMODPrjctsStr);
-    			return "";
-    		}
-    		
+    		if(modPrjcts.isEmpty())throw new CLICMDException(noMODProjects);
+   		
     		String prjctName;
     		if(s.trim().equals(""))prjctName = iss.getAnswerOutOfList(whichOnePhrase, modPrjcts);
     		else prjctName = s.trim();
 
-			if(modPrjcts.contains(prjctName))
-			{
+    		
+			if(!modPrjcts.contains(prjctName))throw new CLICMDException("No such Project.");
 				
-				JSONObject pJSON = knownProjects.get(prjctName);
-				knownProjects.remove(prjctName);
-				ds.wakeMODProject(pJSON);
-				knownProjects.put(prjctName, pJSON);
-				
-			}
-			else
-			{
-				System.out.println("No such Project.");
-				return "";
-			}
+			JSONObject pJSON = knownProjects.get(prjctName);
+			knownProjects.remove(prjctName);
+			ds.wakeMODProject(pJSON);
+			knownProjects.put(prjctName, pJSON);
 			
 			return "";
 		};
@@ -765,43 +734,29 @@ public class GTDCLI implements Beholder<String>
 
 			System.out.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    		if(aPrjcts.isEmpty())
-    		{
-    			System.out.println(noActivePrjctsStr);
-    			return new JSONObject();
-    		}
+    		if(aPrjcts.isEmpty())throw new CLICMDException(noActiveProjects);
     		
     		String prjct;
     		if(s.trim().equals(""))prjct = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
     		else prjct = s.trim();
     		
-    		if(!knownProjects.keySet().contains(prjct))
-    		{
-    			System.out.println("No such Project.");
-    			return new JSONObject();
-    		}
-
-    		if(aPrjcts.contains(prjct))
-    		{
-    			JSONObject pJSON = knownProjects.get(prjct);
-				boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
-				boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
+    		if(!knownProjects.keySet().contains(prjct))throw new CLICMDException(noSuchProject);
+    		
+    		if(!aPrjcts.contains(prjct))throw new CLICMDException(projectIsNotActive);
+    		
+    		JSONObject pJSON = knownProjects.get(prjct);
+			boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
+			boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
     			
-    			if(stepDidIt||projectDidIt)
-    			{
-    				System.out.println("Sorry Deadline abuse.");
-					alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
-    				return new JSONObject();
-    			}
- 
-    			ds.spawnStep(pJSON);
-    			return pJSON;
-    		}
-    		else
+    		if(stepDidIt||projectDidIt)
     		{
-    			System.out.println("Project is not active.");
-    			return new JSONObject();
+				alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+				throw new CLICMDException(sorryDeadlineAbuse);
     		}
+ 
+    		ds.spawnStep(pJSON);
+    		return pJSON;
+    		
 		};
 		
     	ioArray.clear();
@@ -814,44 +769,28 @@ public class GTDCLI implements Beholder<String>
 
     		System.out.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    		if(aPrjcts.isEmpty())
-    		{
-    			System.out.println(noActivePrjctsStr);
-    			return new JSONObject();
-    		}
+    		if(aPrjcts.isEmpty())throw new CLICMDException(noActiveProjects);
 
-    			
     		String pName;
     		if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
     		else pName = s.trim();
     			
-    		if(!knownProjects.keySet().contains(pName))
-    		{
-    			System.out.println("No such Project.");
-    			return new JSONObject();
-    		}
+    		if(!knownProjects.keySet().contains(pName))throw new CLICMDException(noSuchProject + pName);
     			
-    		if(aPrjcts.contains(pName))
-    		{
-    			JSONObject pJSON = knownProjects.get(pName);
-        		boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
-        		boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
+    		if(!aPrjcts.contains(pName))throw new CLICMDException(projectIsNotActive);
+    		
+    		JSONObject pJSON = knownProjects.get(pName);
+        	boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
+        	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
 
-        		if(stepDidIt||projectDidIt)
-    			{
-    				System.out.println("Sorry Deadline abuse.");
-					alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
-    				return new JSONObject();
-    			};
+        	if(stepDidIt||projectDidIt)
+        	{
+        		alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+        		throw new CLICMDException(sorryDeadlineAbuse);
+    		}
 
-    			ds.terminateProject(pJSON);
-    			return pJSON;
-    		}
-    		else
-    		{
-    			System.out.println("Project is not active.");
-    			return new JSONObject();
-    		}
+    		ds.terminateProject(pJSON);
+    		return pJSON;
 		};
 		
     	ioArray.clear();
@@ -861,6 +800,7 @@ public class GTDCLI implements Beholder<String>
 		
 		MeatOfCLICmd<JSONObject> killStep = (s)->
 		{
+			
     		System.out.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
 
@@ -868,29 +808,24 @@ public class GTDCLI implements Beholder<String>
     		if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
     		else pName = s.trim();
     			
-    			
-    		if(aPrjcts.contains(pName))
-    		{
-    			JSONObject pJSON = knownProjects.get(pName);
-        		boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
-        		boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
+    		if(!knownProjects.keySet().contains(pName))throw new CLICMDException(noSuchProject+pName);
+    		
+    		if(!aPrjcts.contains(pName))throw new CLICMDException(projectIsNotActive);
+    		
+    		JSONObject pJSON = knownProjects.get(pName);
+        	boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
+        	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
 
-    			if(stepDidIt||projectDidIt)
-    			{
-    				System.out.println("Sorry Deadline abuse.");
-					alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
-    				return new JSONObject();
-    			}
-    			
-    			ds.terminateStep(pJSON);  				
-   
-    			return pJSON;
-    		}
-    		else
+    		if(stepDidIt||projectDidIt)
     		{
-    			System.out.println("Project is not active or doesn't exist.");
-    			return new JSONObject();
+    			
+				alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+    			throw new CLICMDException(sorryDeadlineAbuse);
     		}
+    			
+    		ds.terminateStep(pJSON);  				
+   
+    		return pJSON;
 		};
 
 		ioArray.clear();

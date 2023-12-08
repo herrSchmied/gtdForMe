@@ -9,7 +9,7 @@ import someMath.InterfaceNumberException;
 public interface MeatOfCLICmd <R>
 {
 	
-	public R execute(String s) throws InterfaceNumberException, SpawnProjectException, 
+	public R execute(String s) throws CLICMDException, InterfaceNumberException, SpawnProjectException, 
 	SpawnStepException, ProjectTerminationException, StepTerminationException, IOException,
 	TimeGoalOfProjectException, InputArgumentException;
 }
