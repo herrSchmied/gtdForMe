@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 
-import java.util.InputMismatchException;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import allgemein.LittleTimeTools;
+import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
 
 
@@ -163,7 +163,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testNewPrjct() throws Exception
+	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, InputArgumentException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
 		
 		String data = newProjectSequenz(newPrjctName);
@@ -222,7 +222,7 @@ class TestingCLI
 	}
 	
 	@Test
-	public void testWakeMOD() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testWakeMOD() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
 		String data = modProjectSequenz(wakeProjectName);
 		data = data + wakeMODProjectSequenz(wakeProjectName);
@@ -246,7 +246,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testNewMODProject() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testNewMODProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
 
 		String data = modProjectSequenz(modPrjctName);
@@ -265,7 +265,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testAddNoteToProject() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testAddNoteToProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
 				
 		String data = newProjectSequenz(addNotePrjctName);
@@ -291,7 +291,7 @@ class TestingCLI
 	}
 	
 	@Test
-	public void testKillStep() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testKillStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
 		
 		String data = newProjectSequenz(killStepPrjctName);
@@ -317,7 +317,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testNextStep() throws InputMismatchException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testNextStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
 		
 		String data = newProjectSequenz(appendStpPrjctName);

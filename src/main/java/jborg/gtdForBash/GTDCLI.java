@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.InputMismatchException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.HashMap;
@@ -38,7 +37,7 @@ import allgemein.LittleTimeTools;
 
 
 import consoleTools.BashSigns;
-
+import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
 
 import consoleTools.TerminalTableDisplay;
@@ -208,7 +207,7 @@ public class GTDCLI implements Beholder<String>
 
 	private final InputStreamSession iss;
 		
-    public GTDCLI(InputStreamSession iss) throws IOException, URISyntaxException, InputMismatchException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    public GTDCLI(InputStreamSession iss) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
 	{
     	
     	this.iss = iss;
@@ -245,7 +244,7 @@ public class GTDCLI implements Beholder<String>
 		}
 	}
     
-    private void boot() throws IOException, URISyntaxException, InputMismatchException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    private void boot() throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
     {
     	
     	initComands();
@@ -940,12 +939,12 @@ public class GTDCLI implements Beholder<String>
     	System.out.println("Time: " + time + '\n');
     }
     
-    public static void main(String... args) throws IOException, URISyntaxException, InputMismatchException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    public static void main(String... args) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
     
-    public void loopForCommands() throws InputMismatchException, IOException, JSONException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    public void loopForCommands() throws InputArgumentException, IOException, JSONException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
     {
     	
     	String px = BashSigns.boldBBCPX;
@@ -1095,7 +1094,7 @@ public class GTDCLI implements Beholder<String>
     	return output;
     }
     
-	public void nxtStp(JSONObject pJSON) throws InputMismatchException, SpawnStepException, IOException
+	public void nxtStp(JSONObject pJSON) throws InputArgumentException, SpawnStepException, IOException
     {
     	ds.spawnStep(pJSON);
     }

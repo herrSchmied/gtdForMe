@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.InputMismatchException;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -176,7 +175,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		this.iss = iss;
 	}
 	
-	public JSONObject spawnMODProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, IOException 
+	public JSONObject spawnMODProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, InputArgumentException, IOException 
 	{
 
 		System.out.println("");
@@ -221,7 +220,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 
 	}
 	
-	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, TimeGoalOfProjectException, InputMismatchException, SpawnStepException, IOException
+	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, TimeGoalOfProjectException, InputArgumentException, SpawnStepException, IOException
 	{
 		
 		System.out.println("");
@@ -275,7 +274,8 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		else throw new TimeGoalOfProjectException(prjctTimeOrGoalInvalidMsg);
 	}
 	
-	private boolean timeAndGoalOfActiveProjectIsValide(LocalDateTime nddt, LocalDateTime bdt, LocalDateTime dldt, String goal)
+	private boolean timeAndGoalOfActiveProjectIsValide(LocalDateTime nddt, LocalDateTime bdt, 
+			LocalDateTime dldt, String goal)
 	{
 		
 		if(dldt==null)
@@ -307,7 +307,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		return true;
 	};
 
-	public void spawnStep(JSONObject pJson) throws SpawnStepException, InputMismatchException, IOException
+	public void spawnStep(JSONObject pJson) throws SpawnStepException, InputArgumentException, IOException
 	{
 
 
@@ -511,7 +511,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		}
 	}
 	
-	public void wakeMODProject(JSONObject pJson) throws IOException, InputMismatchException, SpawnStepException, TimeGoalOfProjectException
+	public void wakeMODProject(JSONObject pJson) throws IOException, InputArgumentException, SpawnStepException, TimeGoalOfProjectException
 	{
 		
 		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(pJson.getString(ProjectJSONKeyz.BDTKey));
@@ -549,7 +549,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		return false;
 	}
 
-	public void terminateStep(JSONObject pJson) throws IOException, StepTerminationException
+	public void terminateStep(JSONObject pJson) throws IOException, InputArgumentException, StepTerminationException
 	{
 
 		JSONObject sJson = getLastStepOfProject(pJson);
@@ -605,7 +605,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		return false;
 	}
 	
-	public void terminateProject(JSONObject pJson) throws InputMismatchException, JSONException, IOException, ProjectTerminationException
+	public void terminateProject(JSONObject pJson) throws InputArgumentException, JSONException, IOException, ProjectTerminationException
 	{
 		
 		if(projectIsAlreadyTerminated(pJson)) throw new ProjectTerminationException(prjctTExcAllreadyDeadMsg);
