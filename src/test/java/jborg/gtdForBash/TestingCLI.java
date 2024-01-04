@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
-
+import java.time.Month;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -359,14 +359,38 @@ class TestingCLI
 	
 	public String translateTimeToAnswerString(LocalDateTime ldt)
 	{
-		
-		int hour = ldt.getHour();
-		int minute = ldt.getMinute();
-		int year = ldt.getYear();
-		int month = ldt.getMonthValue();
 		int day = ldt.getDayOfMonth();
+		String dayStr = "" + day;
+		if(day<10) dayStr = "0" + day;
 		
-		return hour + "\n" + minute +"\n" + year + "\n" + month + "\n" + day +"\n";
+		int month = ldt.getMonthValue();
+		Month m = Month.of(month);
+		String monthStr = "";
+		for(String s: InputStreamSession.monthMap.keySet())
+		{
+			Month d = InputStreamSession.monthMap.get(s);
+			if(m.equals(d))
+			{
+				monthStr = s;
+				break;
+			}
+		}
+
+		int hour = ldt.getHour();
+		String hourStr = ""+hour;
+		if(hour<10) hourStr = "0" + hour;
+		
+		int year = ldt.getYear();
+		String yearStr = year+"";
+		if(yearStr.length()==3)yearStr = "0" + yearStr;
+		if(yearStr.length()==2)yearStr = "00" + yearStr;
+		if(yearStr.length()==1)yearStr = "000" + yearStr;
+
+		int minute = ldt.getMinute();
+		String minStr = "" + minute;
+		if(minute<10) minStr = "0" + minute;
+		
+		return dayStr + monthStr + year + "T" + hourStr + ":" + minStr +"\n";
 
 	}
 	

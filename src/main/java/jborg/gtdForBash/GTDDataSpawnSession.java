@@ -200,7 +200,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		if(changeBDT)
 		{
 			System.out.println("");
-			bdt = iss.getDateTime(bdtQ, ancient, jetzt);//must be born before now.
+			bdt = iss.getDateTimeInOneLine(bdtQ, ancient, jetzt);//must be born before now.
 		}
 		else bdt = nddt;
 				
@@ -244,7 +244,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		if(changeBDT)
 		{
 			System.out.println("");
-			bdt = iss.getDateTime(bdtQ, ancient, LocalDateTime.now());//must be born before now.
+			bdt = iss.getDateTimeInOneLine(bdtQ, ancient, LocalDateTime.now());//must be born before now.
 		}
 		else bdt = nddt;
 				
@@ -262,7 +262,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 
 		System.out.println("");
 		System.out.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
-		dldt = iss.getDateTime(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+		dldt = iss.getDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
 		String deadLineStr = LittleTimeTools.timeString(dldt);
 		pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 
@@ -344,8 +344,12 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		System.out.println("");
 		differentBDT = iss.getYesOrNo(wantToChangeBDTOfStepQstn);
 		System.out.println("");
-		System.out.println(stepBDTMsgPrefix + bdtOfPrj + stepBDTMsgMid + jetzt + stepBDTMsgSuffix);
-		if(differentBDT)bdtOfStep = iss.getDateTime(stepDateTimeQstn, ldtBDTOfPrj, LocalDateTime.now());
+		
+		if(differentBDT)
+		{
+			System.out.println(stepBDTMsgPrefix + bdtOfPrj + stepBDTMsgMid + jetzt + stepBDTMsgSuffix);
+			bdtOfStep = iss.getDateTimeInOneLine(stepDateTimeQstn, ldtBDTOfPrj, LocalDateTime.now());
+		}
 		else bdtOfStep = nddtOfStep;
 			
 		List<String> sss = new ArrayList<>();
@@ -368,7 +372,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		if(index==firstStepIndex-1)
 		{
 			System.out.println(stpDLDTHintPrefix + prjctNDDT + stpDLDTHintMid  + prjctDeadLine);
-			LocalDateTime deadLineLDT = iss.getDateTime(stpDeadlinePleasePhrase, ldtNDDTOfPrjct, prjctDLDTYear);
+			LocalDateTime deadLineLDT = iss.getDateTimeInOneLine(stpDeadlinePleasePhrase, ldtNDDTOfPrjct, prjctDLDTYear);
 			deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 		}
 		else
@@ -377,7 +381,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
 			System.out.println(extrStpDLDTHintPrefix + oldStepTDT + extrStpDLDTHintMid + prjctDeadLine);
 			LocalDateTime ldtOldStepTDT = LittleTimeTools.LDTfromTimeString(oldStepTDT);
-			LocalDateTime deadLineLDT = iss.getDateTime(stpDeadlinePleasePhrase, ldtOldStepTDT, prjctDLDTYear);
+			LocalDateTime deadLineLDT = iss.getDateTimeInOneLine(stpDeadlinePleasePhrase, ldtOldStepTDT, prjctDLDTYear);
 			deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 		}
 			
@@ -521,7 +525,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		String nddtStr = LittleTimeTools.timeString(nddt);
 
 		System.out.println("");
-		dldt = iss.getDateTime(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+		dldt = iss.getDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
 		String deadLineStr = LittleTimeTools.timeString(dldt);
 
 		String goal = pJson.getString(ProjectJSONKeyz.goalKey);
@@ -579,7 +583,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			if(wantToChangeTDTOfStep)
 			{
 				System.out.println(stpTDTHintPrefix + nddtOfStepStr + stpTDTHintMid + jetztStr);
-				tdt = iss.getDateTime(stepWhenTDTQstn, nddtOfStep, jetzt);
+				tdt = iss.getDateTimeInOneLine(stepWhenTDTQstn, nddtOfStep, jetzt);
 			}
 			
 			sJson.put(StepJSONKeyz.statusKey, stepStatus);
@@ -628,7 +632,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 				
 		boolean wantChangeTDTQuestion = iss.getYesOrNo(wantToChangeTDTOfPrjctQstn);
 		LocalDateTime tdt = jetzt;
-		if(wantChangeTDTQuestion)tdt = iss.getDateTime(prjctWhenTDTQstn,ancient, jetzt);
+		if(wantChangeTDTQuestion)tdt = iss.getDateTimeInOneLine(prjctWhenTDTQstn,ancient, jetzt);
 
 		String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
 		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
