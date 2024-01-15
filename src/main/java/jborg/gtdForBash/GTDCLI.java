@@ -139,6 +139,7 @@ public class GTDCLI implements Beholder<String>
 	public static final String add_Note = "add note";
 	public static final String view_Notes = "show notes";
 	public static final String successes = "successes";
+	public static final String fails = "fails";
 	
 	private final Set<String> commands = new HashSet<>();
 
@@ -870,7 +871,32 @@ public class GTDCLI implements Beholder<String>
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 	
 		registerCmd(GTDCLI.successes, sdcSetName, ioArray, successes);
-    }
+
+		MeatOfCLICmd<String> fails = (s)->
+		{
+    		Map<String, JSONObject> map = new HashMap<>();
+    		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
+    		
+    		if(noAPrjcts.isEmpty()) throw new CLICMDException(noNotActiveProjects);
+
+    		for(String prjctName: noAPrjcts)
+    		{
+    			JSONObject pJSON = knownProjects.get(prjctName);
+    			if(pJSON.getString(ProjectJSONKeyz.statusKey).equals(StatusMGMT.failed))
+    				map.put(prjctName, pJSON);
+    		}
+    		
+    		showProjectMapAsTable(map);
+    		
+    		return "";
+		};
+
+    	ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
+	
+		registerCmd(GTDCLI.fails, sdcSetName, ioArray, fails);
+	}
+    
 
 	/** @param ioArray index 0 = mustHaveArgument	*
 	 *  @param ioArray index 1 = canHaveArgument	*
