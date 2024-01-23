@@ -418,43 +418,6 @@ public class GTDCLI implements Beholder<String>
 
 		registerCmd(list_commands, sdcSetName, ioArray, listCmds);
 		
-		MeatOfCLICmd<String> lastSteps = (s)->
-		{
-			
-			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
-			List<List<String>> rows = new ArrayList<>();
-
-			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
-
-			for(JSONObject pJSON: knownProjects.values())
-			{
-				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
-				
-				JSONObject lastStep = getLastStep(pJSON);
-				String desc = lastStep.getString(StepJSONKeyz.descKey);
-				String status = lastStep.getString(StepJSONKeyz.statusKey);
-				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
-				
-				List<String> row = new ArrayList<>();
-				row.add(prjctName);
-				row.add(desc);
-				row.add(status);
-				row.add(dldt);
-				
-				rows.add(row);
-			}
-			
-			
-			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 12);
-			System.out.println(ttd);
-			
-			return ttd.toString();
-		};
-
-		ioArray.clear();
-		ioArray.addAll(Arrays.asList(false, true, true, false));
-		
-		registerCmd(view_last_steps_of_Projects, sdcSetName, ioArray, lastSteps);
 		
 		MeatOfCLICmd<String> projectView = (s)->
 		{
@@ -535,6 +498,50 @@ public class GTDCLI implements Beholder<String>
 		ioArray.addAll(Arrays.asList(false, false, false, false));
 		
 		registerCmd(list_active_ones, sdcSetName, ioArray, showActivePrjcts);
+		
+		MeatOfCLICmd<String> lastSteps = (s)->
+		{
+			
+			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
+			List<List<String>> rows = new ArrayList<>();
+
+			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+			if(aPrjcts.isEmpty())
+			{
+				System.out.println("No active Projects.");
+				return "";
+			}
+			
+			for(String prjctName: aPrjcts)
+			{
+				
+				JSONObject pJSON = knownProjects.get(prjctName);
+				
+				JSONObject lastStep = getLastStep(pJSON);
+				String desc = lastStep.getString(StepJSONKeyz.descKey);
+				String status = lastStep.getString(StepJSONKeyz.statusKey);
+				String dldt = lastStep.getString(StepJSONKeyz.DLDTKey);
+				
+				List<String> row = new ArrayList<>();
+				row.add(prjctName);
+				row.add(desc);
+				row.add(status);
+				row.add(dldt);
+				
+				rows.add(row);
+			}
+			
+			
+			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 12);
+			System.out.println(ttd);
+			
+			return ttd.toString();
+		};
+
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, true, true, false));
+		
+		registerCmd(view_last_steps_of_Projects, sdcSetName, ioArray, lastSteps);
 		
 		MeatOfCLICmd<String> stats = (s)->
 		{
