@@ -53,7 +53,7 @@ public class GTDCLI implements Beholder<String>
 	private final String statesFileName = "statusMGMT.states";
 	private final StatusMGMT states = loadStates();
 	
-	
+	private final List<String> history = new ArrayList<>();
 	
 	private static final String projectDataFolderRelativePath = "projectDATA/";
 	
@@ -139,7 +139,6 @@ public class GTDCLI implements Beholder<String>
 	        if (directory.mkdir())
 	        {
 	            System.out.println(dataFolderCreated);
-	        	initComands();
 	        	
 	    		Set<JSONObject> prjctSet = loadProjects();
 	    		for(JSONObject json: prjctSet)
@@ -166,12 +165,7 @@ public class GTDCLI implements Beholder<String>
 	        }
 		}		
 	}
-    
-    private void boot() throws IOException, URISyntaxException, NaturalNumberException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
-    {
-    	
-    }
-        
+         
     public void greetings() throws IOException
     {
     	LocalDateTime inTheMoment = LocalDateTime.now();
@@ -364,11 +358,6 @@ public class GTDCLI implements Beholder<String>
 	public Map<String, JSONObject> getProjectMap()
 	{
 		return knownProjects;
-	}
-
-    private void initComands()
-    {
-
 	}
   
     public InputStreamSession getInputStreamSession()
