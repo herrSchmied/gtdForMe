@@ -42,7 +42,7 @@ import consoleTools.InputStreamSession;
 
 import consoleTools.TerminalTableDisplay;
 /* */
-import someMath.InterfaceNumberException;
+import someMath.NaturalNumberException;
 
 import static fileShortCuts.TextAndObjSaveAndLoad.*;
 
@@ -208,7 +208,7 @@ public class GTDCLI implements Beholder<String>
 
 	private final InputStreamSession iss;
 		
-    public GTDCLI(InputStreamSession iss) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    public GTDCLI(InputStreamSession iss) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
 	{
     	
     	this.iss = iss;
@@ -245,7 +245,7 @@ public class GTDCLI implements Beholder<String>
 		}
 	}
     
-    private void boot() throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    private void boot() throws IOException, URISyntaxException, NaturalNumberException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
     {
     	
     	initComands();
@@ -931,12 +931,12 @@ public class GTDCLI implements Beholder<String>
     	System.out.println("Time: " + time + '\n');
     }
     
-    public static void main(String... args) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    public static void main(String... args) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
     
-    public void loopForCommands() throws InputArgumentException, IOException, JSONException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    public void loopForCommands() throws NaturalNumberException, InputArgumentException, IOException, JSONException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
     {
     	
     	String px = BashSigns.boldBBCPX;
@@ -972,7 +972,7 @@ public class GTDCLI implements Beholder<String>
     			clicmd.executeCmd("");
     		}
     	}
-    	catch(CLICMDException | InterfaceNumberException | InputArgumentException e)
+    	catch(CLICMDException | InputArgumentException e)
     	{
     		System.out.println(e);
     	}
@@ -1009,7 +1009,7 @@ public class GTDCLI implements Beholder<String>
     	return output;
     }
 
-    public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, InterfaceNumberException
+    public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, NaturalNumberException
     {
 		List<String> headers = columnList;
 		List<List<String>> rows = new ArrayList<>();
@@ -1124,6 +1124,8 @@ public class GTDCLI implements Beholder<String>
     	if(stepIsTerminated(step))return false;
     	
     	String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
+    	if(dldtStr.equals(GTDDataSpawnSession.stepDeadlineNone))return false;
+    	
     	LocalDateTime stepDLDT = LittleTimeTools.LDTfromTimeString(dldtStr);
     			
     	if(stepDLDT.isBefore(jetzt)) return true;//Is Step DLDT abused?
@@ -1139,6 +1141,8 @@ public class GTDCLI implements Beholder<String>
     	LocalDateTime jetzt = LocalDateTime.now();
 
     	String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
+    	if(projectDLDTStr.equals(GTDDataSpawnSession.prjctDeadlineNone))return false;
+    	
     	LocalDateTime projectDLDT = LittleTimeTools.LDTfromTimeString(projectDLDTStr);
 
     	if(projectDLDT.isBefore(jetzt)) return true;//Is Project DLDT abused?

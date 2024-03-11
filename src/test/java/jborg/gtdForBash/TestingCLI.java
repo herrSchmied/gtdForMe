@@ -4,9 +4,12 @@ package jborg.gtdForBash;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+
 import java.net.URISyntaxException;
+
 import java.time.LocalDateTime;
 import java.time.Month;
+
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -17,8 +20,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import allgemein.LittleTimeTools;
+
 import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
+
+import someMath.NaturalNumberException;
 
 
 class TestingCLI
@@ -40,6 +46,8 @@ class TestingCLI
 	
 	String newPrjctName = "Project_Nuovo";
 	String newPrjctGoal = "Testing this here";
+	
+	String newPrjctNoDLDT = "No_DLDT_Project";
 	
 	String stepDesc = "Hello Bello GoodBye!";
 	String stepDesc2 = "Grrrl";
@@ -72,12 +80,14 @@ class TestingCLI
 
 		String changeStepBDT = "No";
 		String chosenFromStatieList = "1";//ATBD
+		String dldtQuestion = "yes";
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 
 		String data = GTDCLI.next_Step + " " + prjctName + '\n'
 				+ changeStepBDT + '\n'
 				+ chosenFromStatieList + '\n'
 				+ stepDesc2 + '\n'
+				+ dldtQuestion + '\n'
 				+ stepDLDTStr;
 		
 		return data;
@@ -102,6 +112,7 @@ class TestingCLI
 	{
 		
 		String changePrjctBDT = "No";
+		String dldtQuestion = "yes";
 		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
 		String changeStepBDT = "No";
 		String chosenFromStatieList = "1";//ATBD
@@ -111,11 +122,34 @@ class TestingCLI
 				+ prjctName + '\n'
 				+ newPrjctGoal + '\n'
 				+ changePrjctBDT + '\n'
+				+ dldtQuestion + '\n'
 				+ prjctDLDTStr
 				+ changeStepBDT + '\n'
 				+ chosenFromStatieList + '\n'
 				+ stepDesc + '\n'
+				+ dldtQuestion + '\n'
 				+ stepDLDTStr;
+				
+		return data;
+	}
+
+	public String newProjectSequenzNoDLDT(String prjctName)
+	{
+		
+		String changePrjctBDT = "No";
+		String dldtQuestion = "no";
+		String changeStepBDT = "No";
+		String chosenFromStatieList = "1";//ATBD
+		
+		String data = GTDCLI.new_Project + '\n'
+				+ prjctName + '\n'
+				+ newPrjctGoal + '\n'
+				+ changePrjctBDT + '\n'
+				+ dldtQuestion + '\n'
+				+ changeStepBDT + '\n'
+				+ chosenFromStatieList + '\n'
+				+ stepDesc + '\n'
+				+ dldtQuestion + '\n';
 				
 		return data;
 	}
@@ -150,20 +184,23 @@ class TestingCLI
 		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
 		String changeStepBDT = "No";
 		String chosenFromStatieList = "1";
+		String dldtQuestion = "yes";
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 
 		String data = GTDCLI.wake_MOD + prjctName + '\n'
+					+ dldtQuestion + '\n'
 					+ prjctDLDTStr
 					+ changeStepBDT + '\n'
 					+ chosenFromStatieList + '\n'
 					+ stepDesc3 + '\n'
+					+ dldtQuestion + '\n'
 					+ stepDLDTStr;
 		
 		return data;
 	}
 
 	@Test
-	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, InputArgumentException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, InputArgumentException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		
 		String data = newProjectSequenz(newPrjctName);
@@ -222,7 +259,7 @@ class TestingCLI
 	}
 	
 	@Test
-	public void testWakeMOD() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testWakeMOD() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		String data = modProjectSequenz(wakeProjectName);
 		data = data + wakeMODProjectSequenz(wakeProjectName);
@@ -246,7 +283,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testNewMODProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testNewMODProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
 	{
 
 		String data = modProjectSequenz(modPrjctName);
@@ -265,7 +302,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testAddNoteToProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testAddNoteToProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
 	{
 				
 		String data = newProjectSequenz(addNotePrjctName);
@@ -291,7 +328,7 @@ class TestingCLI
 	}
 	
 	@Test
-	public void testKillStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testKillStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		
 		String data = newProjectSequenz(killStepPrjctName);
@@ -317,7 +354,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testNextStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+	public void testNextStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		
 		String data = newProjectSequenz(appendStpPrjctName);
@@ -355,6 +392,62 @@ class TestingCLI
 		JSONObject step1 = steps.getJSONObject(0);
 		String desc0 = step1.getString(StepJSONKeyz.descKey);
 		assert(desc0.equals(stepDesc));
+	}
+	
+	@Test
+	public void testNewProjectWithoutDeadline() throws JSONException, IOException, URISyntaxException, InputArgumentException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+	{
+		
+		String data = newProjectSequenzNoDLDT(newPrjctNoDLDT);
+		data = data + GTDCLI.exit + '\n';
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
+		InputStreamSession iss = new InputStreamSession(bais);
+
+        gtdCli = new GTDCLI(iss);				
+		
+		Set<JSONObject> projects = GTDCLI.loadProjects();
+		
+		JSONObject newProject = pickProjectByName(newPrjctNoDLDT, projects);
+		assert(newProject!=null);
+		
+		assert(newProject.has(ProjectJSONKeyz.statusKey));
+		String status = newProject.getString(ProjectJSONKeyz.statusKey);
+		assert(status.equals(StatusMGMT.atbd));
+		
+		assert(newProject.has(ProjectJSONKeyz.BDTKey));
+		String bdtStr = newProject.getString(ProjectJSONKeyz.BDTKey);
+		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
+		assert(jetzt.minusSeconds(4).isBefore(bdt));//bdt not older than 4 seconds!
+		
+		assert(newProject.has(ProjectJSONKeyz.NDDTKey));
+		String nddtStr = newProject.getString(ProjectJSONKeyz.NDDTKey);
+		LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
+		assert(jetzt.minusSeconds(4).isBefore(nddt));//nddt ist nicht älter als 4 Sekunden.
+		
+		assert(newProject.has(ProjectJSONKeyz.DLDTKey));
+		assert(GTDDataSpawnSession.prjctDeadlineNone.equals(newProject.getString(ProjectJSONKeyz.DLDTKey)));
+		
+		assert(newProject.has(ProjectJSONKeyz.stepArrayKey));
+		JSONArray stpArr = newProject.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+		JSONObject step = stpArr.getJSONObject(0);
+		
+		bdtStr = step.getString(StepJSONKeyz.BDTKey);
+		bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
+		assert(jetzt.minusSeconds(5).isBefore(bdt));//bdt not older than 5 seconds!
+		
+		nddtStr = step.getString(StepJSONKeyz.NDDTKey);
+		nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
+		assert(jetzt.minusSeconds(5).isBefore(nddt));//nddt ist nicht älter als 5 Sekunden.
+		
+		assert(step.has(StepJSONKeyz.DLDTKey));
+		assert(GTDDataSpawnSession.stepDeadlineNone.equals(step.getString(StepJSONKeyz.DLDTKey)));
+
+		String goal = newProject.getString(ProjectJSONKeyz.goalKey);
+		assert(goal.equals(newPrjctGoal));
+		
+		String stepDesc = step.getString(StepJSONKeyz.descKey);
+		assert(stepDesc.equals(this.stepDesc));
 	}
 	
 	public String translateTimeToAnswerString(LocalDateTime ldt)

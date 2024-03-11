@@ -17,6 +17,7 @@ public class StatusMGMT implements Serializable
 	public static final String atStartSetName = "starterSet";
 	public static final String onTheWaySetName = "onTheWay";
 	
+	public static final String asap = "As soon as possible";
 	public static final String atbd = "About_to_be_Done!";
 	public static final String mod = "Maybe_One_Day?";
 	public static final String success = "Done!_successfully.";
@@ -56,6 +57,7 @@ public class StatusMGMT implements Serializable
 		addState(atStartSetName, atbd, true, true);
 		addState(atStartSetName, mod, true, false);//is not a Step Status.
 		addState(atStartSetName, waiting, true, true);
+		addState(atStartSetName, asap, true, true);
 		
 		Set<String> onTheWaySet = new HashSet<>();
 		addNewStateSet(onTheWaySetName, onTheWaySet);
@@ -64,6 +66,7 @@ public class StatusMGMT implements Serializable
 		addState(onTheWaySetName, mod, true, false);//is not a Step Status.
 		addState(onTheWaySetName, waiting, true, true);
 		addState(onTheWaySetName, needsNewStep, true, false);
+		addState(onTheWaySetName, asap, true, true);
 	}
 
 	/*

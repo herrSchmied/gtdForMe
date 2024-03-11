@@ -33,6 +33,9 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	
 	public static final String time = "Time";
 
+	public static final String prjctDeadlineQuestion = "Project got Deadline?";
+	public static final String prjctDeadlineNone = "No got no Deadline!";
+	
 	public static final String prjctTimeOrGoalNotValide = "Time and/or Goal of Project not valide.";
 	public static final String prjctDLDTHintPrefix = "Project Deadline. Min.: ";
 	public static final String prjctDLDTHintMid = " Minutes in Future. Max.: ";
@@ -65,12 +68,15 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	public static final String goalQ = "Goal of Project: ";
 	public static final String changeBDTQ = "Want to change Birthdatetime of Project? ";
 	public static final String bdtQ = "BDT of Project:";
+	
+	public static final int maxDLDTYear = 2020;
 	public static final int minBDTYear = 1800;
 	public static final int minMonth = 1;
 	public static final int minDay = 1;
 	public static final int minHour = 0;
 	public static final int minMinute = 0;
 	public static final LocalDateTime ancient = LocalDateTime.of(minBDTYear, minMonth, minDay, minHour, minMinute);
+	public static final LocalDateTime farInFuture = LocalDateTime.of(maxDLDTYear, minMonth, minDay, minHour, minMinute);
 
 	public static final String dldtQ = "Deadline for Project?";
 	public static final int dldtRange = 100;
@@ -82,6 +88,9 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	
 	public static final String btnTxtChangeBDT = "Change BDT";
 	public static final String changingBDTInputPhrase = "Determining BDT";
+	
+	public final static String stepDeadlineQuestion = "Step got Deadline?";
+	public final static String stepDeadlineNone = "No Step Deadline!";
 	
 	public final static String stepWhenTDTQstn = "When took the Termination of this Step place?";
 	public static final String stepDescPhrase = "Describe Step:";
@@ -251,20 +260,26 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		pJson.put(ProjectJSONKeyz.nameKey, name);
 		pJson.put(ProjectJSONKeyz.goalKey, goal);
 		pJson.put(ProjectJSONKeyz.statusKey, status);
-			
+
 		pJson.put(ProjectJSONKeyz.DLDTKey, deadLineUnknownStr);
-				
+
 		String bdtStr = LittleTimeTools.timeString(bdt);
 		pJson.put(ProjectJSONKeyz.BDTKey, bdtStr);
 			
 		String nddtStr = LittleTimeTools.timeString(nddt);
 		pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 
-		System.out.println("");
-		System.out.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
-		dldt = iss.getDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
-		String deadLineStr = LittleTimeTools.timeString(dldt);
-		pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
+		boolean gotDLDT = iss.getYesOrNo(prjctDeadlineQuestion);
+		
+		if(gotDLDT)
+		{
+			System.out.println("");
+			System.out.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
+			dldt = iss.getDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+			String deadLineStr = LittleTimeTools.timeString(dldt);
+			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
+		}
+		else pJson.put(ProjectJSONKeyz.DLDTKey, prjctDeadlineNone);
 
 		if(timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))
 		{
@@ -277,12 +292,6 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	private boolean timeAndGoalOfActiveProjectIsValide(LocalDateTime nddt, LocalDateTime bdt, 
 			LocalDateTime dldt, String goal)
 	{
-		
-		if(dldt==null)
-		{
-			System.out.println(prjctNotValide[indexOfPrjctNeedsDLDT]);
-			return false;
-		}
 		
 		if(dldt!=null&&bdt.isAfter(dldt))//Maybe it is mod Project!!!
 		{
@@ -305,7 +314,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		}
 		
 		return true;
-	};
+	}
 
 	public void spawnStep(JSONObject pJson) throws SpawnStepException, InputArgumentException, IOException
 	{
@@ -368,23 +377,37 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		
 		String prjctDeadLine = pJson.getString(ProjectJSONKeyz.DLDTKey);
 		String deadLineStr = "";
-		LocalDateTime prjctDLDTYear = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
-		if(index==firstStepIndex-1)
+		
+		LocalDateTime prjctDLDTYear;
+		if(!prjctDeadLine.equals(prjctDeadlineNone))prjctDLDTYear = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
+		else prjctDLDTYear = farInFuture;
+		
+		boolean gotDeadline = iss.getYesOrNo(stepDeadlineQuestion);
+		
+		if(gotDeadline)
 		{
-			System.out.println(stpDLDTHintPrefix + prjctNDDT + stpDLDTHintMid  + prjctDeadLine);
-			LocalDateTime deadLineLDT = iss.getDateTimeInOneLine(stpDeadlinePleasePhrase, ldtNDDTOfPrjct, prjctDLDTYear);
-			deadLineStr = LittleTimeTools.timeString(deadLineLDT);
+			if(index==firstStepIndex-1)
+			{
+				System.out.println(stpDLDTHintPrefix + prjctNDDT + stpDLDTHintMid  + prjctDeadLine);
+				LocalDateTime deadLineLDT = iss.getDateTimeInOneLine(stpDeadlinePleasePhrase, ldtNDDTOfPrjct, prjctDLDTYear);
+				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
+			}
+			else
+			{
+				System.out.println("");
+				String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
+				System.out.println(extrStpDLDTHintPrefix + oldStepTDT + extrStpDLDTHintMid + prjctDeadLine);
+				LocalDateTime ldtOldStepTDT = LittleTimeTools.LDTfromTimeString(oldStepTDT);
+				LocalDateTime deadLineLDT = iss.getDateTimeInOneLine(stpDeadlinePleasePhrase, ldtOldStepTDT, prjctDLDTYear);
+				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
+			}
 		}
-		else
-		{
-			System.out.println("");
-			String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
-			System.out.println(extrStpDLDTHintPrefix + oldStepTDT + extrStpDLDTHintMid + prjctDeadLine);
-			LocalDateTime ldtOldStepTDT = LittleTimeTools.LDTfromTimeString(oldStepTDT);
-			LocalDateTime deadLineLDT = iss.getDateTimeInOneLine(stpDeadlinePleasePhrase, ldtOldStepTDT, prjctDLDTYear);
-			deadLineStr = LittleTimeTools.timeString(deadLineLDT);
+		else 
+		{	
+			if(!prjctDeadLine.equals(prjctDeadlineNone))deadLineStr = prjctDeadLine;
+			else deadLineStr = stepDeadlineNone;
 		}
-			
+		
 		newStep.put(StepJSONKeyz.DLDTKey, deadLineStr);
 		newStep.put(StepJSONKeyz.statusKey, stepStatus);
 		newStep.put(StepJSONKeyz.descKey, descriptionOfStep);
@@ -444,6 +467,8 @@ public class GTDDataSpawnSession implements Subjekt<String>
 
 			
 		String prjctDLStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
+		if(prjctDLStr.equals(prjctDeadlineNone))return stepIsNotViolatingTimeframeOfProjectMsg;
+
 		LocalDateTime prjctDeadLine = LittleTimeTools.LDTfromTimeString(prjctDLStr);
 
 		String dldtOfStepStr = step.getString(StepJSONKeyz.DLDTKey);
@@ -470,8 +495,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	
 	public String stepIsOkToItsSelf(JSONObject step)
 	{
-		
-		
+
 		//stepIsNotOkayToitSelfMsgSet
 		String bdtOfStepStr = step.getString(StepJSONKeyz.BDTKey);
 		LocalDateTime bdtOfStep = LittleTimeTools.LDTfromTimeString(bdtOfStepStr);
@@ -486,15 +510,19 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		if(desc.equals(""))return stepIsNotOkayToItSelfMsgList.get(indexOfStpHasNoDesc);
 
 		LocalDateTime born = LittleTimeTools.LDTfromTimeString(bdtStr);
-			
-		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(deadLineStr);
-			
+		
 		LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
 		
-		if(dldt.isBefore(born)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpDLDTBeforeBDT);
 		if(nddt.isBefore(born)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpNotedBeforeBorn);
-		if(dldt.isBefore(nddt)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpDLDTBeforeNDDT);
 		
+		if(!deadLineStr.equals(stepDeadlineNone))
+		{
+			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(deadLineStr);
+			
+			if(dldt.isBefore(born)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpDLDTBeforeBDT);
+			if(dldt.isBefore(nddt)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpDLDTBeforeNDDT);
+		}
+
 		return stepIsOkToItSelfMsg;
 	}
 	
@@ -525,9 +553,16 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		String nddtStr = LittleTimeTools.timeString(nddt);
 
 		System.out.println("");
-		dldt = iss.getDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
-		String deadLineStr = LittleTimeTools.timeString(dldt);
-
+		boolean gotDLDT = iss.getYesOrNo(prjctDeadlineQuestion);
+		
+		String deadLineStr = "";
+		if(gotDLDT)
+		{
+			dldt = iss.getDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+			deadLineStr = LittleTimeTools.timeString(dldt);
+		}
+		else deadLineStr = prjctDeadlineNone;
+		
 		String goal = pJson.getString(ProjectJSONKeyz.goalKey);
 		if(timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))
 		{
