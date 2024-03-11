@@ -1010,14 +1010,16 @@ public class GTDCLI implements Beholder<String>
     			clicmd.executeCmd("");
     		}
     	}
-    	catch(CLICMDException | InputArgumentException e)
+    	catch(CLICMDException | NaturalNumberException | InputArgumentException | SpawnProjectException |
+    			SpawnStepException | ProjectTerminationException | StepTerminationException | IOException |
+    			TimeGoalOfProjectException e)
     	{
     		System.out.println(e);
     	}
     	
     	if(!noMoreLoops)loopForCommands();
     }
-    
+
     public String getArgumentOfCommand(String commandTyped, String commandKnown)
     {
     	

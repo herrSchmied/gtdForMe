@@ -231,7 +231,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 
 	}
 	
-	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, TimeGoalOfProjectException, InputArgumentException, IOException
+	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, TimeGoalOfProjectException, InputArgumentException, IOException, SpawnStepException
 	{
 		
 		System.out.println("");
@@ -286,15 +286,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		if(timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))
 		{
 			
-			try
-			{
-				spawnStep(pJson);//Here status will be overwritten. Here step status will be equal project status.
-			}
-			catch(SpawnStepException e)
-			{
-				e.printStackTrace();
-				throw new SpawnProjectException(invalideStep);
-			}
+			spawnStep(pJson);//Here status will be overwritten. Here step status will be equal project status.
 			
 			return pJson;
 		}
@@ -555,7 +547,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		}
 	}
 	
-	public void wakeMODProject(JSONObject pJson) throws IOException, InputArgumentException, TimeGoalOfProjectException, SpawnProjectException
+	public void wakeMODProject(JSONObject pJson) throws IOException, InputArgumentException, TimeGoalOfProjectException, SpawnProjectException, SpawnStepException
 	{
 		
 		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(pJson.getString(ProjectJSONKeyz.BDTKey));
@@ -582,15 +574,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 
-			try
-			{
-				spawnStep(pJson);//Here status will be overwritten.;
-			}
-			catch(SpawnStepException e)
-			{
-				e.printStackTrace();
-				throw new SpawnProjectException(invalideStep);
-			}
+			spawnStep(pJson);//Here status will be overwritten.;
 		}
 		else throw new TimeGoalOfProjectException(prjctTimeOrGoalNotValide);
 	}
