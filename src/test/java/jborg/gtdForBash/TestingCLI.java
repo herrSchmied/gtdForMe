@@ -83,7 +83,7 @@ class TestingCLI
 		String dldtQuestion = "yes";
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 
-		String data = GTDCLI.next_Step + " " + prjctName + '\n'
+		String data = SomeCommands.next_Step + " " + prjctName + '\n'
 				+ changeStepBDT + '\n'
 				+ chosenFromStatieList + '\n'
 				+ stepDesc2 + '\n'
@@ -100,7 +100,7 @@ class TestingCLI
 		String wantToMakeTDTNote = "No";
 		String wantToChangeTDT = "No";
 
-		String data = GTDCLI.terminate_Step + " " + prjctName + '\n'
+		String data = SomeCommands.terminate_Step + " " + prjctName + '\n'
 					+ stepWasSuccessQstn + '\n'
 					+ wantToMakeTDTNote + '\n'
 					+ wantToChangeTDT + '\n';
@@ -118,7 +118,7 @@ class TestingCLI
 		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 		
-		String data = GTDCLI.new_Project + '\n'
+		String data = SomeCommands.new_Project + '\n'
 				+ prjctName + '\n'
 				+ newPrjctGoal + '\n'
 				+ changePrjctBDT + '\n'
@@ -141,7 +141,7 @@ class TestingCLI
 		String changeStepBDT = "No";
 		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
 		
-		String data = GTDCLI.new_Project + '\n'
+		String data = SomeCommands.new_Project + '\n'
 				+ prjctName + '\n'
 				+ newPrjctGoal + '\n'
 				+ changePrjctBDT + '\n'
@@ -159,7 +159,7 @@ class TestingCLI
 		
 		String changePrjctBDT = "No";
 		
-		String data = GTDCLI.new_MOD + '\n'
+		String data = SomeCommands.new_MOD + '\n'
 				+ prjctName + '\n'
 				+ modPrjctGoal + '\n'
 				+ changePrjctBDT + '\n';
@@ -170,9 +170,9 @@ class TestingCLI
 	public String addNoteSequenz(String prjctName)
 	{
 
-		String data = GTDCLI.add_Note + " " + prjctName + '\n'
+		String data = SomeCommands.add_Note + " " + prjctName + '\n'
 				+ noticeOne + "\n"
-				+ GTDCLI.add_Note + " " + prjctName + '\n'
+				+ SomeCommands.add_Note + " " + prjctName + '\n'
 				+ noticeTwo + "\n";
 				
 		return data;
@@ -187,7 +187,7 @@ class TestingCLI
 		String dldtQuestion = "yes";
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 
-		String data = GTDCLI.wake_MOD + prjctName + '\n'
+		String data = SomeCommands.wake_MOD + prjctName + '\n'
 					+ dldtQuestion + '\n'
 					+ prjctDLDTStr
 					+ changeStepBDT + '\n'
@@ -204,7 +204,7 @@ class TestingCLI
 	{
 		
 		String data = newProjectSequenz(newPrjctName);
-		data = data + GTDCLI.exit + '\n';
+		data = data + SomeCommands.exit + '\n';
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -263,7 +263,7 @@ class TestingCLI
 	{
 		String data = modProjectSequenz(wakeProjectName);
 		data = data + wakeMODProjectSequenz(wakeProjectName);
-		data = data + GTDCLI.exit + '\n';
+		data = data + SomeCommands.exit + '\n';
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -287,7 +287,7 @@ class TestingCLI
 	{
 
 		String data = modProjectSequenz(modPrjctName);
-		data = data + GTDCLI.exit + '\n';
+		data = data + SomeCommands.exit + '\n';
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -307,7 +307,7 @@ class TestingCLI
 				
 		String data = newProjectSequenz(addNotePrjctName);
 		data = data + addNoteSequenz(addNotePrjctName);
-		data = data + GTDCLI.exit + '\n';
+		data = data + SomeCommands.exit + '\n';
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -333,7 +333,7 @@ class TestingCLI
 		
 		String data = newProjectSequenz(killStepPrjctName);
 		data = data + killStepSequenz(killStepPrjctName);
-		data = data + GTDCLI.exit + '\n';
+		data = data + SomeCommands.exit + '\n';
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -346,7 +346,7 @@ class TestingCLI
 		JSONObject project = pickProjectByName(killStepPrjctName, projects);
 		assert(project!=null);
 		
-		JSONObject step = GTDCLI.getLastStep(project);
+		JSONObject step = SomeCommands.getLastStep(project);
 		StatusMGMT statusMGMT = StatusMGMT.getInstance();
 		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
 		assert(terminalSet.contains(step.getString(StepJSONKeyz.statusKey)));
@@ -360,7 +360,7 @@ class TestingCLI
 		String data = newProjectSequenz(appendStpPrjctName);
 		data = data + killStepSequenz(appendStpPrjctName);
 		data = data + nxtStpSequenz(appendStpPrjctName);
-		data = data + GTDCLI.exit + '\n';
+		data = data + SomeCommands.exit + '\n';
 		System.out.println(data);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
@@ -374,7 +374,7 @@ class TestingCLI
 		JSONObject project = pickProjectByName(appendStpPrjctName, projects);
 		assert(project!=null);
 		
-		JSONObject step2 = GTDCLI.getLastStep(project);
+		JSONObject step2 = SomeCommands.getLastStep(project);
 		StatusMGMT statusMGMT = StatusMGMT.getInstance();
 		Set<String> atStartSet = statusMGMT.getStatesOfASet(StatusMGMT.atStartSetName);
 		String stepStatus = step2.getString(StepJSONKeyz.statusKey);
@@ -399,7 +399,7 @@ class TestingCLI
 	{
 		
 		String data = newProjectSequenzNoDLDT(newPrjctNoDLDT);
-		data = data + GTDCLI.exit + '\n';
+		data = data + SomeCommands.exit + '\n';
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
