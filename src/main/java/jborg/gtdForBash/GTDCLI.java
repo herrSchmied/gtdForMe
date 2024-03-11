@@ -55,6 +55,7 @@ public class GTDCLI implements Beholder<String>
 	
 	private final String sayGoodBye = "Bye!";
 	
+	private final String unknownProject = "Unknown Project!";
 	private final String projectIsNotActive = "Project is not active.";
 	private final String sorryDeadlineAbuse = "Sorry Deadline Abuse.";
 	private final String noPrjctFound = "No Projects found.";
@@ -64,6 +65,7 @@ public class GTDCLI implements Beholder<String>
 	private final String thereIsNoDataFolder = "There is no Data Folder";
 	private final String dataFolderCreated = "Data Folder created successfully.";
 	private final String failedToCreateDirectory = "Failed to create the directory.";
+	private final String noNotMODProjects = "Not Not Mod Projects.";
 	private final String noMODProjects = "No MOD Projects.";
 	private final String noActiveProjects = "No active Projects!";
 	private final String noNotActiveProjects = "No not active Projects!";
@@ -113,6 +115,7 @@ public class GTDCLI implements Beholder<String>
 			+ "to do it soon enough?(no): ";
 	
 	private List<String> columnList = Arrays.asList("Name", "Status", "BDT", "Age");
+	private List<String> stepColumns = Arrays.asList("Desc", "Status", "BDT", "DLDT");
 	
 	/* Remember: No command can be the beginning of another command.
 	 * Write a Method to check that!!!!!!
@@ -140,6 +143,7 @@ public class GTDCLI implements Beholder<String>
 	public static final String view_Notes = "show notes";
 	public static final String successes = "successes";
 	public static final String fails = "fails";
+	public static final String show_Steps_of = "show steps of";
 	
 	private final Set<String> commands = new HashSet<>();
 
@@ -206,6 +210,23 @@ public class GTDCLI implements Beholder<String>
 		return !activePrjctName.test(s);
 	};
 
+	public final Predicate<String> modPrjctName = (s)->
+	{
+		if(!knownProjects.containsKey(s))return false;
+		
+		JSONObject pJSON = knownProjects.get(s);
+		
+		String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+		
+		return status.equals(StatusMGMT.mod);
+	};
+	
+	public final Predicate<String> noModPrjctName = (s)->
+	{
+		return !modPrjctName.test(s);
+	};
+
+	
 	private final InputStreamSession iss;
 		
     public GTDCLI(InputStreamSession iss) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
@@ -902,8 +923,25 @@ public class GTDCLI implements Beholder<String>
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 	
 		registerCmd(GTDCLI.fails, sdcSetName, ioArray, fails);
-	}
+		
+		MeatOfCLICmd<String> showSteps = (s)->
+		{
     
+			String t = s.trim();
+			if(!knownProjects.containsKey(t))throw new CLICMDException(unknownProject);
+			
+			JSONObject pJSON = knownProjects.get(t);
+
+			showProjectStepsAsTable(pJSON);
+
+    		return "";
+		};
+
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(true, false, true, false));
+		
+		registerCmd(GTDCLI.show_Steps_of, sdcSetName, ioArray, showSteps);
+	}
 
 	/** @param ioArray index 0 = mustHaveArgument	*
 	 *  @param ioArray index 1 = canHaveArgument	*
@@ -1009,6 +1047,48 @@ public class GTDCLI implements Beholder<String>
     	return output;
     }
 
+    public void showProjectStepsAsTable(JSONObject pJSON)
+    {
+    	
+		List<String> headers = stepColumns;
+		List<List<String>> rows = new ArrayList<>();
+		
+		String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+		
+		JSONArray steps;
+		if(!status.equals(StatusMGMT.mod))
+		{
+			steps = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+			
+			int len = steps.length();
+			for(int n=0;n<len;n++)
+			{
+				
+				JSONObject step = steps.getJSONObject(n);
+				
+				String desc = step.getString(StepJSONKeyz.descKey);
+				String stepStatus = step.getString(StepJSONKeyz.statusKey);
+				String bdt = step.getString(StepJSONKeyz.BDTKey);
+				String dldt = step.getString(StepJSONKeyz.DLDTKey);
+
+	    		List<String> row = new ArrayList<>();
+	    		row.add(desc);
+	    		row.add(stepStatus);
+	    		row.add(bdt);
+	    		row.add(dldt);
+	    		
+	    		rows.add(row);
+
+			}
+
+			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
+			
+			System.out.println(ttd.toString());
+		}
+		
+		
+
+    }
     public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, NaturalNumberException
     {
 		List<String> headers = columnList;

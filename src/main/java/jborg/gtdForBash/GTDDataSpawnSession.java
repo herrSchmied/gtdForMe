@@ -108,7 +108,8 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	public static final String noteAddPhrase = "Write Note:";
 	public static final boolean notTxtAQstn = true;
 	
-	private static Set<String> stepStartStatuses = new HashSet<>(Arrays.asList(StatusMGMT.atbd, StatusMGMT.waiting));
+	private static StatusMGMT statusMGMT = StatusMGMT.getInstance();
+	private static Set<String> stepStartStatuses = statusMGMT.getStatesOfASet(StatusMGMT.atStartSetName);
 		
 	public static final String stepStatusPhrase = "Choose Status: ";
 	
@@ -130,7 +131,8 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	public static final String makeDLBtnTxt = "Make Deadline";
 
 	public static final String invalidePrjctName = "There is already a Project with that Name.";
-
+	public static final String invalideStep = "Invalide Step.";
+	
 	public static final String deadLineUnknownStr = "UNKNOWN";
 	public static final String prjctTimeOrGoalInvalidMsg = "Time and/or Goal ain't valide for this Project.";
 	public static final String stepSpawnExceptionFormerStepIsntTerminated = "Sorry former Step isn't Terminated.";
@@ -229,7 +231,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 
 	}
 	
-	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, TimeGoalOfProjectException, InputArgumentException, SpawnStepException, IOException
+	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, TimeGoalOfProjectException, InputArgumentException, IOException
 	{
 		
 		System.out.println("");
@@ -283,7 +285,17 @@ public class GTDDataSpawnSession implements Subjekt<String>
 
 		if(timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))
 		{
-			spawnStep(pJson);//Here status will be overwritten. Here step status will be equal project status.
+			
+			try
+			{
+				spawnStep(pJson);//Here status will be overwritten. Here step status will be equal project status.
+			}
+			catch(SpawnStepException e)
+			{
+				e.printStackTrace();
+				throw new SpawnProjectException(invalideStep);
+			}
+			
 			return pJson;
 		}
 		else throw new TimeGoalOfProjectException(prjctTimeOrGoalInvalidMsg);
@@ -543,7 +555,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		}
 	}
 	
-	public void wakeMODProject(JSONObject pJson) throws IOException, InputArgumentException, SpawnStepException, TimeGoalOfProjectException
+	public void wakeMODProject(JSONObject pJson) throws IOException, InputArgumentException, TimeGoalOfProjectException, SpawnProjectException
 	{
 		
 		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(pJson.getString(ProjectJSONKeyz.BDTKey));
@@ -570,7 +582,15 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 
-			spawnStep(pJson);//Here status will be overwritten.;
+			try
+			{
+				spawnStep(pJson);//Here status will be overwritten.;
+			}
+			catch(SpawnStepException e)
+			{
+				e.printStackTrace();
+				throw new SpawnProjectException(invalideStep);
+			}
 		}
 		else throw new TimeGoalOfProjectException(prjctTimeOrGoalNotValide);
 	}

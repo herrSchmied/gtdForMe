@@ -115,7 +115,7 @@ class TestingCLI
 		String dldtQuestion = "yes";
 		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
 		String changeStepBDT = "No";
-		String chosenFromStatieList = "1";//ATBD
+		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 		
 		String data = GTDCLI.new_Project + '\n'
@@ -139,7 +139,7 @@ class TestingCLI
 		String changePrjctBDT = "No";
 		String dldtQuestion = "no";
 		String changeStepBDT = "No";
-		String chosenFromStatieList = "1";//ATBD
+		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
 		
 		String data = GTDCLI.new_Project + '\n'
 				+ prjctName + '\n'
