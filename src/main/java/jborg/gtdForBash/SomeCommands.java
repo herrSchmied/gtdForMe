@@ -329,6 +329,7 @@ public class SomeCommands
     			JSONObject lastStep = getLastStep(pJSON);
     				
     			String stepDLDTStr = lastStep.getString(StepJSONKeyz.DLDTKey);
+    			if(stepDLDTStr.equals(GTDDataSpawnSession.stepDeadlineNone))continue;
     			LocalDateTime stepDLDT = LittleTimeTools.LDTfromTimeString(stepDLDTStr);
     				
     			String dauer = new ExactPeriode(jetzt, stepDLDT).toString();
