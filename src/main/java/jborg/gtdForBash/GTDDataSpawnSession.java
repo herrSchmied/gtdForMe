@@ -190,7 +190,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	{
 
 		System.out.println("");
-		String name = getFreeStyleString(prjctNameQ);
+		String name = iss.forcedString(prjctNameQ);
 		name = name.trim();
 		if(knownProjectsNames.contains(name))
 		{
@@ -209,13 +209,13 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		String goal = iss.getString(goalQ);
 			
 		System.out.println("");
-		boolean changeBDT = forcedYesOrNo(changeBDTQ);
+		boolean changeBDT = iss.forcedYesOrNo(changeBDTQ);
 
 		LocalDateTime jetzt = LocalDateTime.now();
 		if(changeBDT)
 		{
 			System.out.println("");
-			bdt = forcedDateTimeInOneLine(bdtQ, ancient, jetzt);//must be born before now.
+			bdt = iss.forcedDateTimeInOneLine(bdtQ, ancient, jetzt);//must be born before now.
 		}
 		else bdt = nddt;
 				
@@ -239,7 +239,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 	{
 		
 		System.out.println("");
-		String name = getFreeStyleString(prjctNameQ);
+		String name = iss.forcedString(prjctNameQ);
 		name = name.trim();
 		if(knownProjectsNames.contains(name))
 		{
@@ -255,16 +255,16 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		LocalDateTime dldt = null;
 			
 		System.out.println("");
-		String goal = getFreeStyleString(goalQ);
+		String goal = iss.forcedString(goalQ);
 
 		System.out.println("");
-		boolean changeBDT = forcedYesOrNo(changeBDTQ);
+		boolean changeBDT = iss.forcedYesOrNo(changeBDTQ);
 
 		if(changeBDT)
 		{
 			
 			System.out.println("");
-			bdt = forcedDateTimeInOneLine(bdtQ, ancient, LocalDateTime.now());//must be born before now.
+			bdt = iss.forcedDateTimeInOneLine(bdtQ, ancient, LocalDateTime.now());//must be born before now.
 		}
 		else bdt = nddt;
 				
@@ -280,14 +280,14 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		String nddtStr = LittleTimeTools.timeString(nddt);
 		pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 
-		boolean gotDLDT = forcedYesOrNo(prjctDeadlineQuestion);
+		boolean gotDLDT = iss.forcedYesOrNo(prjctDeadlineQuestion);
 		
 		if(gotDLDT)
 		{
 			System.out.println("");
 			System.out.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
 			
-			dldt = forcedDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+			dldt = iss.forcedDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
 			String deadLineStr = LittleTimeTools.timeString(dldt);
 			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 		}
@@ -305,7 +305,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 			TimeGoalOfProjectException tgope = new TimeGoalOfProjectException(prjctTimeOrGoalInvalidMsg);
 			System.out.println(tgope.getMessage());
 			
-			boolean qt = forcedYesOrNo("Want to try again?");
+			boolean qt = iss.forcedYesOrNo("Want to try again?");
 
 			if(qt)return spawnNewProject(knownProjectsNames, statusMGMT);//Force valide Time.;
 			else return null;
@@ -374,7 +374,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		String jetzt = LittleTimeTools.timeString(LocalDateTime.now());
 			
 		System.out.println("");
-		differentBDT = forcedYesOrNo(wantToChangeBDTOfStepQstn);
+		differentBDT = iss.forcedYesOrNo(wantToChangeBDTOfStepQstn);
 	
 		System.out.println("");
 		
@@ -382,14 +382,14 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		{
 					
 			System.out.println(stepBDTMsgPrefix + bdtOfPrj + stepBDTMsgMid + jetzt + stepBDTMsgSuffix);
-			bdtOfStep = forcedDateTimeInOneLine(stepDateTimeQstn, ldtBDTOfPrj, LocalDateTime.now());
+			bdtOfStep = iss.forcedDateTimeInOneLine(stepDateTimeQstn, ldtBDTOfPrj, LocalDateTime.now());
 		}
 		else bdtOfStep = nddtOfStep;
 			
 		List<String> sss = new ArrayList<>();
 		sss.addAll(stepStartStatuses);
 		System.out.println("");
-		stepStatus = forcedOutOfList(stepChooseStatusQstn, sss);
+		stepStatus = iss.forcedOutOfList(stepChooseStatusQstn, sss);
 					
 		String phrase;
 		if(stepStatus.equals(StatusMGMT.waiting))phrase = waitingForPhrase;
@@ -407,14 +407,14 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		if(!prjctDeadLine.equals(prjctDeadlineNone))prjctDLDTYear = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
 		else prjctDLDTYear = farInFuture;
 		
-		boolean gotDeadline = forcedYesOrNo(stepDeadlineQuestion);
+		boolean gotDeadline = iss.forcedYesOrNo(stepDeadlineQuestion);
 		
 		if(gotDeadline)
 		{
 			if(index==firstStepIndex-1)
 			{
 				System.out.println(stpDLDTHintPrefix + prjctNDDT + stpDLDTHintMid  + prjctDeadLine);
-				LocalDateTime deadLineLDT = forcedDateTimeInOneLine(stpDeadlinePleasePhrase, ldtNDDTOfPrjct, prjctDLDTYear);
+				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stpDeadlinePleasePhrase, ldtNDDTOfPrjct, prjctDLDTYear);
 				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
 			else
@@ -423,7 +423,7 @@ public class GTDDataSpawnSession implements Subjekt<String>
 				String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
 				System.out.println(extrStpDLDTHintPrefix + oldStepTDT + extrStpDLDTHintMid + prjctDeadLine);
 				LocalDateTime ldtOldStepTDT = LittleTimeTools.LDTfromTimeString(oldStepTDT);
-				LocalDateTime deadLineLDT = forcedDateTimeInOneLine(stpDeadlinePleasePhrase, ldtOldStepTDT, prjctDLDTYear);
+				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stpDeadlinePleasePhrase, ldtOldStepTDT, prjctDLDTYear);
 				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
 		}
@@ -757,59 +757,4 @@ public class GTDDataSpawnSession implements Subjekt<String>
 		else observer.remove(b);
 	}
 	
-	private String getFreeStyleString(String question)
-	{
-		
-		String s = iss.getString(question);
-		return s;
-	}
-	
-	private boolean forcedYesOrNo(String question) throws IOException
-	{
-		boolean q;
-		
-		try
-		{
-			q = iss.getYesOrNo(question);
-			return q;
-		}
-		catch (InputArgumentException e)
-		{
-			System.out.println(e.getMessage());
-			return forcedYesOrNo(question);
-		}
-	}
-	
-	private String forcedOutOfList(String phrase, List<String> listOfPossibleAnswers) throws IOException
-	{
-		String answer = "";
-		
-		try
-		{
-			answer = iss.getAnswerOutOfList(phrase, listOfPossibleAnswers);
-			return answer;
-		}
-		catch(InputArgumentException iae)
-		{
-			System.out.println(iae.getMessage());
-			return forcedOutOfList(phrase, listOfPossibleAnswers);
-		}
-	}
-
-	private LocalDateTime forcedDateTimeInOneLine(String phrase, LocalDateTime begin, LocalDateTime end)
-	{
-		
-		LocalDateTime ldt;
-		
-		try
-		{
-			ldt = iss.getDateTimeInOneLine(phrase, begin, end);
-			return ldt;
-		}
-		catch(InputArgumentException iae)
-		{
-			System.out.println(iae.getMessage());
-			return forcedDateTimeInOneLine(phrase, begin, end);
-		}
-	}
 }
