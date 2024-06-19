@@ -46,16 +46,21 @@ import someMath.NaturalNumberException;
 
 import static fileShortCuts.TextAndObjSaveAndLoad.*;
 
+import allgemein.SimpleLogger;
+
 
 public class GTDCLI implements Beholder<String>
 {
+	
 	
 	private final String statesFileName = "statusMGMT.states";
 	private final StatusMGMT states = loadStates();
 	
 	private final List<String> history = new ArrayList<>();
 	
-	private static final String projectDataFolderRelativePath = "projectDATA/";
+	public static final String projectDataFolderRelativePath = "projectDATA/";
+	private static final String actionLog = "activityLog";
+	private final SimpleLogger sLog = new SimpleLogger(projectDataFolderRelativePath+actionLog, "Log of GTD ");
 	
 	private final String thereIsAStatesFileLoading = "There is a States File. Trying to Load it";
 	private final String somethinWrongStates = "Something is wrong. Using default States.";
@@ -104,7 +109,8 @@ public class GTDCLI implements Beholder<String>
 	{
 
     	this.iss = iss;
-
+    	System.out.println(sLog.getSessionString());
+    	
     	ds = new GTDDataSpawnSession(this.iss);
     	Path p = Path.of(getPathToDataFolder());
     	
@@ -123,7 +129,7 @@ public class GTDCLI implements Beholder<String>
 				
 			greetings();
 			
-			scds = new SomeCommands(this, knownProjects, states, ds);
+			scds = new SomeCommands(this, knownProjects, states, ds, sLog);
 			commandMap = scds.getCommandMap();
 
 			loopForCommands();
@@ -149,7 +155,7 @@ public class GTDCLI implements Beholder<String>
 	    			
 	    		greetings();
 	    		
-				scds = new SomeCommands(this, knownProjects, states, ds);
+				scds = new SomeCommands(this, knownProjects, states, ds, sLog);
 				commandMap = scds.getCommandMap();
 
 				loopForCommands();
@@ -345,6 +351,7 @@ public class GTDCLI implements Beholder<String>
 
     	saveAll();
     	System.out.println(sayGoodBye);
+    	sLog.saveLog();
     	noMoreLoops = true;
     }
 

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -18,6 +19,7 @@ import org.json.JSONObject;
 
 import allgemein.ExactPeriode;
 import allgemein.LittleTimeTools;
+import allgemein.SimpleLogger;
 import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
@@ -177,7 +179,7 @@ public class SomeCommands
 	private final Predicate<String> noModPrjctName;
 
 	public SomeCommands(GTDCLI cli, Map<String, JSONObject> knownProjects, StatusMGMT states, 
-    		GTDDataSpawnSession ds)
+    		GTDDataSpawnSession ds, SimpleLogger sLog)
     {
 
     	this.cli = cli;
@@ -270,11 +272,12 @@ public class SomeCommands
     	MeatOfCLICmd<JSONObject> newProject = (s)->
 		{
 
+			sLog.logNow("Creating new Project.");
 			JSONObject pJSON = ds.spawnNewProject(knownProjects.keySet(), states);
 
 			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
 			knownProjects.put(name, pJSON);
-
+			sLog.logNow("Project " + name + " created.");
 			return pJSON;
 		};
 		
@@ -285,11 +288,14 @@ public class SomeCommands
 		MeatOfCLICmd<JSONObject> newMODProject = (s)->
 		{
 			
+			sLog.logNow("Attemping to create new MOD Project.");
+			
 			JSONObject pJSON = ds.spawnMODProject(knownProjects.keySet(), states);
 
 			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
 			knownProjects.put(name, pJSON);
-				
+			sLog.logNow("New MOD Project " + name + " created.");
+
 			return pJSON;
 		};
 		
@@ -301,6 +307,7 @@ public class SomeCommands
 		MeatOfCLICmd<String> leave = (s)->
 		{
 			
+			sLog.logNow("Exit.");
 			cli.stop();//Save than exit.
 			
 			return ""; //Unreachable!!!!
@@ -314,12 +321,18 @@ public class SomeCommands
     
 		MeatOfCLICmd<String> nearestDeadline = (s)->
 		{
+			
+			sLog.logNow("Nearest Deadline display.");
 			LocalDateTime jetzt = LocalDateTime.now();
     		long newMinutes = 1000000;
     		List<String> pList = new ArrayList<>();
     		List<String> dauerList = new ArrayList<>();
     			
-			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
+			if(knownProjects.isEmpty())
+			{
+				sLog.logNow("No Projects. No Display");
+				throw new CLICMDException(noPrjctFound);
+			}
 
 			for(JSONObject pJSON: knownProjects.values())
     		{
@@ -384,9 +397,15 @@ public class SomeCommands
 		MeatOfCLICmd<String> listNames = (s)->
 		{
 			
+			sLog.logNow("Project Names display.");
+
 			String output = "";
 			
-			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
+			if(knownProjects.isEmpty())
+			{
+				sLog.logNow("No Projects. No Display.");
+				throw new CLICMDException(noPrjctFound);
+			}
 
 			for(String name: knownProjects.keySet())output = output + '\n' + name;
 			
@@ -402,6 +421,8 @@ public class SomeCommands
 
 		MeatOfCLICmd<String> listCmds = (s)->
 		{
+			
+			sLog.logNow("Command list display.");
 			String output = "";
 
 			for(String cmds: commands)
@@ -423,7 +444,13 @@ public class SomeCommands
 		MeatOfCLICmd<String> projectView = (s)->
 		{
 			
-			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
+			sLog.logNow("Trying to view Project Details.");
+
+			if(knownProjects.isEmpty())
+			{
+				sLog.logNow("No Projects.");
+				throw new CLICMDException(noPrjctFound);
+			}
 
 			String output = "";
 
@@ -433,10 +460,15 @@ public class SomeCommands
 
     		
 	    	String prjct;
-	    	if(s.trim().equals(""))prjct=  iss.getAnswerOutOfList(whichOnePhrase, names);
+	    	if(s.trim().equals(""))prjct=  iss.forcedOutOfList(whichOnePhrase, names);
 	    	else prjct = s.trim();
 	    		
-	    	if(!knownProjects.keySet().contains(prjct))throw new CLICMDException(noSuchProject+prjct);
+	    	if(!knownProjects.keySet().contains(prjct))
+	    	{
+				sLog.logNow("Project " + s + " Does not exist. No Display.");
+	    		throw new CLICMDException(noSuchProject+prjct);
+	    	}
+	    	sLog.logNow("Project " + s + " Exists and details are displayed.");
 
 	    	output = showProjectDetail(knownProjects.get(prjct));
 	    	System.out.println(output);
@@ -453,10 +485,15 @@ public class SomeCommands
 		MeatOfCLICmd<String> showNotActivePrjcts = (s)->
 		{
 
+			sLog.logNow("Inactive Projects display.");
     		Map<String, JSONObject> map = new HashMap<>();
     		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
     		
-    		if(noAPrjcts.isEmpty()) throw new CLICMDException(noNotActiveProjects);
+    		if(noAPrjcts.isEmpty())
+    		{
+    			sLog.logNow("No inactive Projects.");
+    			throw new CLICMDException(noNotActiveProjects);
+    		}
 
     		for(String prjctName: noAPrjcts)
     		{
@@ -477,12 +514,17 @@ public class SomeCommands
 		MeatOfCLICmd<String> showActivePrjcts = (s)->
 		{
 			
+			sLog.logNow("Active Projects display.");
 			System.out.println("");
 			
 			Map<String, JSONObject> map = new HashMap<>();
 			
 			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-			if(aPrjcts.isEmpty())throw new CLICMDException(noActiveProjects);
+			if(aPrjcts.isEmpty())
+			{
+				sLog.logNow("No active Projects.");
+				throw new CLICMDException(noActiveProjects);
+			}
 			
 			for(String prjctName: aPrjcts)
 			{
@@ -503,12 +545,15 @@ public class SomeCommands
 		MeatOfCLICmd<String> lastSteps = (s)->
 		{
 			
+			sLog.logNow("Last Steps display.");
 			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
 			List<List<String>> rows = new ArrayList<>();
 
 			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
 			if(aPrjcts.isEmpty())
 			{
+				
+				sLog.logNow("No active Projects.");
 				System.out.println("No active Projects.");
 				return "";
 			}
@@ -547,7 +592,12 @@ public class SomeCommands
 		MeatOfCLICmd<String> stats = (s)->
 		{
 			
-			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
+			sLog.logNow("Stats display.");
+			if(knownProjects.isEmpty())
+			{
+				sLog.logNow("No Projects. No Stats.");
+				throw new CLICMDException(noPrjctFound);
+			}
 
 			int nrOfPrjcts = knownProjects.size();
 			int nrOfActivePrjcts = findProjectsByCondition(activeProject).size();
@@ -592,10 +642,13 @@ public class SomeCommands
 		
 		MeatOfCLICmd<String> saviore = (s)->
 		{
+			
+			sLog.logNow("Saved Data.");
+			sLog.saveLog();
 			cli.saveAll();
 			return "";
 		};
-		
+
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
@@ -604,28 +657,31 @@ public class SomeCommands
 		MeatOfCLICmd<JSONObject> addNote = (s)->
 		{
 			
+			sLog.logNow("Trying to add a Note to a Project.");
+
    			System.out.println("");
 			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-			if(aPrjcts.isEmpty())throw new CLICMDException(noActiveProjects);
+			if(aPrjcts.isEmpty())
+			{
+				sLog.logNow("No Projects. No Note adding.");
+				throw new CLICMDException(noActiveProjects);
+			}
 			
 				
 			String pName;
-			if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
+			if(s.trim().equals(""))pName = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
 			else pName = s.trim();
 				
-			if(!aPrjcts.contains(pName))throw new CLICMDException(noSuchProject + pName);
+			if(!aPrjcts.contains(pName))
+			{
+				sLog.logNow("Project " + pName + " don't exist.");
+				throw new CLICMDException(noSuchProject + pName);
+			}
 
 			JSONObject pJSON = knownProjects.get(pName);
-			boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
-			boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
-				
-			if(stepDidIt||projectDidIt)
-			{
-				System.out.println("Sorry Deadline abuse.");
-				alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
-				return new JSONObject();
-			}
+
 			ds.addNote(pJSON);
+			sLog.logNow("Project " + pName + " exists and Note is added.");
 			return pJSON;
 		};
 		
@@ -636,24 +692,34 @@ public class SomeCommands
 
 		MeatOfCLICmd<String> viewNotes = (s)->
 		{
-	    			
+	    	
+			sLog.logNow("Note display.");
 			System.out.println("");
 			
 			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
 	    	
 	    	String prjct;
 
-	    	if(s.trim().equals(""))prjct = iss.getAnswerOutOfList(notesOfWhichPrjctPhrase, new ArrayList<String>(knownProjects.keySet()));
+	    	if(s.trim().equals(""))prjct = iss.forcedOutOfList(notesOfWhichPrjctPhrase, new ArrayList<String>(knownProjects.keySet()));
 			else prjct = s.trim();
 				
-			if(!knownProjects.keySet().contains(prjct))throw new CLICMDException(noSuchProject+prjct);
+			if(!knownProjects.keySet().contains(prjct))
+			{
+				sLog.logNow("Project " + prjct + " does not exist. No Note display.");
+				throw new CLICMDException(noSuchProject+prjct);
+			}
 			
     		JSONObject pJSON = knownProjects.get(prjct);
     			
     		JSONArray noteArr;
     		String output = "";
-    		if(!pJSON.has(ProjectJSONKeyz.noteArrayKey))throw new CLICMDException(projectStr + " " + prjct + hasNoNotesSuffix);
-    		
+    		if(!pJSON.has(ProjectJSONKeyz.noteArrayKey))	
+    		{
+    			sLog.logNow(projectStr + " " + prjct + hasNoNotesSuffix);
+    			throw new CLICMDException(projectStr + " " + prjct + hasNoNotesSuffix);
+    		}
+    		sLog.logNow(projectStr + " has notes!");
+
     		noteArr = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
     		int l = noteArr.length();
     				
@@ -692,10 +758,16 @@ public class SomeCommands
 		MeatOfCLICmd<String> listMODs = (s)->
 		{
 			
+			sLog.logNow("MOD-Projects name listing display.");
+
 			Map<String, JSONObject> map = new HashMap<>();
     		
     		List<String>modNames = listOfMODs.get();
-    		if(modNames.isEmpty())throw new CLICMDException(noMODProjects);
+    		if(modNames.isEmpty())
+    		{
+    			sLog.logNow("No MOD-Projects.");
+    			throw new CLICMDException(noMODProjects);
+    		}
     		
     		for(String prjctName: modNames)
     		{
@@ -715,16 +787,26 @@ public class SomeCommands
 		MeatOfCLICmd<String> wakeMOD = (s)->
 		{
 			
+			sLog.logNow("Waking MOD-Project.");
+
 			System.out.println("");
     		List<String> modPrjcts = listOfMODs.get();
-    		if(modPrjcts.isEmpty())throw new CLICMDException(noMODProjects);
+    		if(modPrjcts.isEmpty())
+    		{
+    			sLog.logNow("No MOD-Projects.");
+    			throw new CLICMDException(noMODProjects);
+    		}
    		
     		String prjctName;
-    		if(s.trim().equals(""))prjctName = iss.getAnswerOutOfList(whichOnePhrase, modPrjcts);
+    		if(s.trim().equals(""))prjctName = iss.forcedOutOfList(whichOnePhrase, modPrjcts);
     		else prjctName = s.trim();
 
     		
-			if(!modPrjcts.contains(prjctName))throw new CLICMDException("No such Project.");
+			if(!modPrjcts.contains(prjctName))
+			{
+				sLog.logNow("No such MOD-Project. (" + prjctName + ")");
+				throw new CLICMDException("No such MOD-Project. (" + prjctName + ")");
+			}
 				
 			JSONObject pJSON = knownProjects.get(prjctName);
 			knownProjects.remove(prjctName);
@@ -742,15 +824,25 @@ public class SomeCommands
 		MeatOfCLICmd<JSONObject> nextStep = (s)->
 		{
 
+			sLog.logNow("Trying to create next Step for Project");
+
 			System.out.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    		if(aPrjcts.isEmpty())throw new CLICMDException(noActiveProjects);
+    		if(aPrjcts.isEmpty())
+    		{
+    			sLog.logNow("No active Projects. No next Step.");
+    			throw new CLICMDException(noActiveProjects);
+    		}
     		
     		String prjct;
-    		if(s.trim().equals(""))prjct = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
+    		if(s.trim().equals(""))prjct = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
     		else prjct = s.trim();
     		
-    		if(!knownProjects.keySet().contains(prjct))throw new CLICMDException(noSuchProject);
+    		if(!knownProjects.keySet().contains(prjct))
+    		{
+    			sLog.logNow("Project " + prjct + "does not exist. So no next Step.");
+    			throw new CLICMDException(noSuchProject);
+    		}
     		
     		if(!aPrjcts.contains(prjct))throw new CLICMDException(projectIsNotActive);
     		
@@ -761,10 +853,14 @@ public class SomeCommands
     		if(stepDidIt||projectDidIt)
     		{
     			alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+    			sLog.logNow("Deadline abuse so no next Step for Project " + prjct + ".");
+
 				throw new CLICMDException(sorryDeadlineAbuse);
     		}
  
     		ds.spawnStep(pJSON);
+    		sLog.logNow("Step created.");
+
     		return pJSON;
     		
 		};
@@ -777,29 +873,44 @@ public class SomeCommands
 		MeatOfCLICmd<JSONObject> killPrjct = (s)->
 		{
 
-    		System.out.println("");
+			sLog.logNow("Trying to kill an active Project.");
+			System.out.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
-    		if(aPrjcts.isEmpty())throw new CLICMDException(noActiveProjects);
+    		if(aPrjcts.isEmpty())
+    		{
+    			sLog.logNow("No active Projects no Kill.");
+    			throw new CLICMDException(noActiveProjects);
+    		}
 
     		String pName;
-    		if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
+    		if(s.trim().equals(""))pName = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
     		else pName = s.trim();
     			
-    		if(!knownProjects.keySet().contains(pName))throw new CLICMDException(noSuchProject + pName);
+    		if(!knownProjects.keySet().contains(pName))
+    		{
+    			sLog.logNow(noSuchProject + pName + ". No Kill.");
+    			throw new CLICMDException(noSuchProject + pName);
+    		}
     			
-    		if(!aPrjcts.contains(pName))throw new CLICMDException(projectIsNotActive);
+    		if(!aPrjcts.contains(pName))
+    		{
+    			sLog.logNow("Project: " + pName + " is not active. No Kill.");
+    			throw new CLICMDException(projectIsNotActive);
+    		}
     		
     		JSONObject pJSON = knownProjects.get(pName);
-        	boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
         	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
 
-        	if(stepDidIt||projectDidIt)
+        	if(projectDidIt)
         	{
-        		alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+        		alterProjectAfterDLDTAbuse(pJSON, false, projectDidIt);
+        		if(projectDidIt)sLog.logNow("Project: " + pName + " is already Dead. No Kill");
         		throw new CLICMDException(sorryDeadlineAbuse);
     		}
 
     		ds.terminateProject(pJSON);
+    		sLog.logNow("Terminated Project: " + pName);
+
     		return pJSON;
 		};
 		
@@ -810,17 +921,26 @@ public class SomeCommands
 		
 		MeatOfCLICmd<JSONObject> killStep = (s)->
 		{
-			
+
+			sLog.logNow("Terminating Step.");
     		System.out.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
 
     		String pName;
-    		if(s.trim().equals(""))pName = iss.getAnswerOutOfList(whichOnePhrase, aPrjcts);
+    		if(s.trim().equals(""))pName = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
     		else pName = s.trim();
     			
-    		if(!knownProjects.keySet().contains(pName))throw new CLICMDException(noSuchProject+pName);
+    		if(!knownProjects.keySet().contains(pName))
+    		{
+    			sLog.logNow(noSuchProject + pName + ". No Step Termination.");
+    			throw new CLICMDException(noSuchProject+pName);
+    		}
     		
-    		if(!aPrjcts.contains(pName))throw new CLICMDException(projectIsNotActive);
+    		if(!aPrjcts.contains(pName))
+    		{
+    			sLog.logNow("Project: " + pName + " is not active. No Step Termination.");
+    			throw new CLICMDException(projectIsNotActive);
+    		}
     		
     		JSONObject pJSON = knownProjects.get(pName);
         	boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
@@ -830,6 +950,8 @@ public class SomeCommands
     		{
     			
     			alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+    			if(stepDidIt)sLog.logNow("Step of Project " + pName + " is already Terminated.");
+    			if(projectDidIt)sLog.logNow("Project " + pName + " is Terminated. No Step Termination.");
     			throw new CLICMDException(sorryDeadlineAbuse);
     		}
     			
@@ -845,6 +967,7 @@ public class SomeCommands
 		
 		MeatOfCLICmd<String> hilfe = (s)->
 		{
+			sLog.logNow("Help display.");
 			String output = "Not yet Installed.";//TODO:;
 			System.out.println(output);
 			
@@ -858,10 +981,17 @@ public class SomeCommands
 		
 		MeatOfCLICmd<String> win = (s)->
 		{
+			
+			sLog.logNow("Displaying successes.");
+			
     		Map<String, JSONObject> map = new HashMap<>();
     		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
     		
-    		if(noAPrjcts.isEmpty()) throw new CLICMDException(noNotActiveProjects);
+    		if(noAPrjcts.isEmpty())
+    		{
+    			sLog.logNow("No inactive Projects. No Winners.");
+    			throw new CLICMDException(noNotActiveProjects);
+    		}
 
     		for(String prjctName: noAPrjcts)
     		{
@@ -871,6 +1001,8 @@ public class SomeCommands
     		}
     		
     		showProjectMapAsTable(map);
+    		if(map.isEmpty())sLog.logNow("No Successes.");
+    		else sLog.logNow("Displayed Successes.");
     		
     		return "";
 		};
@@ -882,10 +1014,17 @@ public class SomeCommands
 
 		MeatOfCLICmd<String> suckerz = (s)->
 		{
+			
+			sLog.logNow("Display fails.");
+
     		Map<String, JSONObject> map = new HashMap<>();
     		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
     		
-    		if(noAPrjcts.isEmpty()) throw new CLICMDException(noNotActiveProjects);
+    		if(noAPrjcts.isEmpty())
+    		{
+    			sLog.logNow("No active Projects so no fails. No Display.");
+    			throw new CLICMDException(noNotActiveProjects);
+    		}
 
     		for(String prjctName: noAPrjcts)
     		{
@@ -895,7 +1034,9 @@ public class SomeCommands
     		}
     		
     		showProjectMapAsTable(map);
-    		
+    		if(map.isEmpty())sLog.logNow("No fails.");
+    		else sLog.logNow("Displayed fails.");
+ 
     		return "";
 		};
 
@@ -907,13 +1048,18 @@ public class SomeCommands
 		MeatOfCLICmd<String> showSteps = (s)->
 		{
     
+			sLog.logNow("Showing Steps of Project " + s);
 			String t = s.trim();
-			if(!knownProjects.containsKey(t))throw new CLICMDException(unknownProject);
+			if(!knownProjects.containsKey(t))
+			{
+				sLog.logNow("Project " + s + " does not exist so no display.");
+				throw new CLICMDException(unknownProject);
+			}
 			
 			JSONObject pJSON = knownProjects.get(t);
 
 			showProjectStepsAsTable(pJSON);
-
+			sLog.logNow("Displayed Steps of Project: " + s);
     		return "";
 		};
 
