@@ -22,10 +22,22 @@ import allgemein.Subjekt;
 
 import consoleTools.*;
 
-
-public class GTDDataSpawnSession implements Subjekt<String>
+/**
+ * @author John Bernard
+ * @author johnbernard@gmx.net
+ * 
+ * This class is to get the Information needed to Setup
+ * Projects or to note progress in those Projects. It
+ * also has Methods to note termination of "Steps taken
+ * in a Project. Or to Terminate a hole Progress. In 
+ * both cases of termination it asks if it was a success
+ * or a fail. Further more there it is possible to 
+ * attache notes to a Project. And it's all done via
+ * Console.
+ */
+public class GTDDataSpawnSession
 {
-	
+
 	public static final int minMinutesInFutureDLDT = 5;
 	public static final int maxYearsInFutureDLDT = 100;
 	
@@ -734,27 +746,4 @@ public class GTDDataSpawnSession implements Subjekt<String>
 
 		return stepArray.getJSONObject(indexOfLastStep);
 	}
-	
-	@Override
-	public void addBeholders(Beholder<String> b) 
-	{
-		observer.add(b);
-	}
-
-	@Override
-	public void informBeholders(String msg) 
-	{
-		for(Beholder<String> b: observer)
-		{
-			b.refresh(msg);
-		}
-	}
-
-	@Override
-	public void removeBeholders(Beholder<String> b) 
-	{
-		if(!observer.contains(b))throw new IllegalArgumentException(illAExceMsg);
-		else observer.remove(b);
-	}
-	
 }
