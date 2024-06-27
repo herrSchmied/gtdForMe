@@ -200,7 +200,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, InputArgumentException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, InputArgumentException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		
 		String data = newProjectSequenz(newPrjctName);
@@ -259,7 +259,7 @@ class TestingCLI
 	}
 	
 	@Test
-	public void testWakeMOD() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+	public void testWakeMOD() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		String data = modProjectSequenz(wakeProjectName);
 		data = data + wakeMODProjectSequenz(wakeProjectName);
@@ -283,7 +283,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testNewMODProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+	public void testNewMODProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
 	{
 
 		String data = modProjectSequenz(modPrjctName);
@@ -302,7 +302,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testAddNoteToProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+	public void testAddNoteToProject() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
 	{
 				
 		String data = newProjectSequenz(addNotePrjctName);
@@ -328,7 +328,7 @@ class TestingCLI
 	}
 	
 	@Test
-	public void testKillStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+	public void testKillStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		
 		String data = newProjectSequenz(killStepPrjctName);
@@ -354,7 +354,7 @@ class TestingCLI
 	}
 
 	@Test
-	public void testNextStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+	public void testNextStep() throws InputArgumentException, JSONException, IOException, URISyntaxException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		
 		String data = newProjectSequenz(appendStpPrjctName);
@@ -395,7 +395,7 @@ class TestingCLI
 	}
 	
 	@Test
-	public void testNewProjectWithoutDeadline() throws JSONException, IOException, URISyntaxException, InputArgumentException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+	public void testNewProjectWithoutDeadline() throws JSONException, IOException, URISyntaxException, InputArgumentException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
 	{
 		
 		String data = newProjectSequenzNoDLDT(newPrjctNoDLDT);

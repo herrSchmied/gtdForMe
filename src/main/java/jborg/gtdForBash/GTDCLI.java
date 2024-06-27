@@ -105,7 +105,7 @@ public class GTDCLI implements Beholder<String>
 
 	public final int jsonPrintStyle = 4;
 	
-    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, InputArgumentException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, InputArgumentException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException
 	{
 
     	this.iss = iss;
@@ -184,12 +184,12 @@ public class GTDCLI implements Beholder<String>
     	System.out.println("Time: " + time + '\n');
     }
     
-    public static void main(String... args) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException, NaturalNumberException
+    public static void main(String... args) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
     
-    public void loopForCommands() throws NaturalNumberException, InputArgumentException, IOException, JSONException, URISyntaxException, StepTerminationException, ProjectTerminationException, SpawnStepException, SpawnProjectException, TimeGoalOfProjectException
+    public void loopForCommands() throws NaturalNumberException, InputArgumentException, IOException, JSONException, URISyntaxException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException
     {
     	
     	String px = BashSigns.boldBBCPX;
@@ -225,8 +225,7 @@ public class GTDCLI implements Beholder<String>
     			clicmd.executeCmd("");
     		}
     	}
-    	catch(CLICMDException | NaturalNumberException | InputArgumentException | SpawnProjectException |
-    			SpawnStepException | ProjectTerminationException | StepTerminationException | IOException |
+    	catch(CLICMDException | NaturalNumberException | InputArgumentException  | ProjectTerminationException | StepTerminationException | IOException |
     			TimeGoalOfProjectException e)
     	{
     		System.out.println(e);
@@ -246,7 +245,7 @@ public class GTDCLI implements Beholder<String>
     }
    
     
-	public void nxtStp(JSONObject pJSON) throws InputArgumentException, SpawnStepException, IOException
+	public void nxtStp(JSONObject pJSON) throws InputArgumentException, IOException
     {
     	ds.spawnStep(pJSON);
     }

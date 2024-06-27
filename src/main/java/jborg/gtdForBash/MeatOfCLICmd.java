@@ -11,7 +11,6 @@ import someMath.NaturalNumberException;
 public interface MeatOfCLICmd <R> extends Serializable
 {
 	
-	public R execute(String s) throws CLICMDException, SpawnProjectException, 
-	SpawnStepException, ProjectTerminationException, StepTerminationException, IOException,
+	public R execute(String s) throws CLICMDException, ProjectTerminationException, StepTerminationException, IOException,
 	TimeGoalOfProjectException, InputArgumentException, NaturalNumberException;
 }

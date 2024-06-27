@@ -14,11 +14,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-import allgemein.Beholder;
-
 import allgemein.LittleTimeTools;
 
-import allgemein.Subjekt;
 
 import consoleTools.*;
 
@@ -114,8 +111,6 @@ public class GTDDataSpawnSession
 	public static final String illAExceMsg = "Don't know that Beholder.";
 	
 	public static final String differentBDTQstn = "Do You want change BDT of Step?";
-
-	private ArrayList<Beholder<String>> observer = new ArrayList<Beholder<String>>();
 	
 	public static final String noteAddPhrase = "Write Note:";
 	public static final boolean notTxtAQstn = true;
@@ -193,12 +188,31 @@ public class GTDDataSpawnSession
 	
 	final InputStreamSession iss;
 	
+	/**
+	 * The Constructor
+	 * 
+	 * @param iss InputStreamSession which is a wrapped up InputStream
+	 * from System.in.
+	 */
 	public GTDDataSpawnSession(InputStreamSession iss)
 	{
 		this.iss = iss;
 	}
 	
-	public JSONObject spawnMODProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, IOException 
+	/**
+	 * This Method asks for Information for a Maybe-one-day(MOD) Project. It forces valid Data.
+	 * It receives Data via InputStreamSession It returns than a JSONObject with that Data. 
+	 * MOD-Projects don't have any Steps or Deadline. It is possible to make an MOD-Project to
+	 * an active Project by "Waking" it up There is Method that does that. The parameter: 
+	 * knownProjectNames is the list of forbidden Project Names. Otherwise it would cause 
+	 * problems when saving it. 
+	 * 
+	 * @param knownProjectsNames forbidden Names.
+	 * @param statusMGMT allowed Statuses for Projects.
+	 * @return JSONObject MOD-Project-Data.
+	 * @throws IOException only when something with the InputStreamSession goes wrong.
+	 */
+	public JSONObject spawnMODProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException 
 	{
 
 		System.out.println("");
@@ -247,7 +261,16 @@ public class GTDDataSpawnSession
 
 	}
 	
-	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws SpawnProjectException, TimeGoalOfProjectException, IOException, SpawnStepException
+	/**
+	 * Creates an active Project from Data it receives from The User via InputStreamSession.
+	 * It forces valid Data.
+	 * 
+	 * @param knownProjectsNames forbidden Names for the Project.
+	 * @param statusMGMT allowed Statuses for the Project.
+	 * @return JSONObject Project-Data.
+	 * @throws IOException only if something with the InputStreamSession goes wrong.
+	 */
+	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException
 	{
 		
 		System.out.println("");
@@ -316,14 +339,24 @@ public class GTDDataSpawnSession
 		{
 			TimeGoalOfProjectException tgope = new TimeGoalOfProjectException(prjctTimeOrGoalInvalidMsg);
 			System.out.println(tgope.getMessage());
-			
-			boolean qt = iss.forcedYesOrNo("Want to try again?");
 
-			if(qt)return spawnNewProject(knownProjectsNames, statusMGMT);//Force valide Time.;
-			else return null;
+			return spawnNewProject(knownProjectsNames, statusMGMT);//Force valide Time.;
 		}
 	}
 	
+	/**
+	 * Checks if Goal and the DateTimes make Sense.
+	 * The oldest DateTime is BirthDateTime (bdt). The equally old or younger NoteDownDateTime (nddt).
+	 * The youngest always younger than nddt is if exists DeadlineDateTime (dldt).
+	 * 
+	 * @param nddt NoteDownDateTime. Always close to now.
+	 * @param bdt BirthDateTime. Supposed to be the Time when Project was born.
+	 * @param dldt DeadlineDateTime. If exists it is the in the Future and will be checked from Time to time. If a "Check"
+	 * finds out dldt of Project X is no longer in the Future it will Terminate this Project.
+	 * @param goal. The Goal of Project can't be just whitespace or just nothing.
+	 * 
+	 * @return true if DateTimes make Sense and the Goal is not nothing or whitespace.
+	 */
 	private boolean timeAndGoalOfActiveProjectIsValide(LocalDateTime nddt, LocalDateTime bdt, 
 			LocalDateTime dldt, String goal)
 	{
@@ -351,7 +384,7 @@ public class GTDDataSpawnSession
 		return true;
 	}
 
-	public void spawnStep(JSONObject pJson) throws SpawnStepException, IOException
+	public void spawnStep(JSONObject pJson) throws IOException
 	{
 
 
@@ -370,7 +403,12 @@ public class GTDDataSpawnSession
 		{
 			steps = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 			oldStep = getLastStepOfProject(pJson);
-			if(!stepIsAlreadyTerminated(oldStep))throw new SpawnStepException(stepSpawnExceptionFormerStepIsntTerminated);
+			if(!stepIsAlreadyTerminated(oldStep))
+			{
+				System.out.println(stepSpawnExceptionFormerStepIsntTerminated);
+				spawnStep(pJson);
+				return;
+			}
 		}
 		
 		LocalDateTime nddtOfStep = LocalDateTime.now();
@@ -460,7 +498,11 @@ public class GTDDataSpawnSession
 			pJson.put(ProjectJSONKeyz.stepArrayKey, steps);
 			
 		}
-		else throw new SpawnStepException(stepSpawnExceptionStepAintValide);
+		else
+		{
+			System.out.println(stepSpawnExceptionStepAintValide);
+			spawnStep(pJson);
+		}
 	}
 
 	public boolean stepDataIsValide(JSONObject pJson, JSONObject oldStep, JSONObject newStep, int index)
@@ -580,7 +622,7 @@ public class GTDDataSpawnSession
 		}
 	}
 	
-	public void wakeMODProject(JSONObject pJson) throws IOException, InputArgumentException, TimeGoalOfProjectException, SpawnProjectException, SpawnStepException
+	public void wakeMODProject(JSONObject pJson) throws IOException, InputArgumentException
 	{
 		
 		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(pJson.getString(ProjectJSONKeyz.BDTKey));
@@ -609,7 +651,11 @@ public class GTDDataSpawnSession
 
 			spawnStep(pJson);//Here status will be overwritten.;
 		}
-		else throw new TimeGoalOfProjectException(prjctTimeOrGoalNotValide);
+		else
+		{
+			System.out.println(prjctTimeOrGoalNotValide);
+			wakeMODProject(pJson);
+		}
 	}
 	
 	public boolean stepIsAlreadyTerminated(JSONObject sJson)

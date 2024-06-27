@@ -75,7 +75,7 @@ public class CLICommand <O>
     	return cmdName;
     }
     
-    public O executeCmd(String argument) throws CLICMDException, NaturalNumberException, InputArgumentException, SpawnProjectException, SpawnStepException, ProjectTerminationException, StepTerminationException, IOException, TimeGoalOfProjectException
+    public O executeCmd(String argument) throws CLICMDException, NaturalNumberException, InputArgumentException, ProjectTerminationException, IOException, TimeGoalOfProjectException, StepTerminationException
     {
     	
     	if(mustHaveArgument&&argument.trim().equals("")) throw new CLICMDException(mustHaveArgumentStr);
