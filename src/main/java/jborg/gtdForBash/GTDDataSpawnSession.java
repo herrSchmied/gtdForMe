@@ -384,6 +384,15 @@ public class GTDDataSpawnSession
 		return true;
 	}
 
+	/**
+	 * Every non MOD-Project has at least one Step. With Project progress
+	 * more Steps might be noted. This Method provides the Data for Steps
+	 * it does so by asking the User via InputStreamSession.
+	 * 
+	 * @param pJson Project-Data. The Step belongs to that Project.
+	 * @throws IOException only if something with the InputStreamSession 
+	 * goes wrong.
+	 */
 	public void spawnStep(JSONObject pJson) throws IOException
 	{
 
@@ -391,10 +400,10 @@ public class GTDDataSpawnSession
 		JSONObject newStep = new JSONObject();
 		int index = getIndexOfLastStepInPrjct(pJson);
 		JSONObject oldStep;
-		
+		boolean isFirstStep = (index==firstStepIndex-1);
 		
 		JSONArray steps;
-		if(index== firstStepIndex-1)
+		if(isFirstStep)
 		{
 			steps = new JSONArray();
 			oldStep = null;
@@ -461,13 +470,13 @@ public class GTDDataSpawnSession
 		
 		if(gotDeadline)
 		{
-			if(index==firstStepIndex-1)
+			if(isFirstStep)
 			{
 				System.out.println(stpDLDTHintPrefix + prjctNDDT + stpDLDTHintMid  + prjctDeadLine);
 				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stpDeadlinePleasePhrase, ldtNDDTOfPrjct, prjctDLDTYear);
 				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
-			else
+			else //iss got other parameters
 			{
 				System.out.println("");
 				String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
@@ -489,7 +498,7 @@ public class GTDDataSpawnSession
 		newStep.put(StepJSONKeyz.NDDTKey, LittleTimeTools.timeString(nddtOfStep));
 		newStep.put(StepJSONKeyz.BDTKey, LittleTimeTools.timeString(bdtOfStep));
 		
-		if(stepDataIsValide(pJson, oldStep, newStep, index))
+		if(stepDataIsValide(pJson, newStep))
 		{
 			pJson.put(ProjectJSONKeyz.statusKey, stepStatus);//this overwrites old status!
 						
@@ -505,9 +514,22 @@ public class GTDDataSpawnSession
 		}
 	}
 
-	public boolean stepDataIsValide(JSONObject pJson, JSONObject oldStep, JSONObject newStep, int index)
+	/**
+	 * Checks if the DateTimes of the Project and the last two Steps make Sense.
+	 * 
+	 * @param pJson Project-Data. Before the new Step is noted in Project-JSON.
+	 * @param newStep last Step. Not noted in Project-JSON yet. Here to test if
+	 * that is Okay.
+	 * 
+	 * @return true if adding the new Step to Project doesn't create a Time Paradox.
+	 */
+	public boolean stepDataIsValide(JSONObject pJson, JSONObject newStep)
 	{
 	
+		int index = getIndexOfLastStepInPrjct(pJson);
+		JSONObject oldStep = null;
+		if(index>firstStepIndex)oldStep = getLastStepOfProject(pJson);
+			
 		String msg = stepIsOkToItsSelf(newStep);
 		System.out.println("");
 		if(!msg.equals(stepIsOkToItSelfMsg))
@@ -540,6 +562,16 @@ public class GTDDataSpawnSession
 		return true;
 	}
 	
+	/**
+	 * As the name suggest this Method checks if the Step given does not violate
+	 * Project Time Frame.
+	 * 
+	 * @param step not yet added to Project.
+	 * @param pJson Project-Data.
+	 *
+	 * @return boolean if and only if step does not violate the given Projects 
+	 * Time Frame by adding it to it.
+	 */
 	public String stepIsNotViolatingTimeframeOfProject(JSONObject step, JSONObject pJson)
 	{
 		
@@ -558,6 +590,15 @@ public class GTDDataSpawnSession
 		return stepIsNotViolatingTimeframeOfProjectMsg;
 	}
 
+	/**
+	 * A Simple Test if oldStep is terminated before newStep is born.
+	 * 
+	 * @param oldStep
+	 * @param newStep
+	 *
+	 * @return stepIsNotViolatingTimeframeOfFormerStepMsg if DateTimes are Okay.
+	 * else stepIsViolatingTimeframeOfFormerStepMsg.
+	 */
 	public String stepIsNotViolatingTimeframeOfFormerStep(JSONObject oldStep, JSONObject newStep)
 	{
 		
@@ -572,6 +613,14 @@ public class GTDDataSpawnSession
 		return stepIsNotViolatingTimeframeOfFormerStepMsg;
 	}
 	
+	/**
+	 * Checks if bdt, nddt and dldt make sense.
+	 * 
+	 * @param step Data in question.
+	 * 
+	 * @return if everything is alright: stepIsOkToItSelfMsg.
+	 * else some: stepIsNotOkayToItSelfMsgList.get(x).
+	 */
 	public String stepIsOkToItsSelf(JSONObject step)
 	{
 
@@ -594,7 +643,7 @@ public class GTDDataSpawnSession
 		
 		if(nddt.isBefore(born)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpNotedBeforeBorn);
 		
-		if(!deadLineStr.equals(stepDeadlineNone))
+		if(!deadLineStr.equals(stepDeadlineNone)&&!deadLineStr.equals(deadLineUnknownStr))
 		{
 			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(deadLineStr);
 			
@@ -605,6 +654,14 @@ public class GTDDataSpawnSession
 		return stepIsOkToItSelfMsg;
 	}
 	
+	/**
+	 * Receives A text from the User via InputStreamSession. If
+	 * the text is equal to whitespace only or just nothing. then
+	 * Nothing happens. Otherwise it adds a Note to the Root of
+	 * the Project JSONObject given.
+	 *
+	 * @param pJson to be edited.
+	 */
 	public void addNote(JSONObject pJson)
 	{
 		JSONArray ja;
@@ -622,7 +679,17 @@ public class GTDDataSpawnSession
 		}
 	}
 	
-	public void wakeMODProject(JSONObject pJson) throws IOException, InputArgumentException
+	/**
+	 * Wakes MOD-Project up. This means it has a first Step
+	 * a new Status and maybe deadline after this. Answers
+	 * are forced via InputStreamSession.
+	 * 
+	 * @param pJson MOD-Project Data.
+	 
+	 * @throws IOException
+	 * @throws InputArgumentException
+	 */
+	public void wakeMODProject(JSONObject pJson) throws IOException
 	{
 		
 		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(pJson.getString(ProjectJSONKeyz.BDTKey));
@@ -632,12 +699,12 @@ public class GTDDataSpawnSession
 		String nddtStr = LittleTimeTools.timeString(nddt);
 
 		System.out.println("");
-		boolean gotDLDT = iss.getYesOrNo(prjctDeadlineQuestion);
+		boolean gotDLDT = iss.forcedYesOrNo(prjctDeadlineQuestion);
 		
 		String deadLineStr = "";
 		if(gotDLDT)
 		{
-			dldt = iss.getDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+			dldt = iss.forcedDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
 			deadLineStr = LittleTimeTools.timeString(dldt);
 		}
 		else deadLineStr = prjctDeadlineNone;
@@ -658,6 +725,13 @@ public class GTDDataSpawnSession
 		}
 	}
 	
+	/**
+	 * Simple check if Status of Step is a terminal one.
+	 * 
+	 * @param sJson Step Data.
+	 * 
+	 * @return true if Status of Step is a terminal one.
+	 */
 	public boolean stepIsAlreadyTerminated(JSONObject sJson)
 	{
 		
