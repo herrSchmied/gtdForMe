@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -161,6 +160,16 @@ public class GTDDataSpawnSession
 	public static final String prjctTDTAfterNow = "TDT can't be after now.";
 	
 	public static final String stepIsOkToItSelfMsg = "Step is Ok to it Self.";
+	
+	public static final String lastStepIsNotTerminated = "Last Step is not Terminated.";
+	public static final String projectHasNoStepArrayOrHasNoSteps = "Project Has no Step Array or Has no Steps.";
+	public static final String cantTerminateNullDataProjectJSONObject = "Can't Terminate Null. Project JSON-Object is Null.";
+
+	public static final String prjctJSONIsNull = "Project JSON is Null.";
+	public static final String stepJSONIsNull = "Project JSON is Null.";
+	public static final String prjctAlreadyTerminated = "Project Already Terminated.";
+	public static final String stepAlreadyTerminated = "Step Already Terminated.";
+
 	
 	List<String> stepIsNotOkayToItSelfMsgList = 
 			new ArrayList<>(Arrays.asList("Step is Born after Now.",
@@ -337,9 +346,7 @@ public class GTDDataSpawnSession
 		}
 		else
 		{
-			TimeGoalOfProjectException tgope = new TimeGoalOfProjectException(prjctTimeOrGoalInvalidMsg);
-			System.out.println(tgope.getMessage());
-
+			System.out.println(prjctTimeOrGoalInvalidMsg);
 			return spawnNewProject(knownProjectsNames, statusMGMT);//Force valide Time.;
 		}
 	}
@@ -687,7 +694,6 @@ public class GTDDataSpawnSession
 	 * @param pJson MOD-Project Data.
 	 
 	 * @throws IOException
-	 * @throws InputArgumentException
 	 */
 	public void wakeMODProject(JSONObject pJson) throws IOException
 	{
@@ -745,12 +751,47 @@ public class GTDDataSpawnSession
 		return false;
 	}
 
-	public void terminateStep(JSONObject pJson) throws IOException, InputArgumentException, StepTerminationException
+	/**
+	 * Might terminate the last Step of Project. Obstacles are:
+	 * 1.Project or last Step already Terminated.
+	 * 2.Project has no StepArray or no last Step.
+	 *
+	 * It asks Questions about Termination and forces Them via
+	 * InputStreamSession. Then finally it alters the JSONData
+	 * of that Project.
+	 * 
+	 * @param pJson the Project(-Data) in question.
+	 * 
+	 * @throws IOException only if something with InputStreamSession goes wrong.
+	 */
+	public void terminateStep(JSONObject pJson) throws IOException
 	{
+
+		if(pJson==null)
+		{
+			System.out.println(prjctJSONIsNull);
+			return;
+		}
+		
+		if(projectIsAlreadyTerminated(pJson))
+		{
+			System.out.println(prjctAlreadyTerminated);
+			return;
+		}
 
 		JSONObject sJson = getLastStepOfProject(pJson);
 		
-		if(stepIsAlreadyTerminated(sJson))throw new StepTerminationException(stpTerminationExceptionMsg);
+		if(sJson==null)
+		{
+			System.out.println(stepJSONIsNull);
+			return;
+		}
+
+		if(stepIsAlreadyTerminated(sJson))
+		{
+			System.out.println(stepAlreadyTerminated);
+			return;
+		}
 
 		LocalDateTime jetzt = LocalDateTime.now();
 		String jetztStr = LittleTimeTools.timeString(jetzt);
@@ -758,36 +799,38 @@ public class GTDDataSpawnSession
 		String nddtOfStepStr = sJson.getString(StepJSONKeyz.NDDTKey);
 		LocalDateTime nddtOfStep = LittleTimeTools.LDTfromTimeString(nddtOfStepStr);
 		
-		boolean wasItASuccess = iss.getYesOrNo(stepSuccesQstn);
+		boolean wasItASuccess = iss.forcedYesOrNo(stepSuccesQstn);
 
 		String stepStatus;
 		if(wasItASuccess)stepStatus = StatusMGMT.success;
 		else stepStatus = StatusMGMT.failed;
 		
-		try
+		String terminalNote = "";
+		boolean thereIsATerminalNote = iss.forcedYesOrNo(wantToMakeTerminalNotePhrase);
+		if(thereIsATerminalNote)terminalNote = iss.forcedString(stepTerminationNotePhrase);
+			
+		LocalDateTime tdt = LocalDateTime.now();
+		boolean wantToChangeTDTOfStep = iss.forcedYesOrNo(wantToChangeTDTOfStepQstn);
+		if(wantToChangeTDTOfStep)
 		{
-			String terminalNote = "";
-			boolean thereIsATerminalNote = iss.getYesOrNo(wantToMakeTerminalNotePhrase);
-			if(thereIsATerminalNote)terminalNote = iss.getString(stepTerminationNotePhrase);
-			
-			LocalDateTime tdt = LocalDateTime.now();
-			boolean wantToChangeTDTOfStep = iss.getYesOrNo(wantToChangeTDTOfStepQstn);
-			if(wantToChangeTDTOfStep)
-			{
-				System.out.println(stpTDTHintPrefix + nddtOfStepStr + stpTDTHintMid + jetztStr);
-				tdt = iss.getDateTimeInOneLine(stepWhenTDTQstn, nddtOfStep, jetzt);
-			}
-			
-			sJson.put(StepJSONKeyz.statusKey, stepStatus);
-			pJson.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
-			String when = LittleTimeTools.timeString(tdt);
-			sJson.put(StepJSONKeyz.TDTKey, when);
-			if(!terminalNote.trim().equals(""))sJson.put(StepJSONKeyz.TDTNoteKey, terminalNote);
+			System.out.println(stpTDTHintPrefix + nddtOfStepStr + stpTDTHintMid + jetztStr);
+			tdt = iss.forcedDateTimeInOneLine(stepWhenTDTQstn, nddtOfStep, jetzt);
 		}
-		catch(IllegalArgumentException exc) { throw new StepTerminationException(stepTExcIllglArmntPrefix + exc); }
-		catch(JSONException jsonExc) { throw new StepTerminationException(stepTExcJSONErrorMsg); }
+			
+		sJson.put(StepJSONKeyz.statusKey, stepStatus);
+		pJson.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
+		String when = LittleTimeTools.timeString(tdt);
+		sJson.put(StepJSONKeyz.TDTKey, when);
+		if(!terminalNote.trim().equals(""))sJson.put(StepJSONKeyz.TDTNoteKey, terminalNote);
 	}
 
+	/**
+	 * Simple Check does what the Name suggests.
+	 *
+	 * @param pJson Project-Data.
+	 *
+	 * @return the answer to the question: "Is Project Terminated".
+	 */
 	public boolean projectIsAlreadyTerminated(JSONObject pJson)
 	{
 		
@@ -801,42 +844,90 @@ public class GTDDataSpawnSession
 		return false;
 	}
 	
-	public void terminateProject(JSONObject pJson) throws InputArgumentException, JSONException, IOException, ProjectTerminationException
+	/**
+	 * If U Invoke this Method a give it a Project JSONObject. It will ask
+	 * a few Informations from U. If the Project isn't already Terminated.
+	 * I which case it wouldn't do anything. It forces u to give some
+	 * Information about the Termination and then change the Status of the
+	 * Project according to that. Infos are transfered via 
+	 * InputStreamSession
+	 *
+	 * @param pJson JSONObject Project-Data.
+	 * 
+	 * @throws IOException if something goes wrong with the InputStreamSession.
+	 */
+	public void terminateProject(JSONObject pJson) throws IOException
 	{
 		
-		if(projectIsAlreadyTerminated(pJson)) throw new ProjectTerminationException(prjctTExcAllreadyDeadMsg);
+		if(pJson==null)
+		{
+			System.out.println(cantTerminateNullDataProjectJSONObject);
+			return;
+		}
 
+		if(projectIsAlreadyTerminated(pJson)) 
+		{
+			System.out.println(prjctTExcAllreadyDeadMsg);
+			return;
+		}
+
+		JSONObject stepJson = getLastStepOfProject(pJson);
+		
+		if(stepJson==null)
+		{
+			System.out.println(projectHasNoStepArrayOrHasNoSteps);
+			return;
+		}
+		
+		if(!stepIsAlreadyTerminated(stepJson))
+		{
+			System.out.println(lastStepIsNotTerminated);
+			return;
+		}
+		
+		
 		System.out.println(infoAlertTxtPhrase);
 		
 		
 		LocalDateTime jetzt = LocalDateTime.now();
 		
 		String prjctStatus = "";
-		boolean success = iss.getYesOrNo(prjctSuccessQstn);
+		boolean success = iss.forcedYesOrNo(prjctSuccessQstn);
 			
 		if(success)prjctStatus = StatusMGMT.success;
 		else prjctStatus = StatusMGMT.failed;
-
-			
+		
 		String terminalNote = "";
-		boolean wantToMakeTDTNoteQuestion = iss.getYesOrNo(wantToMakeTDTNoteQstn);
+		boolean wantToMakeTDTNoteQuestion = iss.forcedYesOrNo(wantToMakeTDTNoteQstn);
 		if(wantToMakeTDTNoteQuestion) terminalNote = iss.getString(prjctTDTNoteQstn);
 				
-		boolean wantChangeTDTQuestion = iss.getYesOrNo(wantToChangeTDTOfPrjctQstn);
+		boolean wantChangeTDTQuestion = iss.forcedYesOrNo(wantToChangeTDTOfPrjctQstn);
 		LocalDateTime tdt = jetzt;
-		if(wantChangeTDTQuestion)tdt = iss.getDateTimeInOneLine(prjctWhenTDTQstn,ancient, jetzt);
+		if(wantChangeTDTQuestion)tdt = iss.forcedDateTimeInOneLine(prjctWhenTDTQstn,ancient, jetzt);
 
 		String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
 		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
 				
-		if(tdt.isAfter(dldt))throw new ProjectTerminationException(prjctTDTAfterDLDTMsg);
+		if(tdt.isAfter(dldt))
+		{
+			System.out.println(prjctTDTAfterDLDTMsg);
+			return;
+		}
 				
 		String nddtStr = pJson.getString(ProjectJSONKeyz.NDDTKey);
 		LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
 				
-		if(tdt.isBefore(nddt))throw new ProjectTerminationException(prjctTDTBeforeNDDT);
+		if(tdt.isBefore(nddt))
+		{
+			System.out.println(prjctTDTBeforeNDDT);
+			return;
+		}
 			
-		if(tdt.isAfter(jetzt))throw new ProjectTerminationException(prjctTDTAfterNow);
+		if(tdt.isAfter(jetzt))
+		{
+			System.out.println(prjctTDTAfterNow);
+			return;
+		}
 				
 		pJson.put(ProjectJSONKeyz.statusKey, prjctStatus);
 				
@@ -846,6 +937,15 @@ public class GTDDataSpawnSession
 		if(!terminalNote.trim().equals(""))pJson.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);
 	}
 	
+	/**
+	 * Returns the Index of last(youngest) Step JSON Object in
+	 * Project JSON Object. If there is no StepArray or no Steps
+	 * it returns a negative value;
+	 * 
+	 * @param pJson Project-Data.
+	 * 
+	 * @return int index of last Step.
+	 */
 	public int getIndexOfLastStepInPrjct(JSONObject pJson)
 	{
 		JSONArray stepArray;
@@ -859,10 +959,21 @@ public class GTDDataSpawnSession
 		return firstStepIndex-1;
 	}
 	
+	/**
+	 * This gets u the last (youngest) step of the Project in question.
+	 * If for some Reason the Project has no StepArray or no Step JSON
+	 * Objects in that Array it returns null.
+	 * 
+	 * @param pJson Project JSONObject
+	 * 
+	 * @return step JSONObject
+	 */
 	public JSONObject getLastStepOfProject(JSONObject pJson)
 	{
-		JSONArray stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 		int indexOfLastStep = getIndexOfLastStepInPrjct(pJson);
+		if(indexOfLastStep<firstStepIndex)return null;
+		
+		JSONArray stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 
 		return stepArray.getJSONObject(indexOfLastStep);
 	}

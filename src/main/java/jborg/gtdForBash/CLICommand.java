@@ -3,7 +3,6 @@ package jborg.gtdForBash;
 
 import java.io.IOException;
 
-import consoleTools.InputArgumentException;
 import someMath.NaturalNumberException;
 
 
@@ -75,7 +74,7 @@ public class CLICommand <O>
     	return cmdName;
     }
     
-    public O executeCmd(String argument) throws CLICMDException, NaturalNumberException, InputArgumentException, ProjectTerminationException, IOException, TimeGoalOfProjectException, StepTerminationException
+    public O executeCmd(String argument) throws CLICMDException, NaturalNumberException, IOException
     {
     	
     	if(mustHaveArgument&&argument.trim().equals("")) throw new CLICMDException(mustHaveArgumentStr);

@@ -13,24 +13,16 @@ import java.nio.file.Path;
 
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.HashMap;
 
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import allgemein.ExactPeriode;
 import allgemein.Beholder;
 
 import allgemein.LittleTimeTools;
@@ -40,8 +32,6 @@ import consoleTools.BashSigns;
 import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
 
-import consoleTools.TerminalTableDisplay;
-/* */
 import someMath.NaturalNumberException;
 
 import static fileShortCuts.TextAndObjSaveAndLoad.*;
@@ -56,7 +46,7 @@ public class GTDCLI implements Beholder<String>
 	private final String statesFileName = "statusMGMT.states";
 	private final StatusMGMT states = loadStates();
 	
-	private final List<String> history = new ArrayList<>();
+	//private final List<String> history = new ArrayList<>();
 	
 	public static final String projectDataFolderRelativePath = "projectDATA/";
 	private static final String actionLog = "activityLog";
@@ -105,7 +95,7 @@ public class GTDCLI implements Beholder<String>
 
 	public final int jsonPrintStyle = 4;
 	
-    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, InputArgumentException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException
+    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
     	this.iss = iss;
@@ -184,12 +174,12 @@ public class GTDCLI implements Beholder<String>
     	System.out.println("Time: " + time + '\n');
     }
     
-    public static void main(String... args) throws IOException, URISyntaxException, InputArgumentException, JSONException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException, NaturalNumberException
+    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
     
-    public void loopForCommands() throws NaturalNumberException, InputArgumentException, IOException, JSONException, URISyntaxException, StepTerminationException, ProjectTerminationException, TimeGoalOfProjectException
+    public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException
     {
     	
     	String px = BashSigns.boldBBCPX;
@@ -221,12 +211,11 @@ public class GTDCLI implements Beholder<String>
     		{
     			System.out.println('\n'+unknownCmdStr);
     			System.out.println(hereAListOfCmds);
-    			CLICommand<?> clicmd = commandMap.get(scds.list_commands);
+    			CLICommand<?> clicmd = commandMap.get(SomeCommands.list_commands);
     			clicmd.executeCmd("");
     		}
     	}
-    	catch(CLICMDException | NaturalNumberException | InputArgumentException  | ProjectTerminationException | StepTerminationException | IOException |
-    			TimeGoalOfProjectException e)
+    	catch(CLICMDException | NaturalNumberException | IOException e)
     	{
     		System.out.println(e);
     	}

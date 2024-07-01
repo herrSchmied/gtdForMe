@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -81,7 +80,6 @@ public class SomeCommands
 	private final String projectIsNotActive = "Project is not active.";
 	private final String sorryDeadlineAbuse = "Sorry Deadline Abuse.";
 	private final String noPrjctFound = "No Projects found.";
-	private final String noNotMODProjects = "Not Not Mod Projects.";
 	private final String noMODProjects = "No MOD Projects.";
 	private final String noActiveProjects = "No active Projects!";
 	private final String noNotActiveProjects = "No not active Projects!";
@@ -154,11 +152,8 @@ public class SomeCommands
     	return false;
     }    
 
-    private final GTDCLI cli;
     private final InputStreamSession iss;
     private final Map<String, JSONObject> knownProjects;
-    private final StatusMGMT states;
-    private final GTDDataSpawnSession ds;
     
     private final Predicate<JSONObject> isMODProject;
 
@@ -167,26 +162,17 @@ public class SomeCommands
 	private final Predicate<JSONObject> stepIsTerminated;
 
 	private final Predicate<JSONObject> activeProject;
-
-	private final Predicate<JSONObject> notActiveProject;
 	
 	private final Predicate<String> activePrjctName;
 	
 	private final Predicate<String> notActivePrjctName;
-	
-	private final Predicate<String> modPrjctName;
-	
-	private final Predicate<String> noModPrjctName;
 
 	public SomeCommands(GTDCLI cli, Map<String, JSONObject> knownProjects, StatusMGMT states, 
     		GTDDataSpawnSession ds, SimpleLogger sLog)
     {
 
-    	this.cli = cli;
     	this.iss = cli.getInputStreamSession();
     	this.knownProjects = knownProjects;
-    	this.states = states;
-    	this.ds = ds;
     	
 	    isMODProject = (pJSON)->
 	    {
@@ -227,13 +213,6 @@ public class SomeCommands
 			
 			return true;
 		};
-
-		notActiveProject = (jo)-> 
-		{
-			if(!knownProjects.containsValue(jo))return false;//Is a must!!
-			
-			return !activeProject.test(jo);
-		};
 		
 		activePrjctName = (s)->
 		{
@@ -249,22 +228,6 @@ public class SomeCommands
 			if(!knownProjects.containsKey(s)) return false;//Is a must!!
 			
 			return !activePrjctName.test(s);
-		};
-
-		modPrjctName = (s)->
-		{
-			if(!knownProjects.containsKey(s))return false;
-			
-			JSONObject pJSON = knownProjects.get(s);
-			
-			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-			
-			return status.equals(StatusMGMT.mod);
-		};
-		
-		noModPrjctName = (s)->
-		{
-			return !modPrjctName.test(s);
 		};
 
     	checkAllForDLDTAbuse();
