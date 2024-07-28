@@ -19,9 +19,6 @@ import allgemein.LittleTimeTools;
 import consoleTools.*;
 
 /**
- * @author John Bernard
- * @author johnbernard@gmx.net
- * 
  * This class is to get the Information needed to Setup
  * Projects or to note progress in those Projects. It
  * also has Methods to note termination of "Steps taken
@@ -29,53 +26,100 @@ import consoleTools.*;
  * both cases of termination it asks if it was a success
  * or a fail. Further more there it is possible to 
  * attache notes to a Project. And it's all done via
- * Console.
+ * 
+ * @author John Bernard
+ * @author johnbernard@gmx.net
  */
 public class GTDDataSpawnSession
 {
+	
+	/** Project Name Error prompt.*/
+	public static final String prjctNameError = "Name already in use.";	
+	/** Project time and/or Goal not valid Error.*/
+	public static final String prjctTimeOrGoalNotValideError = "Time and/or Goal of Project not valide.";
+	/** Project time Error Array.*/
+	public static final String prjctTimeError[] = new String[] 
+			{"Project needs Deadline.", "Project dead before Living.", "Project Born after Now.", 
+					"Project needs a Goal."};
+	/** Project time Error index, Project needs DLDT*/
+	public static final int indexOfPrjctTimeErrorNeedsDLDT = 0;
+	/** Project time Error index, Project dead before born.*/
+	public static final int indexOfPrjctTimeErrorDeadBeforeBorn = 1;
+	/** Project time Error index, Project born after now.*/
+	public static final int indexOfPrjctTimeErrorBornAfterNow = 2;
+	/** Project time Error index, Project needs valid Goal.*/
+	public static final int indexOfPrjctTimeErrorNeedsGoal = 3;
 
-	public static final int minMinutesInFutureDLDT = 5;
-	public static final int maxYearsInFutureDLDT = 100;
-	
-	public static final int firstStepIndex = 0;
-	
-	public static final String time = "Time";
-
-	public static final String prjctDeadlineQuestion = "Project got Deadline?";
-	public static final String prjctDeadlineNone = "No got no Deadline!";
-	
-	public static final String prjctTimeOrGoalNotValide = "Time and/or Goal of Project not valide.";
+	/** Project Min. Deadline Prefix*/
 	public static final String prjctDLDTHintPrefix = "Project Deadline. Min.: ";
+	/** Project Minutes in Future Max. Prefix.*/
 	public static final String prjctDLDTHintMid = " Minutes in Future. Max.: ";
+	/** Project Years in Future Suffix.*/
 	public static final String prjctDLDTHintSuffix = " Years in Future.";
 	
+	/** First Step Deadline Min. Prefix.*/
 	public static final String stpDLDTHintPrefix = "\nDeadline must be between Projec NDDT: ";
+	/** First Step Deadline Max. Prefix.*/
 	public static final String stpDLDTHintMid = " and Project Deadline: ";
 	
+	/** Later than First Step Deadline Min. Prefix.*/
 	public static final String extrStpDLDTHintPrefix = "Deadline must be between old-Step TDT: ";
+	/** Later than First Step Deadline Max. Prefix.*/
 	public static final String extrStpDLDTHintMid = " and Project Deadline: ";
 	
 	public static final String stpTDTHintPrefix = "TDT must be between ";
 	public static final String stpTDTHintMid = " and ";
-	
-	public static final String prjctNotValide[] = new String[] 
-			{"Project needs Deadline.", "Project dead before Living.", "Project Born after Now.", 
-					"Project needs a Goal."};
-	public static final int indexOfPrjctNeedsDLDT = 0;
-	public static final int indexOfPrjctDeadBeforeBorn = 1;
-	public static final int indexOfPrjctBornAfterNow = 2;
-	public static final int indexOfPrjctNeedsGoal = 3;
-	
+		
 	public static final String stepTerminationNotePhrase = "Termination Note:";
 	public static final String wantToMakeTerminalNotePhrase = "want to make a Terminal note?";
-	
-	public static final String notValide = "Name or Goal not valide.";
 
-	public static final String prjctNameQ = "Project Name: ";
-	public static final String prjctNameError = "Name already in use.";	
-	public static final String goalQ = "Goal of Project: ";
+	/** Question Prompt if u want to Change Project BDT.*/
 	public static final String changeBDTQ = "Want to change Birthdatetime of Project? ";
-	public static final String bdtQ = "BDT of Project:";
+	/** Question if there is a Project Deadline, Prompt.*/
+	public static final String isThereAPrjctDeadlineQ = "Project got Deadline?";
+	/** Question if TDT needs to be changed?*/
+	public final static String wantToChangeTDTOfPrjctQ = "Wan't to change TDT of Project?";
+	/** Question prompt.*/
+	public final static String prjctSuccessQ = "Was Project a Success?";
+
+	/** Project Name Request prompt.*/
+	public static final String prjctNameR = "Project Name: ";
+	/** Goal of Project Request prompt.*/
+	public static final String goalR = "Goal of Project: ";
+	/** BDT Request prompt.*/
+	public static final String bdtR = "BDT of Project:";
+	/** Project Deadline LDT Request, Prompt.*/
+	public static final String prjctDLDTR = "Deadline for Project please!";
+	/** Project Termination Note Request, Prompt.*/
+	public final static String prjctTDTNoteR = "Please type ur TDT-Note?";
+	/** Project TDT Request, Prompt.*/
+	public final static String prjctWhenTDTR = "When took the Termination of this Project place?";
+
+	/** Possible Project Deadline Status.*/
+	public static final String prjctDeadlineNone = "No got no Deadline!";
+
+	/** Step got Deadline Question, Prompt.*/
+	public final static String stepDeadlineQ = "Step got Deadline?";
+	/** Step got Success Question, Prompt.*/
+	public static final String stepSuccessQ = "Was Step a Success?";
+
+	/** Step TDT Request, Prompt.*/
+	public final static String stepWhenTDTR = "When took the Termination of this Step place?";
+	/** Step Desc Request, Prompt.*/
+	public static final String stepDescR = "Describe Step:";
+	/** Step Deadline Request, Prompt.*/
+	public static final String stepDeadlineR = "Step DeadLine Please.";
+
+	/** Possible Status for Step Deadline*/
+	public final static String stepDeadlineNone = "No Step Deadline!";	
+
+	/** first Step Index.*/
+	public static final int firstStepIndex = 0;
+
+	/** The minimal Minutes a Deadline has to be in the Future*/
+	public static final int minMinutesInFutureDLDT = 5;
+	/** The maximal Years a Deadline can be in the Future*/
+	public static final int maxYearsInFutureDLDT = 100;
 	
 	public static final int maxDLDTYear = 2020;
 	public static final int minBDTYear = 1800;
@@ -83,29 +127,16 @@ public class GTDDataSpawnSession
 	public static final int minDay = 1;
 	public static final int minHour = 0;
 	public static final int minMinute = 0;
+
+	/** Min. LocalDateTime for BirthDateTime.*/
 	public static final LocalDateTime ancient = LocalDateTime.of(minBDTYear, minMonth, minDay, minHour, minMinute);
+	
+	/** Max. LocalDateTime a Deadline can be in the Future.*/
 	public static final LocalDateTime farInFuture = LocalDateTime.of(maxDLDTYear, minMonth, minDay, minHour, minMinute);
 
-	public static final String dldtQ = "Deadline for Project?";
 	public static final int dldtRange = 100;
 	
-	public final static String prjctTDTNoteQstn = "Please type ur TDT-Note?";
-	public final static String prjctWhenTDTQstn = "When took the Termination of this Project place?";
-	public final static String wantToChangeTDTOfPrjctQstn = "Wan't to change TDT of Project?";
-	public final static String prjctSuccessQstn = "Was Project a Success?";
-	
-	public static final String btnTxtChangeBDT = "Change BDT";
-	public static final String changingBDTInputPhrase = "Determining BDT";
-	
-	public final static String stepDeadlineQuestion = "Step got Deadline?";
-	public final static String stepDeadlineNone = "No Step Deadline!";
-	
-	public final static String stepWhenTDTQstn = "When took the Termination of this Step place?";
-	public static final String stepDescPhrase = "Describe Step:";
-	public static final String descStepInputTitle = "Description";
-	public static final String stepSuccesQstn = "Was Step a Success?";
-	public static final String stpDeadlinePleasePhrase = "Step DeadLine Please.";
-	
+
 	
 	public static final String illAExceMsg = "Don't know that Beholder.";
 	
@@ -140,7 +171,6 @@ public class GTDDataSpawnSession
 	public static final String invalideStep = "Invalide Step.";
 	
 	public static final String deadLineUnknownStr = "UNKNOWN";
-	public static final String prjctTimeOrGoalInvalidMsg = "Time and/or Goal ain't valide for this Project.";
 	public static final String stepSpawnExceptionFormerStepIsntTerminated = "Sorry former Step isn't Terminated.";
 	public static final String stepSpawnExceptionStepAintValide = "Step ain't valide";
 
@@ -225,7 +255,7 @@ public class GTDDataSpawnSession
 	{
 
 		System.out.println("");
-		String name = iss.forcedString(prjctNameQ);
+		String name = iss.forcedString(prjctNameR);
 		name = name.trim();
 		if(knownProjectsNames.contains(name))
 		{
@@ -241,7 +271,7 @@ public class GTDDataSpawnSession
 
 			
 		System.out.println("");
-		String goal = iss.getString(goalQ);
+		String goal = iss.getString(goalR);
 			
 		System.out.println("");
 		boolean changeBDT = iss.forcedYesOrNo(changeBDTQ);
@@ -250,7 +280,7 @@ public class GTDDataSpawnSession
 		if(changeBDT)
 		{
 			System.out.println("");
-			bdt = iss.forcedDateTimeInOneLine(bdtQ, ancient, jetzt);//must be born before now.
+			bdt = iss.forcedDateTimeInOneLine(bdtR, ancient, jetzt);//must be born before now.
 		}
 		else bdt = nddt;
 				
@@ -283,7 +313,7 @@ public class GTDDataSpawnSession
 	{
 		
 		System.out.println("");
-		String name = iss.forcedString(prjctNameQ);
+		String name = iss.forcedString(prjctNameR);
 		name = name.trim();
 		if(knownProjectsNames.contains(name))
 		{
@@ -299,7 +329,7 @@ public class GTDDataSpawnSession
 		LocalDateTime dldt = null;
 			
 		System.out.println("");
-		String goal = iss.forcedString(goalQ);
+		String goal = iss.forcedString(goalR);
 
 		System.out.println("");
 		boolean changeBDT = iss.forcedYesOrNo(changeBDTQ);
@@ -308,7 +338,7 @@ public class GTDDataSpawnSession
 		{
 			
 			System.out.println("");
-			bdt = iss.forcedDateTimeInOneLine(bdtQ, ancient, LocalDateTime.now());//must be born before now.
+			bdt = iss.forcedDateTimeInOneLine(bdtR, ancient, LocalDateTime.now());//must be born before now.
 		}
 		else bdt = nddt;
 				
@@ -324,14 +354,14 @@ public class GTDDataSpawnSession
 		String nddtStr = LittleTimeTools.timeString(nddt);
 		pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 
-		boolean gotDLDT = iss.forcedYesOrNo(prjctDeadlineQuestion);
+		boolean wantDLDT = iss.forcedYesOrNo(isThereAPrjctDeadlineQ);
 		
-		if(gotDLDT)
+		if(wantDLDT)
 		{
 			System.out.println("");
 			System.out.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
 			
-			dldt = iss.forcedDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
 			String deadLineStr = LittleTimeTools.timeString(dldt);
 			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 		}
@@ -346,7 +376,7 @@ public class GTDDataSpawnSession
 		}
 		else
 		{
-			System.out.println(prjctTimeOrGoalInvalidMsg);
+			System.out.println(prjctTimeOrGoalNotValideError);
 			return spawnNewProject(knownProjectsNames, statusMGMT);//Force valide Time.;
 		}
 	}
@@ -370,7 +400,7 @@ public class GTDDataSpawnSession
 		
 		if(dldt!=null&&bdt.isAfter(dldt))//Maybe it is mod Project!!!
 		{
-			System.out.println(prjctNotValide[indexOfPrjctDeadBeforeBorn]);
+			System.out.println(prjctTimeError[indexOfPrjctTimeErrorDeadBeforeBorn]);
 			return false;
 		}
 		
@@ -378,13 +408,13 @@ public class GTDDataSpawnSession
 		
 		if(jetzt.isBefore(bdt))
 		{
-			System.out.println(prjctNotValide[indexOfPrjctBornAfterNow]);
+			System.out.println(prjctTimeError[indexOfPrjctTimeErrorBornAfterNow]);
 			return false;
 		}
 		
 		if(goal.trim().equals(""))
 		{
-			System.out.println(prjctNotValide[indexOfPrjctNeedsGoal]);
+			System.out.println(prjctTimeError[indexOfPrjctTimeErrorNeedsGoal]);
 			return false;
 		}
 		
@@ -459,7 +489,7 @@ public class GTDDataSpawnSession
 					
 		String phrase;
 		if(stepStatus.equals(StatusMGMT.waiting))phrase = waitingForPhrase;
-		else phrase = stepDescPhrase;
+		else phrase = stepDescR;
 
 		String descriptionOfStep = iss.getString(phrase);
 		
@@ -473,14 +503,14 @@ public class GTDDataSpawnSession
 		if(!prjctDeadLine.equals(prjctDeadlineNone))prjctDLDTYear = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
 		else prjctDLDTYear = farInFuture;
 		
-		boolean gotDeadline = iss.forcedYesOrNo(stepDeadlineQuestion);
+		boolean gotDeadline = iss.forcedYesOrNo(stepDeadlineQ);
 		
 		if(gotDeadline)
 		{
 			if(isFirstStep)
 			{
 				System.out.println(stpDLDTHintPrefix + prjctNDDT + stpDLDTHintMid  + prjctDeadLine);
-				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stpDeadlinePleasePhrase, ldtNDDTOfPrjct, prjctDLDTYear);
+				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stepDeadlineR, ldtNDDTOfPrjct, prjctDLDTYear);
 				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
 			else //iss got other parameters
@@ -489,7 +519,7 @@ public class GTDDataSpawnSession
 				String oldStepTDT = oldStep.getString(StepJSONKeyz.TDTKey);
 				System.out.println(extrStpDLDTHintPrefix + oldStepTDT + extrStpDLDTHintMid + prjctDeadLine);
 				LocalDateTime ldtOldStepTDT = LittleTimeTools.LDTfromTimeString(oldStepTDT);
-				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stpDeadlinePleasePhrase, ldtOldStepTDT, prjctDLDTYear);
+				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stepDeadlineR, ldtOldStepTDT, prjctDLDTYear);
 				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 			}
 		}
@@ -600,8 +630,8 @@ public class GTDDataSpawnSession
 	/**
 	 * A Simple Test if oldStep is terminated before newStep is born.
 	 * 
-	 * @param oldStep
-	 * @param newStep
+	 * @param oldStep former Step of a Project
+	 * @param newStep successor of oldStep.
 	 *
 	 * @return stepIsNotViolatingTimeframeOfFormerStepMsg if DateTimes are Okay.
 	 * else stepIsViolatingTimeframeOfFormerStepMsg.
@@ -693,7 +723,7 @@ public class GTDDataSpawnSession
 	 * 
 	 * @param pJson MOD-Project Data.
 	 
-	 * @throws IOException
+	 * @throws IOException only when something goes wrong with InputStreamSession.
 	 */
 	public void wakeMODProject(JSONObject pJson) throws IOException
 	{
@@ -705,12 +735,12 @@ public class GTDDataSpawnSession
 		String nddtStr = LittleTimeTools.timeString(nddt);
 
 		System.out.println("");
-		boolean gotDLDT = iss.forcedYesOrNo(prjctDeadlineQuestion);
+		boolean gotDLDT = iss.forcedYesOrNo(isThereAPrjctDeadlineQ);
 		
 		String deadLineStr = "";
 		if(gotDLDT)
 		{
-			dldt = iss.forcedDateTimeInOneLine(dldtQ, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
 			deadLineStr = LittleTimeTools.timeString(dldt);
 		}
 		else deadLineStr = prjctDeadlineNone;
@@ -726,7 +756,7 @@ public class GTDDataSpawnSession
 		}
 		else
 		{
-			System.out.println(prjctTimeOrGoalNotValide);
+			System.out.println(prjctTimeOrGoalNotValideError);
 			wakeMODProject(pJson);
 		}
 	}
@@ -799,7 +829,7 @@ public class GTDDataSpawnSession
 		String nddtOfStepStr = sJson.getString(StepJSONKeyz.NDDTKey);
 		LocalDateTime nddtOfStep = LittleTimeTools.LDTfromTimeString(nddtOfStepStr);
 		
-		boolean wasItASuccess = iss.forcedYesOrNo(stepSuccesQstn);
+		boolean wasItASuccess = iss.forcedYesOrNo(stepSuccessQ);
 
 		String stepStatus;
 		if(wasItASuccess)stepStatus = StatusMGMT.success;
@@ -814,7 +844,7 @@ public class GTDDataSpawnSession
 		if(wantToChangeTDTOfStep)
 		{
 			System.out.println(stpTDTHintPrefix + nddtOfStepStr + stpTDTHintMid + jetztStr);
-			tdt = iss.forcedDateTimeInOneLine(stepWhenTDTQstn, nddtOfStep, jetzt);
+			tdt = iss.forcedDateTimeInOneLine(stepWhenTDTR, nddtOfStep, jetzt);
 		}
 			
 		sJson.put(StepJSONKeyz.statusKey, stepStatus);
@@ -892,18 +922,20 @@ public class GTDDataSpawnSession
 		LocalDateTime jetzt = LocalDateTime.now();
 		
 		String prjctStatus = "";
-		boolean success = iss.forcedYesOrNo(prjctSuccessQstn);
+		boolean success = iss.forcedYesOrNo(prjctSuccessQ);
 			
 		if(success)prjctStatus = StatusMGMT.success;
 		else prjctStatus = StatusMGMT.failed;
 		
 		String terminalNote = "";
 		boolean wantToMakeTDTNoteQuestion = iss.forcedYesOrNo(wantToMakeTDTNoteQstn);
-		if(wantToMakeTDTNoteQuestion) terminalNote = iss.getString(prjctTDTNoteQstn);
+		if(wantToMakeTDTNoteQuestion) terminalNote = iss.getString(prjctTDTNoteR);
 				
-		boolean wantChangeTDTQuestion = iss.forcedYesOrNo(wantToChangeTDTOfPrjctQstn);
+		boolean wantChangeTDTQuestion = iss.forcedYesOrNo(wantToChangeTDTOfPrjctQ);
 		LocalDateTime tdt = jetzt;
-		if(wantChangeTDTQuestion)tdt = iss.forcedDateTimeInOneLine(prjctWhenTDTQstn,ancient, jetzt);
+		
+		LocalDateTime lastAction = getLastDateTimeOfProject(pJson);
+		if(wantChangeTDTQuestion)tdt = iss.forcedDateTimeInOneLine(prjctWhenTDTR, lastAction, jetzt);
 
 		String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
 		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
@@ -976,5 +1008,13 @@ public class GTDDataSpawnSession
 		JSONArray stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 
 		return stepArray.getJSONObject(indexOfLastStep);
+	}
+	
+	public LocalDateTime getLastDateTimeOfProject(JSONObject pJson)
+	{
+		JSONObject step = getLastStepOfProject(pJson);
+		String tdtStr = step.getString(StepJSONKeyz.TDTKey);
+		
+		return LittleTimeTools.LDTfromTimeString(tdtStr);
 	}
 }
