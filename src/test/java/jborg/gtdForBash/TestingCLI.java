@@ -66,7 +66,7 @@ class TestingCLI
 	public static void clearFolder()
 	{
 
-    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder();
+    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.projectDataFolderRelativePath);
     	
     	for(File file: listOfFiles)
     	{

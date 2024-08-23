@@ -299,7 +299,10 @@ public class SomeCommands
 
 			for(JSONObject pJSON: knownProjects.values())
     		{
-    				
+    			
+				String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+				if(status.equals(StatusMGMT.mod))continue;
+				
     			String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
     				
     			JSONObject lastStep = getLastStep(pJSON);

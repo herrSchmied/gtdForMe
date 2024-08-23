@@ -12,13 +12,12 @@
 
   <name>gtdForBash</name>
   <description>A_simple_gtdForBash.</description>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <!-- FIXME change it to the project's website <url>http://www.example.com</url> -->
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>19</maven.compiler.source>
-    <maven.compiler.target>19</maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
   </properties>
 
   <dependencies>

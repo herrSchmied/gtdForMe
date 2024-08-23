@@ -452,7 +452,6 @@ public class GTDDataSpawnSession
 			if(!stepIsAlreadyTerminated(oldStep))
 			{
 				System.out.println(stepSpawnExceptionFormerStepIsntTerminated);
-				spawnStep(pJson);
 				return;
 			}
 		}

@@ -75,7 +75,7 @@ public class GTDCLI implements Beholder<String>
 	
 	JSONView -> View JSONObject of a Project.
 	 */
-
+ 
 	private final GTDDataSpawnSession ds;
 	private final InputStreamSession iss;
 	private final SomeCommands scds;
@@ -277,13 +277,23 @@ public class GTDCLI implements Beholder<String>
 
     public static Set<JSONObject> loadProjects() throws IOException, URISyntaxException
     {
-    	
+
     	Set<JSONObject> prjctSet = new HashSet<>();
     	
     	String path = getPathToDataFolder();
+    	
+    	return loadProjects(path);
+    }
+    
+    public static Set<JSONObject> loadProjects(String path) throws IOException, URISyntaxException
+    {
 
-    	File[] listOfFiles = getListOfFilesFromDataFolder();
+    	Set<JSONObject> prjctSet = new HashSet<>();
 
+    	File[] listOfFiles = getListOfFilesFromDataFolder(path);
+
+    	if(listOfFiles==null)return prjctSet;
+    	
     	for(File file: listOfFiles)
     	{
     		String name = file.getName();
@@ -300,11 +310,9 @@ public class GTDCLI implements Beholder<String>
     	
     	return prjctSet;
     }
-    
-    public static File[] getListOfFilesFromDataFolder()
+
+    public static File[] getListOfFilesFromDataFolder(String path)
     {
-    	
-    	String path = getPathToDataFolder();
     	
     	File folder = new File(path);
 
