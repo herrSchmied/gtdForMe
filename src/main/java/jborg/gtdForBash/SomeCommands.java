@@ -1,5 +1,6 @@
 package jborg.gtdForBash;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import allgemein.SimpleLogger;
 import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
+import jborg.gtdForBash.DBIssues.DBSink;
 import someMath.NaturalNumberException;
 
 public class SomeCommands
@@ -30,6 +32,8 @@ public class SomeCommands
 	/* Remember: No command can be the beginning of another command.
 	 * Write a Method to check that!!!!!!
 	 * */
+	
+	public static final String transferProjectHeads = "transfer PH";
 	public static final String save = "save";
 	public static final String exit = "exit";
 	public static final String list_not_active_ones = "show not active ones";
@@ -232,6 +236,35 @@ public class SomeCommands
 
     	checkAllForDLDTAbuse();
 
+
+    	MeatOfCLICmd<String> transPM = (s)->
+		{
+			
+			sLog.logNow("Transfering PM's.");
+			
+			
+			try
+			{
+				DBSink db = new DBSink();
+				for(JSONObject pJson: knownProjects.values())
+				{
+					db.save(pJson);
+					String name = pJson.getString(ProjectJSONKeyz.nameKey);
+					sLog.logNow("Project " + name + " transfered.");
+				}
+			}
+			catch(SQLException sqlExce)
+			{
+				System.out.println(sqlExce);
+			}
+			
+			return "Oki";
+		};
+		
+		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, false, false));
+		
+		registerCmd(transferProjectHeads, pmcSetName, ioArray, transPM);
+		
     	MeatOfCLICmd<JSONObject> newProject = (s)->
 		{
 
@@ -244,7 +277,7 @@ public class SomeCommands
 			return pJSON;
 		};
 		
-		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
+		ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
 		
 		registerCmd(new_Project, pmcSetName, ioArray, newProject);
 		
