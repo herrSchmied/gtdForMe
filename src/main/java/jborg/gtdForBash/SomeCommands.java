@@ -32,7 +32,9 @@ public class SomeCommands
 	/* Remember: No command can be the beginning of another command.
 	 * Write a Method to check that!!!!!!
 	 * */
+
 	
+	public static final String transferSteps = "transfer Steps";
 	public static final String transferProjectHeads = "transfer PH";
 	public static final String save = "save";
 	public static final String exit = "exit";
@@ -237,7 +239,31 @@ public class SomeCommands
     	checkAllForDLDTAbuse();
 
 
-    	MeatOfCLICmd<String> transPM = (s)->
+    	MeatOfCLICmd<String> transSteps = (s)->
+		{
+			
+			sLog.logNow("Transfering Steps.");
+			
+			
+			try
+			{
+				DBSink db = new DBSink();
+				Set<JSONObject> pJSONSet = new HashSet<>(knownProjects.values());
+				db.saveStepsOfSet(pJSONSet);
+			}
+			catch(SQLException sqlExce)
+			{
+				System.out.println(sqlExce);
+			}
+			
+			return "Oki";
+		};
+		
+		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, false, false));
+		
+		registerCmd(transferSteps, ocSetName, ioArray, transSteps);
+
+		MeatOfCLICmd<String> transPM = (s)->
 		{
 			
 			sLog.logNow("Transfering PM's.");
@@ -261,9 +287,9 @@ public class SomeCommands
 			return "Oki";
 		};
 		
-		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, false, false));
+		ioArray = new ArrayList<>(Arrays.asList(false, false, false, false));
 		
-		registerCmd(transferProjectHeads, pmcSetName, ioArray, transPM);
+		registerCmd(transferProjectHeads, ocSetName, ioArray, transPM);
 		
     	MeatOfCLICmd<JSONObject> newProject = (s)->
 		{
