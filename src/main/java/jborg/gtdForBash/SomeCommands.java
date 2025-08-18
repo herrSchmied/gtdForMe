@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -481,7 +482,12 @@ public class SomeCommands
 
    			System.out.println("");
     		List<String> names = new ArrayList<>();
-    		names.addAll(knownProjects.keySet());
+    		
+    		for(String name: knownProjects.keySet())
+    		{
+    			if(activeProject.test(knownProjects.get(name)))names.add(name);
+    		}
+    		Collections.sort(names);
 
     		
 	    	String prjct;
