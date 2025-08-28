@@ -1,5 +1,6 @@
 package jborg.gtdForBash;
 
+
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -450,10 +451,16 @@ public class SomeCommands
 			
 			sLog.logNow("Command list display.");
 			String output = "";
-
-			for(String cmds: commands)
+			
+			List<String> sortedCMDs = new ArrayList<>(commands);
+			Collections.sort(sortedCMDs);
+			int l = sortedCMDs.size();
+			
+			for(int n=0;n<l;n++)
     		{
-    			output = "\n" + cmds +output;
+				String cmdStr = sortedCMDs.get(n);
+				
+    			output = "\n" + cmdStr +output;
     		}
     		
     		System.out.println(output + "\n");
