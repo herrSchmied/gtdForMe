@@ -454,12 +454,14 @@ public class SomeCommands
 			
 			List<String> sortedCMDs = new ArrayList<>(commands);
 			Collections.sort(sortedCMDs);
+			Collections.reverse(sortedCMDs);
+
 			int l = sortedCMDs.size();
-			
+
 			for(int n=0;n<l;n++)
     		{
+
 				String cmdStr = sortedCMDs.get(n);
-				
     			output = "\n" + cmdStr +output;
     		}
     		
