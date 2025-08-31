@@ -3,6 +3,7 @@ package jborg.gtdForBash;
 import java.time.LocalDateTime;
 import java.time.Month;
 
+import allgemein.LittleTimeTools;
 import consoleTools.InputStreamSession;
 
 public class SequenzesForISS
@@ -99,7 +100,32 @@ public class SequenzesForISS
 		return data;
 	}
 
-
+	public static String sequenzNewProjectCustomBDT(String prjctName, LocalDateTime bdt)
+	{
+		
+		String bdtStr = translateTimeToAnswerString(bdt);
+		String changePrjctBDT = "Yes";
+		String dldtQuestion = "yes";
+		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
+		String changeStepBDT = "No";
+		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
+		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
+		
+		String data = SomeCommands.new_Project + '\n'
+				+ prjctName + '\n'
+				+ newPrjctGoal + '\n'
+				+ changePrjctBDT + '\n'
+				+ bdtStr + '\n'
+				+ dldtQuestion + '\n'
+				+ prjctDLDTStr
+				+ changeStepBDT + '\n'
+				+ chosenFromStatieList + '\n'
+				+ stepDesc + '\n'
+				+ dldtQuestion + '\n'
+				+ stepDLDTStr;
+				
+		return data;
+	}
 	public static String sequenzNewProjectNoDLDT(String prjctName)
 	{
 		

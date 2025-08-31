@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,7 +44,9 @@ public class TestingStats
 	public void newPrjcts() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		String data = sequenzNewProject(newPrjctName);
+		LocalDateTime customBDT = LocalDateTime.now().minusYears(1);
+		
+		String data = sequenzNewProjectCustomBDT(newPrjctName, customBDT);
 
 		data = data + sequenzMODProject(wakeProjectName);
 		
@@ -74,6 +77,12 @@ public class TestingStats
         
         List<Pair<LocalDate, LocalDate>> wochen = gtdCli.listOfWeeks();
         
-        assert(wochen.size()==1);
+        for(Pair<LocalDate, LocalDate> pair: wochen)
+        {
+        	assert(pair.getKey().getDayOfWeek().equals(DayOfWeek.MONDAY));
+        	assert(pair.getValue().getDayOfWeek().equals(DayOfWeek.SUNDAY));
+        }
+        
+        System.out.println("Weeks: " + wochen.size());
 	}
 }
