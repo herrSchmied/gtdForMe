@@ -377,16 +377,17 @@ public class GTDCLI implements Beholder<String>
     	DayOfWeek dow = old.getDayOfWeek();
     	int dowNr = dow.getValue();
     	
-    	LocalDate mondayOne = old.minusDays(dowNr+1).toLocalDate();
+    	LocalDate mondayOne = old.minusDays(dowNr-1).toLocalDate();
     	LocalDate jetzt = LocalDate.now();
     	LocalDate currentMonday = mondayOne;
     	
-    	while(currentMonday.isBefore(jetzt))
+    	while(true)
     	{
     		LocalDate currentSunday = currentMonday.plusDays(6);
     		Pair<LocalDate, LocalDate> week = new Pair(currentMonday, currentSunday);
     		listOfWeex.add(week);
     		currentMonday = currentMonday.plusDays(7);
+    		if(currentMonday.isAfter(jetzt))break;
     	}
     	
     	return listOfWeex;
