@@ -10,13 +10,15 @@ import java.net.URISyntaxException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -31,7 +33,7 @@ import allgemein.LittleTimeTools;
 import consoleTools.BashSigns;
 import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
-
+import javafx.util.Pair;
 import someMath.NaturalNumberException;
 
 import static fileShortCuts.TextAndObjSaveAndLoad.*;
@@ -366,4 +368,49 @@ public class GTDCLI implements Beholder<String>
     	return iss;
     }
 
+    public List<Pair<LocalDate, LocalDate>> listOfWeeks()
+    {
+    	
+    	List<Pair<LocalDate, LocalDate>> listOfWeex = new ArrayList<>();
+    	LocalDateTime old = oldestProject().getValue();
+    	
+    	DayOfWeek dow = old.getDayOfWeek();
+    	int dowNr = dow.getValue();
+    	
+    	LocalDate mondayOne = old.minusDays(dowNr+1).toLocalDate();
+    	LocalDate jetzt = LocalDate.now();
+    	LocalDate currentMonday = mondayOne;
+    	
+    	while(currentMonday.isBefore(jetzt))
+    	{
+    		LocalDate currentSunday = currentMonday.plusDays(6);
+    		Pair<LocalDate, LocalDate> week = new Pair(currentMonday, currentSunday);
+    		listOfWeex.add(week);
+    		currentMonday = currentMonday.plusDays(7);
+    	}
+    	
+    	return listOfWeex;
+    }
+    
+    public Pair<String, LocalDateTime> oldestProject()
+    {
+		LocalDateTime oldestBDT = LocalDateTime.now();
+		
+		String name = "";
+		
+		for(JSONObject pJSON: knownProjects.values())
+		{
+			String bdtStr = pJSON.getString(ProjectJSONKeyz.BDTKey);
+			LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
+			if(bdt.isBefore(oldestBDT))
+			{
+				oldestBDT = bdt;
+				name = pJSON.getString(ProjectJSONKeyz.nameKey);
+			}
+		}
+		
+    	Pair<String, LocalDateTime> output = new Pair(name, oldestBDT);
+    	
+    	return output;
+    }
 }

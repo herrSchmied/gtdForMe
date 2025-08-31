@@ -35,7 +35,7 @@ public class SomeCommands
 	 * Write a Method to check that!!!!!!
 	 * */
 
-	
+	public static final String oldest = "oldest project";
 	public static final String transferSteps = "transfer Steps";
 	public static final String transferProjectHeads = "transfer PH";
 	public static final String save = "save";
@@ -240,6 +240,21 @@ public class SomeCommands
 
     	checkAllForDLDTAbuse();
 
+    	MeatOfCLICmd<String> oldestPrjct = (s)->
+    	{
+    		
+    		String name = cli.oldestProject().getKey();
+    		LocalDateTime oldestBDT = cli.oldestProject().getValue();
+    		
+    		String output = name + "\nBDT: " + LittleTimeTools.timeString(oldestBDT);
+    		System.out.println(output);
+    		
+    		return name;
+    	};
+    	
+		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
+		
+		registerCmd(oldest, sdcSetName, ioArray, oldestPrjct);
 
     	MeatOfCLICmd<String> transSteps = (s)->
 		{
@@ -261,7 +276,7 @@ public class SomeCommands
 			return "Oki";
 		};
 		
-		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, false, false));
+		ioArray = new ArrayList<>(Arrays.asList(false, false, false, false));
 		
 		registerCmd(transferSteps, ocSetName, ioArray, transSteps);
 

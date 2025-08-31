@@ -27,45 +27,20 @@ import consoleTools.InputStreamSession;
 
 import someMath.NaturalNumberException;
 
+import static jborg.gtdForBash.SequenzesForISS.*;
 
 public class TestingCLI
 {
 
-	//Remember: the '\n' are gone!!!
-	String wakeProjectName = "Wakeup_MOD_Project";
 
-	String terminatePrjctName = "Terminate_Project";
-	
-	String addNotePrjctName = "Add_Note_Project";
-	
-	String appendStpPrjctName = "Append_Step_Project";
-	
-	String killStepPrjctName = "Kill_Step_Project";
-	
-	String killPrjctNameNoDLDT = "Kill_Project_NODLDT";
-	String killPrjctName = "Kill_Project";
-	
-	String modPrjctName = "MOD_Project";
-	String modPrjctGoal = "MOD-Project Test";
-	
-	String newPrjctName = "Project_Nuovo";
-	String newPrjctGoal = "Testing this here";
-	
-	String newPrjctNoDLDT = "No_DLDT_Project";
-	
-	String stepDesc = "Hello Bello GoodBye!";
-	String stepDesc2 = "Grrrl";
-	String stepDesc3 = "Bla bla";
-	
-	String noticeOne = "Note1";
-	String noticeTwo = "Note2";
 	
 	GTDCLI gtdCli;
 	
-	LocalDateTime jetzt = LocalDateTime.now();
-	LocalDateTime prjctDLDT = jetzt.plusHours(1);
-	LocalDateTime stepDLDT = jetzt.plusMinutes(30);
+	final  LocalDateTime jetzt = LocalDateTime.now();
+	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
+	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
+	
 	@BeforeAll
 	public static void clearFolder()
 	{
@@ -79,130 +54,6 @@ public class TestingCLI
     	}
 	}
 
-	private String sequenzNXTStep(String prjctName)
-	{
-
-		String changeStepBDT = "No";
-		String chosenFromStatieList = "1";//ATBD
-		String dldtQuestion = "yes";
-		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
-
-		String data = SomeCommands.next_Step + " " + prjctName + '\n'
-				+ changeStepBDT + '\n'
-				+ chosenFromStatieList + '\n'
-				+ stepDesc2 + '\n'
-				+ dldtQuestion + '\n'
-				+ stepDLDTStr;
-		
-		return data;
-	}
-	
-	private String sequenzKillStep(String prjctName)
-	{
-	
-		String stepWasSuccessQstn  = "No";
-		String wantToMakeTDTNote = "No";
-		String wantToChangeTDT = "No";
-
-		String data = SomeCommands.terminate_Step + " " + prjctName + '\n'
-					+ stepWasSuccessQstn + '\n'
-					+ wantToMakeTDTNote + '\n'
-					+ wantToChangeTDT + '\n';
-		
-		return data;
-	}
-
-	private String sequenzNewProject(String prjctName)
-	{
-		
-		String changePrjctBDT = "No";
-		String dldtQuestion = "yes";
-		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
-		String changeStepBDT = "No";
-		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
-		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
-		
-		String data = SomeCommands.new_Project + '\n'
-				+ prjctName + '\n'
-				+ newPrjctGoal + '\n'
-				+ changePrjctBDT + '\n'
-				+ dldtQuestion + '\n'
-				+ prjctDLDTStr
-				+ changeStepBDT + '\n'
-				+ chosenFromStatieList + '\n'
-				+ stepDesc + '\n'
-				+ dldtQuestion + '\n'
-				+ stepDLDTStr;
-				
-		return data;
-	}
-
-
-	private String sequenzNewProjectNoDLDT(String prjctName)
-	{
-		
-		String changePrjctBDT = "No";
-		String dldtQuestion = "no";
-		String changeStepBDT = "No";
-		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
-		
-		String data = SomeCommands.new_Project + '\n'
-				+ prjctName + '\n'
-				+ newPrjctGoal + '\n'
-				+ changePrjctBDT + '\n'
-				+ dldtQuestion + '\n'
-				+ changeStepBDT + '\n'
-				+ chosenFromStatieList + '\n'
-				+ stepDesc + '\n'
-				+ dldtQuestion + '\n';
-				
-		return data;
-	}
-
-	private String sequenzMODProject(String prjctName)
-	{
-		
-		String changePrjctBDT = "No";
-		
-		String data = SomeCommands.new_MOD + '\n'
-				+ prjctName + '\n'
-				+ modPrjctGoal + '\n'
-				+ changePrjctBDT + '\n';
-				
-		return data;
-	}
-	
-	private String sequenzAddNote(String prjctName)
-	{
-
-		String data = SomeCommands.add_Note + " " + prjctName + '\n'
-				+ noticeOne + "\n"
-				+ SomeCommands.add_Note + " " + prjctName + '\n'
-				+ noticeTwo + "\n";
-				
-		return data;
-	}
-	
-	private String sequenzWakeMODProject(String prjctName)
-	{
-
-		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
-		String changeStepBDT = "No";
-		String chosenFromStatieList = "1";
-		String dldtQuestion = "yes";
-		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
-
-		String data = SomeCommands.wake_MOD + prjctName + '\n'
-					+ dldtQuestion + '\n'
-					+ prjctDLDTStr
-					+ changeStepBDT + '\n'
-					+ chosenFromStatieList + '\n'
-					+ stepDesc3 + '\n'
-					+ dldtQuestion + '\n'
-					+ stepDLDTStr;
-
-		return data;
-	}
 
 	@Test
 	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, NaturalNumberException
@@ -260,7 +111,7 @@ public class TestingCLI
 		assert(goal.equals(newPrjctGoal));
 		
 		String stepDesc = step.getString(StepJSONKeyz.descKey);
-		assert(stepDesc.equals(this.stepDesc));
+		assert(stepDesc.equals(stepDesc));
 	}
 	
 	@Test
@@ -327,8 +178,8 @@ public class TestingCLI
 		JSONArray notesArr = project.getJSONArray(ProjectJSONKeyz.noteArrayKey);
 		String note1 = notesArr.getString(0);
 		String note2 = notesArr.getString(1);
-		assert(note1.equals(this.noticeOne));
-		assert(note2.equals(this.noticeTwo));
+		assert(note1.equals(noticeOne));
+		assert(note2.equals(noticeTwo));
 		
 	}
 
@@ -396,20 +247,7 @@ public class TestingCLI
 		assert(terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
 	}
 	
-	private String sequenzKillProject(String prjctName)
-	{
 
-		String projectWasSuccessQstn  = "No";
-		String wantToMakeTDTNote = "No";
-		String wantToChangeTDT = "No";
-
-		String data = SomeCommands.terminate_Project + " " + prjctName + '\n'
-				+ projectWasSuccessQstn + '\n'
-				+ wantToMakeTDTNote + '\n'
-				+ wantToChangeTDT + '\n';
-
-		return data;
-	}
 
 	@Test
 	public void testKillStep() throws JSONException, IOException, URISyntaxException, NaturalNumberException
@@ -530,47 +368,10 @@ public class TestingCLI
 		String goal = newProject.getString(ProjectJSONKeyz.goalKey);
 		assert(goal.equals(newPrjctGoal));
 		
-		String stepDesc = step.getString(StepJSONKeyz.descKey);
-		assert(stepDesc.equals(this.stepDesc));
+		String stepDesc2 = step.getString(StepJSONKeyz.descKey);
+		assert(stepDesc2.equals(stepDesc));
 	}
-	
-	private String translateTimeToAnswerString(LocalDateTime ldt)
-	{
-		int day = ldt.getDayOfMonth();
-		String dayStr = "" + day;
-		if(day<10) dayStr = "0" + day;
-		
-		int month = ldt.getMonthValue();
-		Month m = Month.of(month);
-		String monthStr = "";
-		for(String s: InputStreamSession.monthMap.keySet())
-		{
-			Month d = InputStreamSession.monthMap.get(s);
-			if(m.equals(d))
-			{
-				monthStr = s;
-				break;
-			}
-		}
 
-		int hour = ldt.getHour();
-		String hourStr = ""+hour;
-		if(hour<10) hourStr = "0" + hour;
-		
-		int year = ldt.getYear();
-		String yearStr = year+"";
-		if(yearStr.length()==3)yearStr = "0" + yearStr;
-		if(yearStr.length()==2)yearStr = "00" + yearStr;
-		if(yearStr.length()==1)yearStr = "000" + yearStr;
-
-		int minute = ldt.getMinute();
-		String minStr = "" + minute;
-		if(minute<10) minStr = "0" + minute;
-		
-		return dayStr + monthStr + year + "T" + hourStr + ":" + minStr +"\n";
-
-	}
-	
 	private JSONObject pickProjectByName(String pName, Set<JSONObject> projects)
 	{
 
