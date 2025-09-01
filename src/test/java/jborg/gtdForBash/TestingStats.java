@@ -87,11 +87,7 @@ public class TestingStats
         }
         
         System.out.println("Weeks: " + wochen.size());
-        
-        LocalDateTime bdt = extractLDT(wakeProjectName, ProjectJSONKeyz.BDTKey);
-        int nr = gtdCli.isInWhichWeek(bdt);
-        System.out.println(wakeProjectName + " is in the Week: " + nr);
-        
+
 		assert(pickAndCheckByName(wakeProjectName, 53, gtdCli));
 		assert(pickAndCheckByName(modPrjctName, 53, gtdCli));
 		assert(pickAndCheckByName(addNotePrjctName, 53, gtdCli));
