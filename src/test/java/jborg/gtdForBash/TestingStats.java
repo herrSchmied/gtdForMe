@@ -10,13 +10,14 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONException;
-
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-
+import allgemein.LittleTimeTools;
 import consoleTools.InputStreamSession;
 import javafx.util.Pair;
 import someMath.NaturalNumberException;
@@ -75,6 +76,8 @@ public class TestingStats
         
         assert(oldPrjct.getKey().equals(newPrjctName));
         
+        assert(pickAndCheckByName(newPrjctName, 0, gtdCli));
+        
         List<Pair<LocalDate, LocalDate>> wochen = gtdCli.listOfWeeks();
         
         for(Pair<LocalDate, LocalDate> pair: wochen)
@@ -84,5 +87,36 @@ public class TestingStats
         }
         
         System.out.println("Weeks: " + wochen.size());
+        
+        LocalDateTime bdt = extractLDT(wakeProjectName, ProjectJSONKeyz.BDTKey);
+        int nr = gtdCli.isInWhichWeek(bdt);
+        System.out.println(wakeProjectName + " is in the Week: " + nr);
+        
+		assert(pickAndCheckByName(wakeProjectName, 53, gtdCli));
+		assert(pickAndCheckByName(modPrjctName, 53, gtdCli));
+		assert(pickAndCheckByName(addNotePrjctName, 53, gtdCli));
+		assert(pickAndCheckByName(killPrjctNameNoDLDT, 53, gtdCli));
+		assert(pickAndCheckByName(killPrjctName, 53, gtdCli));
+		assert(pickAndCheckByName(killStepPrjctName, 53, gtdCli));
+		assert(pickAndCheckByName(appendStpPrjctName, 53, gtdCli));
+		assert(pickAndCheckByName(newPrjctNoDLDT, 53, gtdCli));
+	}
+	
+	private boolean pickAndCheckByName(String name, int weekNr, GTDCLI gtdCli) throws IOException, URISyntaxException
+	{
+
+        LocalDateTime bdt = extractLDT(name, ProjectJSONKeyz.BDTKey);
+
+		return gtdCli.isInThatWeek(weekNr, bdt);
+	}
+	
+	private LocalDateTime extractLDT(String name, String key) throws IOException, URISyntaxException
+	{
+		
+        Set<JSONObject> jsonSet = GTDCLI.loadProjects();
+
+	    JSONObject pJSON = TestingCLI.pickProjectByName(name, jsonSet);
+
+		return  LittleTimeTools.LDTfromTimeString(pJSON.getString(key));
 	}
 }

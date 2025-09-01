@@ -414,4 +414,31 @@ public class GTDCLI implements Beholder<String>
     	
     	return output;
     }
+    
+    public boolean isInThatWeek(int weekNr, LocalDateTime ldt)
+    {
+
+    	if((weekNr<0)&&(weekNr>listOfWeeks().size()-1))throw new RuntimeException("weekNr does not exist.");
+    	Pair<LocalDate, LocalDate> week = listOfWeeks().get(weekNr);
+    	
+    	LocalDate beginLD = week.getKey().minusDays(1);
+    	LocalDate endLD = week.getValue().plusDays(1);
+    	
+    	LocalDate ld = ldt.toLocalDate();
+    	
+    	return ld.isAfter(beginLD)&&ld.isBefore(endLD);
+    }
+    
+    public int isInWhichWeek(LocalDateTime ldt)
+    {
+    	List<Pair<LocalDate, LocalDate>> weeks = listOfWeeks();
+    	for(int n=0;n<weeks.size();n++)
+    	{
+    		if(isInThatWeek(n, ldt))return n;
+    	}
+    	
+    	throw new RuntimeException("This should not happen.");
+    }
 }
+
+

@@ -373,7 +373,7 @@ public class TestingCLI
 		assert(stepDesc2.equals(stepDesc));
 	}
 
-	private JSONObject pickProjectByName(String pName, Set<JSONObject> projects)
+	public static JSONObject pickProjectByName(String pName, Set<JSONObject> projects)
 	{
 
 		for(JSONObject pJSON: projects)
