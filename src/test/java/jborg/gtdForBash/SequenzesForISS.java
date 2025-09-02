@@ -1,9 +1,9 @@
 package jborg.gtdForBash;
 
+
 import java.time.LocalDateTime;
 import java.time.Month;
 
-import allgemein.LittleTimeTools;
 import consoleTools.InputStreamSession;
 
 public class SequenzesForISS
@@ -240,6 +240,34 @@ public class SequenzesForISS
 				+ projectWasSuccessQstn + '\n'
 				+ wantToMakeTDTNote + '\n'
 				+ wantToChangeTDT + '\n';
+
+		return data;
+	}
+	
+	public static String sequenzManyProjects()
+	{
+
+		LocalDateTime customBDT = LocalDateTime.now().minusYears(1);
+		
+		String data = sequenzNewProjectCustomBDT(newPrjctName, customBDT);
+
+		data = data + sequenzMODProject(wakeProjectName);
+		
+		data = data + sequenzMODProject(modPrjctName);
+		
+		data = data + sequenzNewProject(addNotePrjctName);
+
+		data = data + sequenzNewProjectNoDLDT(killPrjctNameNoDLDT);
+		
+		data = data + sequenzNewProject(killPrjctName);
+		
+		data = data + sequenzNewProject(killStepPrjctName);
+		
+		data = data + sequenzNewProject(appendStpPrjctName);
+
+		data = data + sequenzNewProjectNoDLDT(newPrjctNoDLDT);
+		
+		data = data + SomeCommands.exit + '\n';
 
 		return data;
 	}

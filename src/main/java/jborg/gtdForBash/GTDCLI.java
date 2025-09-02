@@ -10,15 +10,13 @@ import java.net.URISyntaxException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 
 
@@ -33,7 +31,7 @@ import allgemein.LittleTimeTools;
 import consoleTools.BashSigns;
 import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
-import javafx.util.Pair;
+
 import someMath.NaturalNumberException;
 
 import static fileShortCuts.TextAndObjSaveAndLoad.*;
@@ -367,78 +365,19 @@ public class GTDCLI implements Beholder<String>
     {
     	return iss;
     }
-
-    public List<Pair<LocalDate, LocalDate>> listOfWeeks()
-    {
-    	
-    	List<Pair<LocalDate, LocalDate>> listOfWeex = new ArrayList<>();
-    	LocalDateTime old = oldestProject().getValue();
-    	
-    	DayOfWeek dow = old.getDayOfWeek();
-    	int dowNr = dow.getValue();
-    	
-    	LocalDate mondayOne = old.minusDays(dowNr-1).toLocalDate();
-    	LocalDate jetzt = LocalDate.now();
-    	LocalDate currentMonday = mondayOne;
-    	
-    	while(true)
-    	{
-    		LocalDate currentSunday = currentMonday.plusDays(6);
-    		Pair<LocalDate, LocalDate> week = new Pair(currentMonday, currentSunday);
-    		listOfWeex.add(week);
-    		currentMonday = currentMonday.plusDays(7);
-    		if(currentMonday.isAfter(jetzt))break;
-    	}
-    	
-    	return listOfWeex;
-    }
     
-    public Pair<String, LocalDateTime> oldestProject()
-    {
-		LocalDateTime oldestBDT = LocalDateTime.now();
-		
-		String name = "";
-		
-		for(JSONObject pJSON: knownProjects.values())
+	public static JSONObject pickProjectByName(String pName, Set<JSONObject> projects)
+	{
+
+		for(JSONObject pJSON: projects)
 		{
-			String bdtStr = pJSON.getString(ProjectJSONKeyz.BDTKey);
-			LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
-			if(bdt.isBefore(oldestBDT))
-			{
-				oldestBDT = bdt;
-				name = pJSON.getString(ProjectJSONKeyz.nameKey);
-			}
+			assert(pJSON.has(ProjectJSONKeyz.nameKey));
+			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+			if(name.equals(pName)) return pJSON;
 		}
 		
-    	Pair<String, LocalDateTime> output = new Pair(name, oldestBDT);
-    	
-    	return output;
-    }
-    
-    public boolean isInThatWeek(int weekNr, LocalDateTime ldt)
-    {
-
-    	if((weekNr<0)&&(weekNr>listOfWeeks().size()-1))throw new RuntimeException("weekNr does not exist.");
-    	Pair<LocalDate, LocalDate> week = listOfWeeks().get(weekNr);
-    	
-    	LocalDate beginLD = week.getKey().minusDays(1);
-    	LocalDate endLD = week.getValue().plusDays(1);
-    	
-    	LocalDate ld = ldt.toLocalDate();
-    	
-    	return ld.isAfter(beginLD)&&ld.isBefore(endLD);
-    }
-    
-    public int isInWhichWeek(LocalDateTime ldt)
-    {
-    	List<Pair<LocalDate, LocalDate>> weeks = listOfWeeks();
-    	for(int n=0;n<weeks.size();n++)
-    	{
-    		if(isInThatWeek(n, ldt))return n;
-    	}
-    	
-    	throw new RuntimeException("This should not happen.");
-    }
+		return null;
+	}
 }
 
 

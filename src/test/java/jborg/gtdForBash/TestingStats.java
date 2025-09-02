@@ -17,7 +17,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import allgemein.LittleTimeTools;
 import consoleTools.InputStreamSession;
 import javafx.util.Pair;
 import someMath.NaturalNumberException;
@@ -45,40 +44,30 @@ public class TestingStats
 	public void newPrjcts() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		LocalDateTime customBDT = LocalDateTime.now().minusYears(1);
 		
-		String data = sequenzNewProjectCustomBDT(newPrjctName, customBDT);
 
-		data = data + sequenzMODProject(wakeProjectName);
+	}
+	
+	@Test
+	public void testCLIWeekMethods() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	{
 		
-		data = data + sequenzMODProject(modPrjctName);
-		
-		data = data + sequenzNewProject(addNotePrjctName);
-
-		data = data + sequenzNewProjectNoDLDT(killPrjctNameNoDLDT);
-		
-		data = data + sequenzNewProject(killPrjctName);
-		
-		data = data + sequenzNewProject(killStepPrjctName);
-		
-		data = data + sequenzNewProject(appendStpPrjctName);
-
-		data = data + sequenzNewProjectNoDLDT(newPrjctNoDLDT);
-		
-		data = data + SomeCommands.exit + '\n';
+		String data = sequenzManyProjects();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 
         GTDCLI gtdCli = new GTDCLI(iss);			
-
-        Pair<String, LocalDateTime> oldPrjct = gtdCli.oldestProject();
+        Set<JSONObject> prjctSet = GTDCLI.loadProjects();
+        StatisticalTools st = new StatisticalTools(prjctSet);
+        
+        Pair<String, LocalDateTime> oldPrjct = st.oldestProject();
         
         assert(oldPrjct.getKey().equals(newPrjctName));
         
-        assert(pickAndCheckByName(newPrjctName, 0, gtdCli));
+        assert(st.pickAndCheckByName(newPrjctName, 0, gtdCli));
         
-        List<Pair<LocalDate, LocalDate>> wochen = gtdCli.listOfWeeks();
+        List<Pair<LocalDate, LocalDate>> wochen = st.listOfWeeks();
         
         for(Pair<LocalDate, LocalDate> pair: wochen)
         {
@@ -86,33 +75,16 @@ public class TestingStats
         	assert(pair.getValue().getDayOfWeek().equals(DayOfWeek.SUNDAY));
         }
         
-        System.out.println("Weeks: " + wochen.size());
-
-		assert(pickAndCheckByName(wakeProjectName, 53, gtdCli));
-		assert(pickAndCheckByName(modPrjctName, 53, gtdCli));
-		assert(pickAndCheckByName(addNotePrjctName, 53, gtdCli));
-		assert(pickAndCheckByName(killPrjctNameNoDLDT, 53, gtdCli));
-		assert(pickAndCheckByName(killPrjctName, 53, gtdCli));
-		assert(pickAndCheckByName(killStepPrjctName, 53, gtdCli));
-		assert(pickAndCheckByName(appendStpPrjctName, 53, gtdCli));
-		assert(pickAndCheckByName(newPrjctNoDLDT, 53, gtdCli));
+        int weeksSize = wochen.size();
+        
+		assert(st.pickAndCheckByName(wakeProjectName, weeksSize-1, gtdCli));
+		assert(st.pickAndCheckByName(modPrjctName, weeksSize-1, gtdCli));
+		assert(st.pickAndCheckByName(addNotePrjctName, weeksSize-1, gtdCli));
+		assert(st.pickAndCheckByName(killPrjctNameNoDLDT, weeksSize-1, gtdCli));
+		assert(st.pickAndCheckByName(killPrjctName, weeksSize-1, gtdCli));
+		assert(st.pickAndCheckByName(killStepPrjctName, weeksSize-1, gtdCli));
+		assert(st.pickAndCheckByName(appendStpPrjctName, weeksSize-1, gtdCli));
+		assert(st.pickAndCheckByName(newPrjctNoDLDT, weeksSize-1, gtdCli));
 	}
 	
-	private boolean pickAndCheckByName(String name, int weekNr, GTDCLI gtdCli) throws IOException, URISyntaxException
-	{
-
-        LocalDateTime bdt = extractLDT(name, ProjectJSONKeyz.BDTKey);
-
-		return gtdCli.isInThatWeek(weekNr, bdt);
-	}
-	
-	private LocalDateTime extractLDT(String name, String key) throws IOException, URISyntaxException
-	{
-		
-        Set<JSONObject> jsonSet = GTDCLI.loadProjects();
-
-	    JSONObject pJSON = TestingCLI.pickProjectByName(name, jsonSet);
-
-		return  LittleTimeTools.LDTfromTimeString(pJSON.getString(key));
-	}
 }

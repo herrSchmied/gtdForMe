@@ -1,6 +1,7 @@
 package jborg.gtdForBash;
 
 
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -243,13 +244,27 @@ public class SomeCommands
     	MeatOfCLICmd<String> oldestPrjct = (s)->
     	{
     		
-    		String name = cli.oldestProject().getKey();
-    		LocalDateTime oldestBDT = cli.oldestProject().getValue();
+    		StatisticalTools st;
+			try
+			{
+				st = new StatisticalTools(GTDCLI.loadProjects());
+			
+	    		String name = st.oldestProject().getKey();
+	    		LocalDateTime oldestBDT = st.oldestProject().getValue();
+	    		
+	    		String output = name + "\nBDT: " + LittleTimeTools.timeString(oldestBDT);
+	    		System.out.println(output);
+	    		
+	    		return name;
+
+			}
+			catch (URISyntaxException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     		
-    		String output = name + "\nBDT: " + LittleTimeTools.timeString(oldestBDT);
-    		System.out.println(output);
-    		
-    		return name;
+    		throw new RuntimeException("This should not happen.");
     	};
     	
 		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));

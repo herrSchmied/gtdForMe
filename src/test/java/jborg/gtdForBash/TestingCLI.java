@@ -8,22 +8,18 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 
 import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import allgemein.LittleTimeTools;
 
 import consoleTools.BashSigns;
-import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
 
 import someMath.NaturalNumberException;
@@ -56,6 +52,8 @@ public class TestingCLI
 	}
 
 
+	
+	
 	@Test
 	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
@@ -70,7 +68,7 @@ public class TestingCLI
 		
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 		
-		JSONObject newProject = pickProjectByName(newPrjctName, projects);
+		JSONObject newProject = GTDCLI.pickProjectByName(newPrjctName, projects);
 		assert(newProject!=null);
 		
 		assert(newProject.has(ProjectJSONKeyz.statusKey));
@@ -129,7 +127,7 @@ public class TestingCLI
 		
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 		
-		JSONObject project = pickProjectByName(wakeProjectName, projects);
+		JSONObject project = GTDCLI.pickProjectByName(wakeProjectName, projects);
 		assert(project!=null);
 		
 		String prjctStatus = project.getString(ProjectJSONKeyz.statusKey);
@@ -153,7 +151,7 @@ public class TestingCLI
 		
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 		
-		JSONObject project = pickProjectByName(modPrjctName, projects);
+		JSONObject project = GTDCLI.pickProjectByName(modPrjctName, projects);
 		String ziel = project.getString(ProjectJSONKeyz.goalKey);
 		assert(ziel.equals(modPrjctGoal));
 	}
@@ -173,7 +171,7 @@ public class TestingCLI
 		
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 		
-		JSONObject project = pickProjectByName(addNotePrjctName, projects);
+		JSONObject project = GTDCLI.pickProjectByName(addNotePrjctName, projects);
 		assert(project!=null);
 		
 		JSONArray notesArr = project.getJSONArray(ProjectJSONKeyz.noteArrayKey);
@@ -201,7 +199,7 @@ public class TestingCLI
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 		
 
-		JSONObject project = pickProjectByName(killPrjctNameNoDLDT, projects);
+		JSONObject project = GTDCLI.pickProjectByName(killPrjctNameNoDLDT, projects);
 		assert(project!=null);
 		
 		JSONObject step = SomeCommands.getLastStep(project);
@@ -233,7 +231,7 @@ public class TestingCLI
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 		
 
-		JSONObject project = pickProjectByName(killPrjctName, projects);
+		JSONObject project = GTDCLI.pickProjectByName(killPrjctName, projects);
 		assert(project!=null);
 		
 		JSONObject step = SomeCommands.getLastStep(project);
@@ -266,7 +264,7 @@ public class TestingCLI
 		
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 
-		JSONObject project = pickProjectByName(killStepPrjctName, projects);
+		JSONObject project = GTDCLI.pickProjectByName(killStepPrjctName, projects);
 		assert(project!=null);
 		
 		JSONObject step = SomeCommands.getLastStep(project);
@@ -294,7 +292,7 @@ public class TestingCLI
 	
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 
-		JSONObject project = pickProjectByName(appendStpPrjctName, projects);
+		JSONObject project = GTDCLI.pickProjectByName(appendStpPrjctName, projects);
 		assert(project!=null);
 		
 		JSONObject step2 = SomeCommands.getLastStep(project);
@@ -331,7 +329,7 @@ public class TestingCLI
 		
 		Set<JSONObject> projects = GTDCLI.loadProjects();
 		
-		JSONObject newProject = pickProjectByName(newPrjctNoDLDT, projects);
+		JSONObject newProject = GTDCLI.pickProjectByName(newPrjctNoDLDT, projects);
 		assert(newProject!=null);
 		
 		assert(newProject.has(ProjectJSONKeyz.statusKey));
@@ -372,18 +370,4 @@ public class TestingCLI
 		String stepDesc2 = step.getString(StepJSONKeyz.descKey);
 		assert(stepDesc2.equals(stepDesc));
 	}
-
-	public static JSONObject pickProjectByName(String pName, Set<JSONObject> projects)
-	{
-
-		for(JSONObject pJSON: projects)
-		{
-			assert(pJSON.has(ProjectJSONKeyz.nameKey));
-			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
-			if(name.equals(pName)) return pJSON;
-		}
-		
-		return null;
-	}
-
 }
