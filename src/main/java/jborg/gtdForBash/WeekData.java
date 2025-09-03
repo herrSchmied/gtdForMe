@@ -10,11 +10,7 @@ import jborg.gtdForBash.exceptions.WeekDataException;
 
 public class WeekData
 {
-
-	public static final String inThePastStatus = "aWeekOfThePastWeek";
-	public static final String inTheMomentStatus = "currentWeek";
-
-	private final String status;
+	
 	private final LocalDate begin, end;
 	private final int weekNr;
 	
@@ -34,13 +30,21 @@ public class WeekData
 		this.begin = begin;
 		this.end = begin.plusDays(6);
 		this.weekNr = weekNr;
-		if(end.isBefore(LocalDate.now()))status = inThePastStatus;
-		else status = inTheMomentStatus;
 		
 		projectNamesBornInThisWeek = new HashSet<>();
 		projectNamesTerminatedInThisWeek = new HashSet<>();
 	}
 	
+	private boolean weekIsInThePast()
+	{
+		return end.isBefore(LocalDate.now());
+	}
+
+	private void throwsExceptionIfWeekIsNotInThePast(String msg) throws WeekDataException
+	{
+		if(!weekIsInThePast())throw new WeekDataException(msg);
+	}
+
 	/**
 	 * Can only be uses once.
 	 * @param projectNames
@@ -48,13 +52,15 @@ public class WeekData
 	 */
 	public void setProjectsBorn(Set<String> projectNames) throws WeekDataException
 	{
+		
+		throwsExceptionIfWeekIsNotInThePast("Can't Conclude because week is not in the Past.");
+			
 		if(!projectsBornIsSet)
 		{
 			projectNamesBornInThisWeek.addAll(projectNames);
 			projectsBornIsSet = true;
 		}
 		else throw new WeekDataException("Born Projects already Set.");
-
 	}
 	
 	/**
@@ -64,6 +70,9 @@ public class WeekData
 	 */
 	public void setProjectsTerminated(Set<String> projectNames) throws WeekDataException
 	{
+		
+		throwsExceptionIfWeekIsNotInThePast("Can't Conclude because week is not in the Past.");
+
 		if(!projectsTerminatedIsSet)
 		{
 			projectNamesTerminatedInThisWeek.addAll(projectNames);
@@ -79,6 +88,9 @@ public class WeekData
 	 */
 	public void sethowManyStepsDoneInThisWeek(int n) throws WeekDataException
 	{
+		
+		throwsExceptionIfWeekIsNotInThePast("Can't Conclude because week is not in the Past.");
+
 		if(!stepNrIsSet)
 		{
 			howManyStepsDoneInThisWeek = n;
@@ -87,41 +99,30 @@ public class WeekData
 		else throw new WeekDataException("Step Nr. already Set.");
 	}
 
-	public String getStatus()
-	{
-		return status;
-	}
-
-
 	public LocalDate getBegin()
 	{
-		return begin;
+		return begin;//Remember: can give a copy back?
 	}
-
 
 	public LocalDate getEnd()
 	{
-		return end;
+		return end;//Remember: can give a copy back?
 	}
-
 
 	public int getWeekNr()
 	{
 		return weekNr;
 	}
 
-
 	public Set<String> getProjectNamesBornInThisWeek()
 	{
-		return projectNamesBornInThisWeek;
+		return Set.copyOf(projectNamesBornInThisWeek);
 	}
-
 
 	public Set<String> getProjectNamesTerminatedInThisWeek()
 	{
-		return projectNamesTerminatedInThisWeek;
+		return Set.copyOf(projectNamesTerminatedInThisWeek);
 	}
-
 
 	public int getHowManyStepsDoneInThisWeek()
 	{
