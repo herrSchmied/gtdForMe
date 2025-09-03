@@ -2,6 +2,7 @@ package jborg.gtdForBash;
 
 
 
+import java.awt.Point;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -39,14 +40,6 @@ public class TestingStats
     		if(file.isFile())file.delete();
     	}
 	}
-
-	@Test
-	public void newPrjcts() throws JSONException, IOException, URISyntaxException, NaturalNumberException
-	{
-
-		
-
-	}
 	
 	@Test
 	public void testCLIWeekMethods() throws JSONException, IOException, URISyntaxException, NaturalNumberException
@@ -67,7 +60,7 @@ public class TestingStats
         
         assert(st.pickAndCheckByName(newPrjctName, 0, gtdCli));
         
-        List<Pair<LocalDate, LocalDate>> wochen = st.listOfWeeks();
+        List<Pair<LocalDate, LocalDate>> wochen = st.getWeekSpans();
         
         for(Pair<LocalDate, LocalDate> pair: wochen)
         {
@@ -85,6 +78,12 @@ public class TestingStats
 		assert(st.pickAndCheckByName(killStepPrjctName, weeksSize-1, gtdCli));
 		assert(st.pickAndCheckByName(appendStpPrjctName, weeksSize-1, gtdCli));
 		assert(st.pickAndCheckByName(newPrjctNoDLDT, weeksSize-1, gtdCli));
+		
+		Point wknrAndN = st.weekWithMostBDTs();
+		System.out.println("Week with the most BDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Birthes.");
+		assert((wknrAndN.x)==(weeksSize-1));
+		assert((wknrAndN.y)==(prjctSet.size()-1));
+
 	}
 	
 }
