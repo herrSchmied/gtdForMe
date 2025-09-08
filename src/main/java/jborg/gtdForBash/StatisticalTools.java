@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -131,7 +132,7 @@ public class StatisticalTools
 		int bdt[] = new int[weekSpans.size()];
 		
 		for(int n=0;n<weekSpans.size();n++)bdt[n]=0;
-		
+
 		for(JSONObject pJSON: prjctSet)
 		{
 			
@@ -151,6 +152,59 @@ public class StatisticalTools
 		}
 
 		return new Point(weekNr, howMany);
+	}
+	
+	public String periodeResume(ChronoUnit cu, int unitNr)
+	{
+
+		
+		int stepBDTs = 0;
+		int stepNDDTs = 0;
+		int stepsSucceded = 0;
+		int stepsFailed = 0;
+		int stepDeadlineViolation = 0;
+		int openStepDeadlines = 0;
+		int stepDeadlinesHere = 0;
+		String stepMostPressingDeadline = "";
+
+		int prjctBDTs = 0;
+		int prjctNDDTs = 0;
+		int prjctsSucceded = 0;
+		int prjctsFailed = 0;
+		int prjctDeadlineViolation = 0;
+		int openPrjctDeadlines = 0;
+		int prjctDeadlinesHere = 0;
+		String prjctMostPressingDeadline = "";
+		
+		int l = cu.toString().length()-1;
+		String unit = cu.toString().substring(l);
+		
+		if(cu.equals(ChronoUnit.WEEKS))
+		{
+			
+		}
+		
+		String s = "\nProjects:"
+				 + "\nBorn Projects: " + prjctBDTs
+				 + "\nNew Projects written: " + prjctNDDTs
+				 + "\nSuccesses: " + prjctsSucceded
+				 + "\nFailed: " + prjctsFailed
+				 + "\nDeadlineViolations: " + prjctDeadlineViolation
+				 + "\nOpen Deadlines: " + openPrjctDeadlines
+				 + "\nDeadlines this " + unit + ": " + prjctDeadlinesHere
+				 + "\nMost pressing Deadline: " + prjctMostPressingDeadline
+				 + "\n"
+				 + "\nSteps:"
+				 + "\nBorn Steps: " + stepBDTs
+				 + "\nNew Steps written: " + stepNDDTs
+				 + "\nSuccesses: " + stepsSucceded
+				 + "\nFailed: " + stepsFailed
+				 + "\nDeadlineViolations: " + stepDeadlineViolation
+				 + "\nOpen Deadlines: " + openStepDeadlines
+				 + "\nDeadlines this " + unit + ": " + stepDeadlinesHere
+		 		 + "\nMost pressing Deadline: " + stepMostPressingDeadline;
+
+		return s;
 	}
 	
 	public List<Pair<LocalDate, LocalDate>> getWeekSpans()
