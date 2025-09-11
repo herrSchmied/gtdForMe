@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import consoleTools.InputStreamSession;
 import javafx.util.Pair;
+import jborg.gtdForBash.exceptions.WeekDataException;
 import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.SequenzesForISS.*;
@@ -42,7 +43,7 @@ public class TestingStats
 	}
 	
 	@Test
-	public void testCLIWeekMethods() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	public void testCLIWeekMethods() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException
 	{
 		
 		String data = sequenzManyProjects();

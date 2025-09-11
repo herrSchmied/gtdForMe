@@ -160,6 +160,21 @@ public class SequenzesForISS
 		return data;
 	}
 	
+	public static String sequenzMODProjectCustomBDT(String prjctName, LocalDateTime bdt)
+	{
+		
+		String changePrjctBDT = "Yes";
+		String bdtStr = translateTimeToAnswerString(bdt);
+		
+		String data = SomeCommands.new_MOD + '\n'
+				+ prjctName + '\n'
+				+ modPrjctGoal + '\n'
+				+ changePrjctBDT + '\n'
+				+ bdtStr + '\n';
+				
+		return data;
+	}
+
 	public static String sequenzAddNote(String prjctName)
 	{
 
@@ -192,6 +207,61 @@ public class SequenzesForISS
 		return data;
 	}
 
+	public static String sequenzKillProject(String prjctName)
+	{
+
+		String projectWasSuccessQstn  = "No";
+		String wantToMakeTDTNote = "No";
+		String wantToChangeTDT = "No";
+
+		String data = SomeCommands.terminate_Project + " " + prjctName + '\n'
+				+ projectWasSuccessQstn + '\n'
+				+ wantToMakeTDTNote + '\n'
+				+ wantToChangeTDT + '\n';
+
+		return data;
+	}
+
+	public static String sequenzManyProjects()
+	{
+
+		LocalDateTime customBDT = LocalDateTime.now().minusDays(14);
+
+		String data = sequenzNewProjectCustomBDT(newPrjctName, customBDT);
+
+		data = data + sequenzMODProject(wakeProjectName);
+		
+		data = data + sequenzWakeMODProject(wakeProjectName);
+		
+		data = data + sequenzMODProject(modPrjctName);
+		
+		data = data + sequenzNewProject(addNotePrjctName);
+
+		data = data + sequenzNewProjectNoDLDT(killPrjctNameNoDLDT);
+		
+		data = data + sequenzNewProject(killPrjctName);
+		
+		data = data + sequenzKillStep(killPrjctName);
+		
+		data = data + sequenzKillProject(killPrjctName);
+		
+		data = data + sequenzNewProject(killStepPrjctName);
+		
+		data = data + sequenzNewProject(appendStpPrjctName);
+		
+		data = data + sequenzNXTStep(appendStpPrjctName);
+
+		data = data + sequenzNewProjectNoDLDT(newPrjctNoDLDT);
+		
+		data = data + sequenzNewProject(addNotePrjctName);
+		
+		data = data + sequenzAddNote(addNotePrjctName);
+		
+		data = data + SomeCommands.exit + '\n';
+
+		return data;
+	}
+	
 	public static String translateTimeToAnswerString(LocalDateTime ldt)
 	{
 		int day = ldt.getDayOfMonth();
@@ -226,49 +296,5 @@ public class SequenzesForISS
 		if(minute<10) minStr = "0" + minute;
 		
 		return dayStr + monthStr + year + "T" + hourStr + ":" + minStr +"\n";
-
-	}
-	
-	public static String sequenzKillProject(String prjctName)
-	{
-
-		String projectWasSuccessQstn  = "No";
-		String wantToMakeTDTNote = "No";
-		String wantToChangeTDT = "No";
-
-		String data = SomeCommands.terminate_Project + " " + prjctName + '\n'
-				+ projectWasSuccessQstn + '\n'
-				+ wantToMakeTDTNote + '\n'
-				+ wantToChangeTDT + '\n';
-
-		return data;
-	}
-	
-	public static String sequenzManyProjects()
-	{
-
-		LocalDateTime customBDT = LocalDateTime.now().minusYears(1);
-		
-		String data = sequenzNewProjectCustomBDT(newPrjctName, customBDT);
-
-		data = data + sequenzMODProject(wakeProjectName);
-		
-		data = data + sequenzMODProject(modPrjctName);
-		
-		data = data + sequenzNewProject(addNotePrjctName);
-
-		data = data + sequenzNewProjectNoDLDT(killPrjctNameNoDLDT);
-		
-		data = data + sequenzNewProject(killPrjctName);
-		
-		data = data + sequenzNewProject(killStepPrjctName);
-		
-		data = data + sequenzNewProject(appendStpPrjctName);
-
-		data = data + sequenzNewProjectNoDLDT(newPrjctNoDLDT);
-		
-		data = data + SomeCommands.exit + '\n';
-
-		return data;
 	}
 }

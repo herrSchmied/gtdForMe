@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,18 +16,21 @@ import org.json.JSONObject;
 
 import allgemein.LittleTimeTools;
 import javafx.util.Pair;
+import jborg.gtdForBash.exceptions.WeekDataException;
 
 public class StatisticalTools
 {
 
 	final Set<JSONObject> prjctSet;
 	final List<Pair<LocalDate, LocalDate>> weekSpans;
+	final List<WeekData> weekDatas;
 
-	public StatisticalTools(Set<JSONObject> prjctSet)
+	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException
 	{
 
 		this.prjctSet = prjctSet;
 		weekSpans = computeWeekSpans();
+		weekDatas = getWeekDataList();
 	}
 	
 	public List<Pair<LocalDate, LocalDate>> computeWeekSpans()
@@ -54,10 +58,71 @@ public class StatisticalTools
 	    	
     	return weekSpans;
 	}
+	
+	public List<WeekData> getWeekDataList() throws IOException, URISyntaxException, WeekDataException
+	{
+
+		List<WeekData> outputList = new ArrayList<>();
+		int s = weekSpans.size();
+
+		for(int n=0;n<s;n++)
+		{
+
+			Pair<LocalDate, LocalDate> span = weekSpans.get(n);
+
+			Set<String> activeProjects = new HashSet<>();
+			Set<String> bdtProjects = new HashSet<>();
+			Set<String> nddtProjects = new HashSet<>();
+			Set<String> terminatedProjects = new HashSet<>();
+			WeekData wd = new WeekData(span.getKey(), n);
+			
+			for(JSONObject pJSON: prjctSet)
+			{
+				if(span.getValue().isAfter(LocalDate.now()))continue;
+				String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+				LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
+				if(isInThatWeek(n, bdt))
+				{
+					bdtProjects.add(name);
+				}
+				
+				LocalDateTime nddt = extractLDT(pJSON, ProjectJSONKeyz.NDDTKey);
+				if(isInThatWeek(n, nddt))
+				{
+					nddtProjects.add(name);
+				}
+
+				String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+				
+				StatusMGMT statusMGMT = StatusMGMT.getInstance();
+				if(statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName).contains(status))
+				{
+					
+					LocalDateTime tdt = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
+					if(isInThatWeek(n, tdt))
+					{
+						terminatedProjects.add(name);
+					}
+				}
+				else
+				{
+					if(span.getValue().isAfter(bdt.toLocalDate()))activeProjects.add(name);
+				}
+			}
+			
+			wd.setProjectsActive(activeProjects);
+			wd.setProjectsBorn(bdtProjects);
+			wd.setProjectsWrittenDown(nddtProjects);
+			wd.setProjectsTerminated(terminatedProjects);
+			
+			outputList.add(wd);
+		}
+
+		return outputList;
+	}
 	   
     public Pair<String, LocalDateTime> oldestProject()
     {
-
 		LocalDateTime oldestBDT = LocalDateTime.now();
 		
 		String name = "";

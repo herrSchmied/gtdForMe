@@ -26,6 +26,7 @@ import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.SequenzesForISS.*;
 
+
 public class TestingCLI
 {
 
@@ -35,7 +36,6 @@ public class TestingCLI
 	final  LocalDateTime jetzt = LocalDateTime.now();
 	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
 	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
-
 
 	static String data = sequenzNewProject(newPrjctName)
 		+ sequenzMODProject(wakeProjectName)
@@ -56,7 +56,7 @@ public class TestingCLI
 		+ sequenzNewProjectNoDLDT(newPrjctNoDLDT)
 		+ sequenzMODProject(modPrjctName)
 		+ SomeCommands.exit + '\n';
-	
+
 	@BeforeAll
 	public static void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
@@ -135,10 +135,6 @@ public class TestingCLI
 		assert(goal.equals(modPrjctGoal));
 	}
 
-	
-
-	
-	
 	@Test
 	public void testNewMODProject() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
@@ -152,147 +148,131 @@ public class TestingCLI
 	@Test
 	public void testAddNoteToProject() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
-	  
-	  JSONObject project = GTDCLI.pickProjectByName(addNotePrjctName, projects);
-	  assert(project!=null);
-	  
-	  JSONArray notesArr = project.getJSONArray(ProjectJSONKeyz.noteArrayKey);
-	  String note1 = notesArr.getString(0); String note2 = notesArr.getString(1);
-	  assert(note1.equals(noticeOne)); assert(note2.equals(noticeTwo));
+
+		JSONObject project = GTDCLI.pickProjectByName(addNotePrjctName, projects);
+		assert(project!=null);
+
+		JSONArray notesArr = project.getJSONArray(ProjectJSONKeyz.noteArrayKey);
+		String note1 = notesArr.getString(0); String note2 = notesArr.getString(1);
+		assert(note1.equals(noticeOne)); assert(note2.equals(noticeTwo));
 	}
 	  
-	 @Test public void testKillProjectWithNoDLDT() throws JSONException,
-	 IOException, URISyntaxException, NaturalNumberException {
+	@Test
+	public void testKillProjectWithNoDLDT() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	{
+
+		Set<JSONObject> projects = GTDCLI.loadProjects();
+		JSONObject project = GTDCLI.pickProjectByName(killPrjctNameNoDLDT, projects);
+		assert(project!=null);
 	 
 	
-	 
-	 Set<JSONObject> projects = GTDCLI.loadProjects();
-	 
-	 JSONObject project = GTDCLI.pickProjectByName(killPrjctNameNoDLDT, projects);
-	 assert(project!=null);
-	 
-	JSONObject step = SomeCommands.getLastStep(project); StatusMGMT statusMGMT =
-	StatusMGMT.getInstance(); Set<String> terminalSet =
-	statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
-	 
-	String stepStatus = step.getString(StepJSONKeyz.statusKey);
-	
-	System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
-	assert(terminalSet.contains(stepStatus));
-	 
-	assert(terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
+		JSONObject step = SomeCommands.getLastStep(project);
+		StatusMGMT statusMGMT =	StatusMGMT.getInstance();
+		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
+		String stepStatus = step.getString(StepJSONKeyz.statusKey);
+		System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
+		assert(terminalSet.contains(stepStatus));
+		assert(terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
 
-	 }
+	}
 	 
-	public void testKillProject() throws JSONException, IOException,
-	URISyntaxException, NaturalNumberException {
-	 
-	 JSONObject project = GTDCLI.pickProjectByName(killPrjctName, projects);
-	 assert(project!=null);
-	 
-	JSONObject step = SomeCommands.getLastStep(project); StatusMGMT statusMGMT =
-	StatusMGMT.getInstance(); Set<String> terminalSet =
-	statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
-	 
-	String stepStatus = step.getString(StepJSONKeyz.statusKey);
-	 
-	System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
-	assert(terminalSet.contains(stepStatus));
-	 
-	 assert(terminalSet.contains(project.get(ProjectJSONKeyz.statusKey))); }
-	 
-	 
-	 
-	 @Test public void testKillStep() throws JSONException, IOException,
-	 URISyntaxException, NaturalNumberException {
+	public void testKillProject() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	{
+		
+		JSONObject project = GTDCLI.pickProjectByName(killPrjctName, projects);
+		assert(project!=null);
+		
+		JSONObject step = SomeCommands.getLastStep(project); 
+		StatusMGMT statusMGMT =	StatusMGMT.getInstance(); 
+		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
+		String stepStatus = step.getString(StepJSONKeyz.statusKey);
+		System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
+		assert(terminalSet.contains(stepStatus));
+		assert(terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
+	}
 
+	@Test 
+	public void testKillStep() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	{
+
+		JSONObject project = GTDCLI.pickProjectByName(killStepPrjctName, projects);
+		assert(project!=null);
+		
+		JSONObject step = SomeCommands.getLastStep(project);
+		StatusMGMT statusMGMT = StatusMGMT.getInstance();
+		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
+	 	assert(terminalSet.contains(step.getString(StepJSONKeyz.statusKey))); 
+	}
+
+	@Test
+	public void testNextStep() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	{
+
+		JSONObject project = GTDCLI.pickProjectByName(appendStpPrjctName, projects);
+		assert(project!=null);
+
+		JSONObject step2 = SomeCommands.getLastStep(project);
+		StatusMGMT statusMGMT = StatusMGMT.getInstance();
+		Set<String> atStartSet = statusMGMT.getStatesOfASet(StatusMGMT.atStartSetName);
+		String stepStatus = step2.getString(StepJSONKeyz.statusKey);
+		assert(atStartSet.contains(stepStatus));
 	 
-	 JSONObject project = GTDCLI.pickProjectByName(killStepPrjctName, projects);
-	assert(project!=null);
+		Set<String> onTheWaySet = statusMGMT.getStatesOfASet(StatusMGMT.onTheWaySetName);
+		assert(onTheWaySet.contains(stepStatus));
+
+		JSONArray steps = project.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+		assert(steps.length()==2);
 	 
-	 JSONObject step = SomeCommands.getLastStep(project); StatusMGMT statusMGMT =
-	 StatusMGMT.getInstance(); Set<String> terminalSet =
-	 statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
-	 assert(terminalSet.contains(step.getString(StepJSONKeyz.statusKey)));
-	 
-	 }
-	 
-	 
-	 @Test public void testNextStep() throws JSONException, IOException,
-	 URISyntaxException, NaturalNumberException {
-	 
-	 JSONObject project = GTDCLI.pickProjectByName(appendStpPrjctName, projects);
-	 assert(project!=null);
-	 
-	 JSONObject step2 = SomeCommands.getLastStep(project); StatusMGMT statusMGMT =
-	 StatusMGMT.getInstance(); Set<String> atStartSet =
-	 statusMGMT.getStatesOfASet(StatusMGMT.atStartSetName); String stepStatus =
-	 step2.getString(StepJSONKeyz.statusKey);
-	 assert(atStartSet.contains(stepStatus));
-	 
-	Set<String> onTheWaySet =
-	 statusMGMT.getStatesOfASet(StatusMGMT.onTheWaySetName);
-	 assert(onTheWaySet.contains(stepStatus));
-	 
-	 JSONArray steps = project.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-	 assert(steps.length()==2);
-	 
-	 String desc1 = step2.getString(StepJSONKeyz.descKey);
-	 assert(desc1.equals(stepDesc2));
-	 
-	 JSONObject step1 = steps.getJSONObject(0); String desc0 =
-	 step1.getString(StepJSONKeyz.descKey); assert(desc0.equals(stepDesc));
-	 }
-	 
-	 
-	 @Test
-	 public void testNewProjectWithoutDeadline() throws JSONException,
-	 IOException, URISyntaxException, NaturalNumberException
-	 {
-	  
-	 JSONObject newProject = GTDCLI.pickProjectByName(newPrjctNoDLDT, projects);
-	 assert(newProject!=null);
-	 
-	 assert(newProject.has(ProjectJSONKeyz.statusKey));
-	 String status = newProject.getString(ProjectJSONKeyz.statusKey);
-	 assert(status.equals(StatusMGMT.atbd));
-	  
-	  assert(newProject.has(ProjectJSONKeyz.BDTKey));
-	  String bdtStr = newProject.getString(ProjectJSONKeyz.BDTKey);
-	  LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
-	  assert(jetzt.minusSeconds(4).isBefore(bdt));//bdt not older than 4 seconds!
-	  assert(newProject.has(ProjectJSONKeyz.NDDTKey));
-	  String nddtStr = newProject.getString(ProjectJSONKeyz.NDDTKey);
-	  LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
-	  assert(jetzt.minusSeconds(4).isBefore(nddt));//nddt ist nicht älter als 4 Sekunden.
-	 
-	  assert(newProject.has(ProjectJSONKeyz.DLDTKey));
-	  assert(GTDDataSpawnSession.prjctDeadlineNone.equals(newProject.getString(
-	  ProjectJSONKeyz.DLDTKey)));
-	  
-	  assert(newProject.has(ProjectJSONKeyz.stepArrayKey)); 
-	  JSONArray stpArr = newProject.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-	  JSONObject step = stpArr.getJSONObject(0);
-	  
-	  bdtStr = step.getString(StepJSONKeyz.BDTKey); bdt =
-	  LittleTimeTools.LDTfromTimeString(bdtStr);
-	  assert(jetzt.minusSeconds(5).isBefore(bdt));//bdt not older than 5 seconds!
-	  
-	  nddtStr = step.getString(StepJSONKeyz.NDDTKey); nddt =
-	  LittleTimeTools.LDTfromTimeString(nddtStr);
-	  assert(jetzt.minusSeconds(5).isBefore(nddt));//nddt ist nicht älter als 5 Sekunden.
-	  
-	  assert(step.has(StepJSONKeyz.DLDTKey));
-	  assert(GTDDataSpawnSession.stepDeadlineNone.equals(step.getString(
-	  StepJSONKeyz.DLDTKey)));
-	  
-	  String goal = newProject.getString(ProjectJSONKeyz.goalKey);
-	  assert(goal.equals(newPrjctGoal));
-	  
-	  String stepDesc2 = step.getString(StepJSONKeyz.descKey);
-	  assert(stepDesc2.equals(stepDesc));
-	  }
-	 	  
+		String desc1 = step2.getString(StepJSONKeyz.descKey);
+		assert(desc1.equals(stepDesc2));
+
+		JSONObject step1 = steps.getJSONObject(0); 
+		String desc0 = step1.getString(StepJSONKeyz.descKey);
+		assert(desc0.equals(stepDesc));
+	}
+
+	@Test
+	public void testNewProjectWithoutDeadline() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	{
+		
+		JSONObject newProject = GTDCLI.pickProjectByName(newPrjctNoDLDT, projects);
+		assert(newProject!=null);
+		assert(newProject.has(ProjectJSONKeyz.statusKey));
+		
+		String status = newProject.getString(ProjectJSONKeyz.statusKey);
+		assert(status.equals(StatusMGMT.atbd));
+		assert(newProject.has(ProjectJSONKeyz.BDTKey));
+
+		String bdtStr = newProject.getString(ProjectJSONKeyz.BDTKey);
+		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
+		assert(jetzt.minusSeconds(4).isBefore(bdt));//bdt not older than 4 seconds!
+		assert(newProject.has(ProjectJSONKeyz.NDDTKey));
+
+		String nddtStr = newProject.getString(ProjectJSONKeyz.NDDTKey);
+		LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
+		assert(jetzt.minusSeconds(4).isBefore(nddt));//nddt ist nicht älter als 4 Sekunden.
+		assert(newProject.has(ProjectJSONKeyz.DLDTKey));
+		assert(GTDDataSpawnSession.prjctDeadlineNone.equals(newProject.getString(ProjectJSONKeyz.DLDTKey)));
+		assert(newProject.has(ProjectJSONKeyz.stepArrayKey)); 
+		
+		JSONArray stpArr = newProject.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+		JSONObject step = stpArr.getJSONObject(0);
+		bdtStr = step.getString(StepJSONKeyz.BDTKey);
+		bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
+		assert(jetzt.minusSeconds(5).isBefore(bdt));//bdt not older than 5 seconds!
+
+		nddtStr = step.getString(StepJSONKeyz.NDDTKey);
+		nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
+		assert(jetzt.minusSeconds(5).isBefore(nddt));//nddt ist nicht älter als 5 Sekunden.
+		assert(step.has(StepJSONKeyz.DLDTKey));
+		assert(GTDDataSpawnSession.stepDeadlineNone.equals(step.getString(StepJSONKeyz.DLDTKey)));
+		
+		String goal = newProject.getString(ProjectJSONKeyz.goalKey);
+		assert(goal.equals(newPrjctGoal));
+
+		String stepDesc2 = step.getString(StepJSONKeyz.descKey);
+		assert(stepDesc2.equals(stepDesc));
+	}
 
 	private static void doCLI() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{

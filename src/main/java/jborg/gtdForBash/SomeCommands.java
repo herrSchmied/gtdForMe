@@ -27,6 +27,7 @@ import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
 import jborg.gtdForBash.DBIssues.DBSink;
+import jborg.gtdForBash.exceptions.WeekDataException;
 import someMath.NaturalNumberException;
 
 public class SomeCommands
@@ -258,7 +259,7 @@ public class SomeCommands
 	    		return name;
 
 			}
-			catch (URISyntaxException e)
+			catch (URISyntaxException | WeekDataException e)
 			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
