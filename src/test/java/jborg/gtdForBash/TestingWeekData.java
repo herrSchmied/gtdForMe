@@ -4,7 +4,6 @@ package jborg.gtdForBash;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 import java.time.DayOfWeek;
@@ -38,7 +37,7 @@ public class TestingWeekData
 		assert(ldSunday.equals(wd.getEnd()));
 		assert(ldSunday.getDayOfWeek().equals(DayOfWeek.SUNDAY));
 	}
-	
+
 	@Test
 	public void testActiveProjects() throws WeekDataException
 	{
@@ -82,7 +81,7 @@ public class TestingWeekData
 
 	    assert(actualMessage.equals(expectedMessage));
 	}
-	
+
 	@Test
 	public void testNewProjectsWrittenDown() throws WeekDataException
 	{
@@ -124,7 +123,7 @@ public class TestingWeekData
 
 	    assert(actualMessage.equals(expectedMessage));
 	}
-	
+
 	@Test
 	public void testProjectsBorn() throws WeekDataException
 	{
@@ -166,7 +165,7 @@ public class TestingWeekData
 
 	    assert(actualMessage.equals(expectedMessage));
 	}
-	
+
 	@Test
 	public void testProjectsTerminated() throws WeekDataException
 	{
