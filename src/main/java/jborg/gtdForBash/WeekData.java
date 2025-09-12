@@ -28,11 +28,15 @@ public class WeekData
 	
 	private int howManyStepsDoneInThisWeek;
 	private boolean stepNrIsSet = false;
+	
+	public static final String weekBeginExceptionMsg = "Week must begin Monday.";
+	public static final String cantConcludeExceptionMsg = "Can't Conclude because week is not in the Past.";
+	public static final String alreadySetExceptionMsg = "Already Set.";
 
 	public WeekData(LocalDate begin, int weekNr) throws WeekDataException
 	{
 		
-		if(!begin.getDayOfWeek().equals(DayOfWeek.MONDAY))throw new WeekDataException("Week must begin Monday.");
+		if(!begin.getDayOfWeek().equals(DayOfWeek.MONDAY))throw new WeekDataException(weekBeginExceptionMsg);
 		this.begin = begin;
 		this.end = begin.plusDays(6);
 		this.weekNr = weekNr;
@@ -61,14 +65,14 @@ public class WeekData
 	public void setProjectsActive(Set<String> projectNames) throws WeekDataException
 	{
 
-		throwsExceptionIfWeekIsNotInThePast("Can't Conclude because week is not in the Past.");
+		throwsExceptionIfWeekIsNotInThePast(cantConcludeExceptionMsg);
 
 		if(!projectsActiveIsSet)
 		{
 			projectsActive.addAll(projectNames);
 			projectsActiveIsSet = true;
 		}
-		else throw new WeekDataException("Active Projects is already Set.");
+		else throw new WeekDataException(alreadySetExceptionMsg);
 	}
 
 	/**
@@ -79,14 +83,14 @@ public class WeekData
 	public void setProjectsWrittenDown(Set<String> projectNames) throws WeekDataException
 	{
 		
-		throwsExceptionIfWeekIsNotInThePast("Can't Conclude because week is not in the Past.");
+		throwsExceptionIfWeekIsNotInThePast(cantConcludeExceptionMsg);
 			
 		if(!projectsWrittenIsSet)
 		{
 			newProjectNamesWrittenDown.addAll(projectNames);
 			projectsWrittenIsSet = true;
 		}
-		else throw new WeekDataException("New Projects Written is already Set.");
+		else throw new WeekDataException(alreadySetExceptionMsg);
 	}
 
 	/**
@@ -97,14 +101,14 @@ public class WeekData
 	public void setProjectsBorn(Set<String> projectNames) throws WeekDataException
 	{
 		
-		throwsExceptionIfWeekIsNotInThePast("Can't Conclude because week is not in the Past.");
+		throwsExceptionIfWeekIsNotInThePast(cantConcludeExceptionMsg);
 			
 		if(!projectsBornIsSet)
 		{
 			projectNamesBorn.addAll(projectNames);
 			projectsBornIsSet = true;
 		}
-		else throw new WeekDataException("Born Projects already Set.");
+		else throw new WeekDataException(alreadySetExceptionMsg);
 	}
 	
 	/**
@@ -115,14 +119,14 @@ public class WeekData
 	public void setProjectsTerminated(Set<String> projectNames) throws WeekDataException
 	{
 		
-		throwsExceptionIfWeekIsNotInThePast("Can't Conclude because week is not in the Past.");
+		throwsExceptionIfWeekIsNotInThePast(cantConcludeExceptionMsg);
 
 		if(!projectsTerminatedIsSet)
 		{
 			projectNamesTerminated.addAll(projectNames);
 			projectsTerminatedIsSet = true;
 		}
-		else throw new WeekDataException("Terminated Projects is already Set.");
+		else throw new WeekDataException(alreadySetExceptionMsg);
 	}
 
 	/**
@@ -133,14 +137,14 @@ public class WeekData
 	public void sethowManyStepsDoneInThisWeek(int n) throws WeekDataException
 	{
 		
-		throwsExceptionIfWeekIsNotInThePast("Can't Conclude because week is not in the Past.");
+		throwsExceptionIfWeekIsNotInThePast(cantConcludeExceptionMsg);
 
 		if(!stepNrIsSet)
 		{
 			howManyStepsDoneInThisWeek = n;
 			stepNrIsSet = true;
 		}
-		else throw new WeekDataException("Step Nr. already Set.");
+		else throw new WeekDataException(alreadySetExceptionMsg);
 	}
 
 	public LocalDate getBegin()
