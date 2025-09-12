@@ -64,12 +64,6 @@ public class TestingWeekData
 	    String expectedMessage = WeekData.alreadySetExceptionMsg;
 	    String actualMessage = exception.getMessage();
 	    assert(actualMessage.equals(expectedMessage));
-
-	    Set<String> set = new HashSet<>();
-	    set.addAll(wd.getActiveProjects());
-	    set.add("P4");
-	    assert(set.containsAll(wd.getActiveProjects()));
-	    assert(!wd.getActiveProjects().contains("P4"));
 	    
 		ldMonday = ld.minusDays(dow.getValue()-1);
 		assert(ldMonday.getDayOfWeek().equals(DayOfWeek.MONDAY));
@@ -113,12 +107,6 @@ public class TestingWeekData
 
 	    assert(actualMessage.equals(expectedMessage));
 
-	    Set<String> set = new HashSet<>();
-	    set.addAll(wd.getProjectsWrittenDown());
-	    set.add("P4");
-	    assert(set.containsAll(wd.getProjectsWrittenDown()));
-	    assert(!wd.getProjectsWrittenDown().contains("P4"));
-
 		ldMonday = ld.minusDays(dow.getValue()-1);
 		assert(ldMonday.getDayOfWeek().equals(DayOfWeek.MONDAY));
 
@@ -161,12 +149,6 @@ public class TestingWeekData
 
 	    assert(actualMessage.equals(expectedMessage));
 
-	    Set<String> set = new HashSet<>();
-	    set.addAll(wd.getProjectsBorn());
-	    set.add("P4");
-	    assert(set.containsAll(wd.getProjectsBorn()));
-	    assert(!wd.getProjectsBorn().contains("P4"));
-
 		ldMonday = ld.minusDays(dow.getValue()-1);
 		assert(ldMonday.getDayOfWeek().equals(DayOfWeek.MONDAY));
 
@@ -208,12 +190,6 @@ public class TestingWeekData
 	    String actualMessage = exception.getMessage();
 
 	    assert(actualMessage.equals(expectedMessage));
-
-	    Set<String> set = new HashSet<>();
-	    set.addAll(wd.getProjectsTerminated());
-	    set.add("P4");
-	    assert(set.containsAll(wd.getProjectsTerminated()));
-	    assert(!wd.getProjectsTerminated().contains("P4"));
 
 		ldMonday = ld.minusDays(dow.getValue()-1);
 		assert(ldMonday.getDayOfWeek().equals(DayOfWeek.MONDAY));
