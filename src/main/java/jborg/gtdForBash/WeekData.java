@@ -134,7 +134,7 @@ public class WeekData
 	 * @param n
 	 * @throws WeekDataException
 	 */
-	public void sethowManyStepsDoneInThisWeek(int n) throws WeekDataException
+	public void setHowManyStepsDone(int n) throws WeekDataException
 	{
 		
 		throwsExceptionIfWeekIsNotInThePast(cantConcludeExceptionMsg);
@@ -162,27 +162,43 @@ public class WeekData
 		return weekNr;
 	}
 
+	/**
+	 * Returns immutable Set!
+	 * @return
+	 */
 	public Set<String> getActiveProjects()
 	{
 		return Set.copyOf(projectsActive);
 	}
 
-	public Set<String> getNewProjectNamesWrittenDown()
+	/**
+	 * Returns immutable Set!
+	 * @return
+	 */
+	public Set<String> getProjectsWrittenDown()
 	{
 		return Set.copyOf(newProjectNamesWrittenDown);
 	}
 
-	public Set<String> getProjectNamesBornInThisWeek()
+	/**
+	 * Returns immutable Set!
+	 * @return
+	 */
+	public Set<String> getProjectsBorn()
 	{
 		return Set.copyOf(projectNamesBorn);
 	}
 
-	public Set<String> getProjectNamesTerminatedInThisWeek()
+	/**
+	 * Returns immutable Set!
+	 * @return
+	 */
+	public Set<String> getProjectsTerminated()
 	{
 		return Set.copyOf(projectNamesTerminated);
 	}
 
-	public int getHowManyStepsDoneInThisWeek()
+	public int getHowManyStepsDone()
 	{
 		return howManyStepsDoneInThisWeek;
 	}
