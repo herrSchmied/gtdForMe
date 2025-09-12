@@ -75,17 +75,17 @@ public class StatisticalTools
 			Set<String> nddtProjects = new HashSet<>();
 			Set<String> terminatedProjects = new HashSet<>();
 			WeekData wd = new WeekData(span.getKey(), n);
-			
+			if(span.getValue().isAfter(LocalDate.now()))continue;
+
 			for(JSONObject pJSON: prjctSet)
 			{
-				if(span.getValue().isAfter(LocalDate.now()))continue;
 				String name = pJSON.getString(ProjectJSONKeyz.nameKey);
 				LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
 				if(isInThatWeek(n, bdt))
 				{
 					bdtProjects.add(name);
 				}
-				
+
 				LocalDateTime nddt = extractLDT(pJSON, ProjectJSONKeyz.NDDTKey);
 				if(isInThatWeek(n, nddt))
 				{

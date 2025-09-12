@@ -37,25 +37,6 @@ public class TestingCLI
 	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
 	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
-	static String data = sequenzNewProject(newPrjctName)
-		+ sequenzMODProject(wakeProjectName)
-		+ sequenzWakeMODProject(wakeProjectName)
-		+ sequenzNewProject(addNotePrjctName)
-		+ sequenzAddNote(addNotePrjctName)
-		+ sequenzNewProjectNoDLDT(killPrjctNameNoDLDT)
-		+ sequenzKillStep(killPrjctNameNoDLDT)
-		+ sequenzKillProject(killPrjctNameNoDLDT)
-		+ sequenzNewProject(killPrjctName)
-		+ sequenzKillStep(killPrjctName)
-		+ sequenzKillProject(killPrjctName)
-		+ sequenzNewProject(killStepPrjctName)
-		+ sequenzKillStep(killStepPrjctName)
-		+ sequenzNewProject(appendStpPrjctName)
-		+ sequenzKillStep(appendStpPrjctName)
-		+ sequenzNXTStep(appendStpPrjctName)
-		+ sequenzNewProjectNoDLDT(newPrjctNoDLDT)
-		+ sequenzMODProject(modPrjctName)
-		+ SomeCommands.exit + '\n';
 
 	@BeforeAll
 	public static void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
@@ -277,7 +258,7 @@ public class TestingCLI
 	private static void doCLI() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(sequenzManyProjects().getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 
         gtdCli = new GTDCLI(iss);				

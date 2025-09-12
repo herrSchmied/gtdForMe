@@ -29,8 +29,12 @@ import static jborg.gtdForBash.SequenzesForISS.*;
 public class TestingStats
 {
 
+    static GTDCLI gtdCli;
+    static Set<JSONObject> prjctSet;
+    
+
 	@BeforeAll
-	public static void clearFolder()
+	public static void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
     	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.projectDataFolderRelativePath);
@@ -40,19 +44,20 @@ public class TestingStats
     		
     		if(file.isFile())file.delete();
     	}
-	}
-	
-	@Test
-	public void testCLIWeekMethods() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException
-	{
-		
+    	
 		String data = sequenzManyProjects();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 
-        GTDCLI gtdCli = new GTDCLI(iss);			
-        Set<JSONObject> prjctSet = GTDCLI.loadProjects();
+        gtdCli = new GTDCLI(iss);			
+        prjctSet = GTDCLI.loadProjects();
+	}
+	
+	@Test
+	public void testCLIWeekMethods() throws WeekDataException, IOException, URISyntaxException
+	{
+		
         StatisticalTools st = new StatisticalTools(prjctSet);
         
         Pair<String, LocalDateTime> oldPrjct = st.oldestProject();
@@ -83,8 +88,6 @@ public class TestingStats
 		Point wknrAndN = st.weekWithMostBDTs();
 		System.out.println("Week with the most BDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Birthes.");
 		assert((wknrAndN.x)==(weeksSize-1));
-		assert((wknrAndN.y)==(prjctSet.size()-1));
-
+		assert((wknrAndN.y)==(prjctSet.size()));
 	}
-	
 }

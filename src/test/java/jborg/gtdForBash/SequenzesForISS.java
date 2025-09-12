@@ -1,6 +1,24 @@
 package jborg.gtdForBash;
 
 
+import static jborg.gtdForBash.SequenzesForISS.addNotePrjctName;
+import static jborg.gtdForBash.SequenzesForISS.appendStpPrjctName;
+import static jborg.gtdForBash.SequenzesForISS.killPrjctName;
+import static jborg.gtdForBash.SequenzesForISS.killPrjctNameNoDLDT;
+import static jborg.gtdForBash.SequenzesForISS.killStepPrjctName;
+import static jborg.gtdForBash.SequenzesForISS.modPrjctName;
+import static jborg.gtdForBash.SequenzesForISS.newPrjctName;
+import static jborg.gtdForBash.SequenzesForISS.newPrjctNoDLDT;
+import static jborg.gtdForBash.SequenzesForISS.sequenzAddNote;
+import static jborg.gtdForBash.SequenzesForISS.sequenzKillProject;
+import static jborg.gtdForBash.SequenzesForISS.sequenzKillStep;
+import static jborg.gtdForBash.SequenzesForISS.sequenzMODProject;
+import static jborg.gtdForBash.SequenzesForISS.sequenzNXTStep;
+import static jborg.gtdForBash.SequenzesForISS.sequenzNewProject;
+import static jborg.gtdForBash.SequenzesForISS.sequenzNewProjectNoDLDT;
+import static jborg.gtdForBash.SequenzesForISS.sequenzWakeMODProject;
+import static jborg.gtdForBash.SequenzesForISS.wakeProjectName;
+
 import java.time.LocalDateTime;
 import java.time.Month;
 
@@ -225,39 +243,25 @@ public class SequenzesForISS
 	public static String sequenzManyProjects()
 	{
 
-		LocalDateTime customBDT = LocalDateTime.now().minusDays(14);
-
-		String data = sequenzNewProjectCustomBDT(newPrjctName, customBDT);
-
-		data = data + sequenzMODProject(wakeProjectName);
-		
-		data = data + sequenzWakeMODProject(wakeProjectName);
-		
-		data = data + sequenzMODProject(modPrjctName);
-		
-		data = data + sequenzNewProject(addNotePrjctName);
-
-		data = data + sequenzNewProjectNoDLDT(killPrjctNameNoDLDT);
-		
-		data = data + sequenzNewProject(killPrjctName);
-		
-		data = data + sequenzKillStep(killPrjctName);
-		
-		data = data + sequenzKillProject(killPrjctName);
-		
-		data = data + sequenzNewProject(killStepPrjctName);
-		
-		data = data + sequenzNewProject(appendStpPrjctName);
-		
-		data = data + sequenzNXTStep(appendStpPrjctName);
-
-		data = data + sequenzNewProjectNoDLDT(newPrjctNoDLDT);
-		
-		data = data + sequenzNewProject(addNotePrjctName);
-		
-		data = data + sequenzAddNote(addNotePrjctName);
-		
-		data = data + SomeCommands.exit + '\n';
+		String data = sequenzNewProject(newPrjctName)
+				+ sequenzMODProject(wakeProjectName)
+				+ sequenzWakeMODProject(wakeProjectName)
+				+ sequenzNewProject(addNotePrjctName)
+				+ sequenzAddNote(addNotePrjctName)
+				+ sequenzNewProjectNoDLDT(killPrjctNameNoDLDT)
+				+ sequenzKillStep(killPrjctNameNoDLDT)
+				+ sequenzKillProject(killPrjctNameNoDLDT)
+				+ sequenzNewProject(killPrjctName)
+				+ sequenzKillStep(killPrjctName)
+				+ sequenzKillProject(killPrjctName)
+				+ sequenzNewProject(killStepPrjctName)
+				+ sequenzKillStep(killStepPrjctName)
+				+ sequenzNewProject(appendStpPrjctName)
+				+ sequenzKillStep(appendStpPrjctName)
+				+ sequenzNXTStep(appendStpPrjctName)
+				+ sequenzNewProjectNoDLDT(newPrjctNoDLDT)
+				+ sequenzMODProject(modPrjctName)
+				+ SomeCommands.exit + '\n';
 
 		return data;
 	}
