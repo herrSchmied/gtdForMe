@@ -21,21 +21,25 @@ public class ProjectJSONValidator
 
 	public ProjectJSONValidator()
 	{
-	        try(InputStream schemaStream = getClass().getResourceAsStream("/gtdResources/projectJSONSchema.json"))
-	        {
-	        	JSONObject rawSchema = new JSONObject(new JSONTokener(schemaStream));
-	            schema = SchemaLoader.load(rawSchema);
-	        }
-	        catch(Exception e)
-	        {
-	            throw new RuntimeException("Failed to load schema", e);
-	        }
+
+		String path = "/projectJSONSchema.json";
+		try(InputStream schemaStream = getClass().getResourceAsStream(path))
+		{
+	
+			JSONObject rawSchema = new JSONObject(new JSONTokener(schemaStream));
+			schema = SchemaLoader.load(rawSchema);
+		}
+	    catch(Exception e)
+	    {
+	    	throw new RuntimeException("Failed to load schema", e);
+	    }
 	 }
 
 	public boolean validate(String jsonString)
 	{
 
 		JSONObject json = new JSONObject(jsonString);
+
 		try
 		{
 			schema.validate(json);

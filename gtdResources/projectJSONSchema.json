@@ -1,25 +1,25 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Project",
     "description": "A Project",
     "type": "object",
     "properties": 
 	{
-        "name": 
+        "Project_Name": 
 		{
             "description": "A unique name for the Project",
             "type": "string"
         },
-        "status":
+        "Project_Status":
 		{
             "description": "Status of Project",
             "type": "string"
         },
-        "goal":
+        "Goal":
 		{
-			"descriptio": "Goal of the Project",
+			"description": "Goal of the Project",
             "type": "string"
         }
     },
-    "required": ["name", "status", "goal"]
+    "required": ["Project_Name", "Project_Status", "Goal"]
 }

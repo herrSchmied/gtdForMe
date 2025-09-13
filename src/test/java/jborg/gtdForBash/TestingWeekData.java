@@ -49,8 +49,7 @@ public class TestingWeekData
 		
 		WeekData wd = new WeekData(ldMonday, 0);
 
-		Exception exception = assertThrows(WeekDataException.class, 
-		()->
+		Exception exception = assertThrows(WeekDataException.class, ()->
 		{
 		    Set<String> activeProjects = new HashSet<>();
 		    activeProjects.add("P1");
@@ -69,8 +68,7 @@ public class TestingWeekData
 
 		WeekData wd2 = new WeekData(ldMonday, 0);
 
-	    exception = assertThrows(WeekDataException.class,
-	    () ->
+	    exception = assertThrows(WeekDataException.class, () ->
 	    {
 	    	Set<String> activeProjects = new HashSet<>(Arrays.asList("P1", "P2", "P3"));
 	    	wd2.setProjectsActive(activeProjects);
@@ -93,8 +91,7 @@ public class TestingWeekData
 		
 		WeekData wd = new WeekData(ldMonday, 0);
 
-		Exception exception = assertThrows(WeekDataException.class, 
-		()->
+		Exception exception = assertThrows(WeekDataException.class, ()->
 		{
 		    Set<String> newProjectsWrittenDown = new HashSet<>(Arrays.asList("P1", "P2", "P3"));
 		    wd.setProjectsWrittenDown(newProjectsWrittenDown);
@@ -111,8 +108,7 @@ public class TestingWeekData
 
 		WeekData wd2 = new WeekData(ldMonday, 0);
 
-	    exception = assertThrows(WeekDataException.class,
-	    () ->
+	    exception = assertThrows(WeekDataException.class, () ->
 	    {
 	    	Set<String> newProjectsWrittenDown = new HashSet<>(Arrays.asList("P1", "P2", "P3"));
 	    	wd2.setProjectsWrittenDown(newProjectsWrittenDown);
@@ -135,8 +131,7 @@ public class TestingWeekData
 		
 		WeekData wd = new WeekData(ldMonday, 0);
 
-		Exception exception = assertThrows(WeekDataException.class, 
-		()->
+		Exception exception = assertThrows(WeekDataException.class, ()->
 		{
 		    Set<String> projectsBorn = new HashSet<>(Arrays.asList("P1", "P2", "P3"));
 		    wd.setProjectsBorn(projectsBorn);
@@ -153,8 +148,7 @@ public class TestingWeekData
 
 		WeekData wd2 = new WeekData(ldMonday, 0);
 
-	    exception = assertThrows(WeekDataException.class,
-	    () ->
+	    exception = assertThrows(WeekDataException.class, () ->
 	    {
 	    	Set<String> projectsBorn = new HashSet<>(Arrays.asList("P1", "P2", "P3"));
 	    	wd2.setProjectsBorn(projectsBorn);
@@ -177,8 +171,7 @@ public class TestingWeekData
 		
 		WeekData wd = new WeekData(ldMonday, 0);
 
-		Exception exception = assertThrows(WeekDataException.class, 
-		()->
+		Exception exception = assertThrows(WeekDataException.class, ()->
 		{
 		    Set<String> projectsTerminated = new HashSet<>(Arrays.asList("P1", "P2", "P3"));
 		    wd.setProjectsTerminated(projectsTerminated);
@@ -195,8 +188,7 @@ public class TestingWeekData
 
 		WeekData wd2 = new WeekData(ldMonday, 0);
 
-	    exception = assertThrows(WeekDataException.class,
-	    () ->
+	    exception = assertThrows(WeekDataException.class, () ->
 	    {
 	    	Set<String> projectsTerminated = new HashSet<>(Arrays.asList("P1", "P2", "P3"));
 	    	wd2.setProjectsTerminated(projectsTerminated);
@@ -219,8 +211,7 @@ public class TestingWeekData
 		
 		WeekData wd = new WeekData(ldMonday, 0);
 
-		Exception exception = assertThrows(WeekDataException.class, 
-		()->
+		Exception exception = assertThrows(WeekDataException.class, ()->
 		{
 		    int stepNr = 1;
 		    wd.setHowManyStepsDone(stepNr);
@@ -237,8 +228,7 @@ public class TestingWeekData
 
 		WeekData wd2 = new WeekData(ldMonday, 0);
 
-	    exception = assertThrows(WeekDataException.class,
-	    () ->
+	    exception = assertThrows(WeekDataException.class, () ->
 	    {
 	    	int stepNr = 1;
 	    	wd2.setHowManyStepsDone(stepNr);
