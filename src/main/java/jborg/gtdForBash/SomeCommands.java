@@ -165,14 +165,45 @@ public class SomeCommands
     private final InputStreamSession iss;
     private final Map<String, JSONObject> knownProjects;
     
-    private final Predicate<JSONObject> isMODProject;
+    public static final Predicate<JSONObject> isMODProject = (pJSON)->
+    {
+    	String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+    	return status.equals(StatusMGMT.mod);
+    };
 
-    private final Predicate<JSONObject> projectIsTerminated;
+    public static final Predicate<JSONObject> projectIsTerminated = (jo)->
+	{
+
+	    String status = jo.getString(ProjectJSONKeyz.statusKey);
+	    
+	    StatusMGMT states = StatusMGMT.getInstance();
+	   
+	    Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
+	    	
+	    return terminalSet.contains(status);
+	};
     
-	private final Predicate<JSONObject> stepIsTerminated;
+	public static final Predicate<JSONObject> stepIsTerminated = (step)->
+	{
 
-	private final Predicate<JSONObject> activeProject;
-	
+	   	String status = step.getString(StepJSONKeyz.statusKey);
+	   	
+	   	StatusMGMT states = StatusMGMT.getInstance();
+
+	   	Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
+	    	
+	   	return terminalSet.contains(status);
+	};
+
+	public static final Predicate<JSONObject> activeProject = (jo)->
+	{
+		if(projectIsTerminated.test(jo))return false;
+		
+		if(isMODProject.test(jo))return false;
+		
+		return true;
+	};
+
 	private final Predicate<String> activePrjctName;
 	
 	private final Predicate<String> notActivePrjctName;
@@ -183,47 +214,7 @@ public class SomeCommands
 
     	this.iss = cli.getInputStreamSession();
     	this.knownProjects = knownProjects;
-    	
-	    isMODProject = (pJSON)->
-	    {
-	    	
-	    	String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-	    	
-	    	return status.equals(StatusMGMT.mod);
-	    };
 
-	    projectIsTerminated = (jo)->
-		{
-
-		    String status = jo.getString(ProjectJSONKeyz.statusKey);
-		   
-		    Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
-		    	
-		    return terminalSet.contains(status);
-		};
-		    
-		stepIsTerminated = (step)->
-		{
-		    	
-		   	String status = step.getString(StepJSONKeyz.statusKey);
-		    	   
-		   	Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
-		    	
-		   	return terminalSet.contains(status);
-		};
-
-		activeProject = (jo)->
-		{
-			
-			if(!knownProjects.containsValue(jo))return false;
-			
-			if(projectIsTerminated.test(jo))return false;
-			
-			if(isMODProject.test(jo))return false;
-			
-			return true;
-		};
-		
 		activePrjctName = (s)->
 		{
 			if(!knownProjects.containsKey(s)) return false;
@@ -250,8 +241,8 @@ public class SomeCommands
 			{
 				st = new StatisticalTools(GTDCLI.loadProjects());
 			
-	    		String name = st.oldestProject().getKey();
-	    		LocalDateTime oldestBDT = st.oldestProject().getValue();
+	    		String name = st.oldestLDT(ProjectJSONKeyz.BDTKey).getKey();
+	    		LocalDateTime oldestBDT = st.oldestLDT(ProjectJSONKeyz.BDTKey).getValue();
 	    		
 	    		String output = name + "\nBDT: " + LittleTimeTools.timeString(oldestBDT);
 	    		System.out.println(output);
@@ -261,10 +252,9 @@ public class SomeCommands
 			}
 			catch (URISyntaxException | WeekDataException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-    		
+
     		throw new RuntimeException("This should not happen.");
     	};
     	

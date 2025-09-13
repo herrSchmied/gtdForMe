@@ -33,12 +33,12 @@ public class StatisticalTools
 		weekDatas = getWeekDataList();
 	}
 	
-	public List<Pair<LocalDate, LocalDate>> computeWeekSpans()
+	public List<Pair<LocalDate, LocalDate>> computeWeekSpans() throws IOException, URISyntaxException
 	{
 
 		List<Pair<LocalDate, LocalDate>> weekSpans = new ArrayList<>();
 		
-	    LocalDateTime old = oldestProject().getValue();
+	    LocalDateTime old = oldestLDT(ProjectJSONKeyz.BDTKey).getValue();
 	    	
 	   	DayOfWeek dow = old.getDayOfWeek();
 	   	int dowNr = dow.getValue();
@@ -121,28 +121,70 @@ public class StatisticalTools
 		return outputList;
 	}
 	   
-    public Pair<String, LocalDateTime> oldestProject()
+    public Pair<String, LocalDateTime> oldestLDT(String jsonKey) throws IOException, URISyntaxException
     {
-		LocalDateTime oldestBDT = LocalDateTime.now();
+		LocalDateTime oldestLDT = LocalDateTime.now();
 		
 		String name = "";
 		
 		for(JSONObject pJSON: prjctSet)
 		{
-			String bdtStr = pJSON.getString(ProjectJSONKeyz.BDTKey);
-			LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
-			if(bdt.isBefore(oldestBDT))
+
+			LocalDateTime bdt = extractLDT(pJSON, jsonKey);
+			if(bdt.isBefore(oldestLDT))
 			{
-				oldestBDT = bdt;
+				oldestLDT = bdt;
 				name = pJSON.getString(ProjectJSONKeyz.nameKey);
 			}
 		}
 		
-    	Pair<String, LocalDateTime> output = new Pair<>(name, oldestBDT);
+    	Pair<String, LocalDateTime> output = new Pair<>(name, oldestLDT);
     	
     	return output;
     }
     
+    public Pair<String, LocalDateTime> youngestLDT(String jsonKey) throws IOException, URISyntaxException
+    {
+
+		LocalDateTime youngest = oldestLDT(jsonKey).getValue();
+		
+		String name = "";
+		
+		for(JSONObject pJSON: prjctSet)
+		{
+
+			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
+			if(ldt.isAfter(youngest))
+			{
+				youngest = ldt;
+				name = pJSON.getString(ProjectJSONKeyz.nameKey);
+			}
+		}
+		
+    	Pair<String, LocalDateTime> output = new Pair<>(name, youngest);
+    	
+    	return output;
+    }
+
+    public List<LocalDateTime> allLDTs(String jsonKey) throws IOException, URISyntaxException
+    {
+
+    	List<LocalDateTime> list = new ArrayList<>();
+		
+		for(JSONObject pJSON: prjctSet)
+		{
+
+			if(jsonKey.equals(ProjectJSONKeyz.TDTKey)&&
+					!SomeCommands.projectIsTerminated.test(pJSON))
+						continue;
+
+			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
+			list.add(ldt);
+		}
+
+    	return list;
+    }
+
     public boolean isInThatWeek(int weekNr, LocalDateTime ldt)
     {
 
@@ -157,7 +199,7 @@ public class StatisticalTools
     	return ld.isAfter(beginLD)&&ld.isBefore(endLD);
     }
     
-    public int isInWhichWeek(LocalDateTime ldt)
+    public int isInWhichWeek(LocalDateTime ldt) throws IOException, URISyntaxException
     {
     	List<Pair<LocalDate, LocalDate>> weeks = computeWeekSpans();
     	for(int n=0;n<weeks.size();n++)

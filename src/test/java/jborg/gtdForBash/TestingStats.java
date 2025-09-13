@@ -60,7 +60,7 @@ public class TestingStats
 		
         StatisticalTools st = new StatisticalTools(prjctSet);
         
-        Pair<String, LocalDateTime> oldPrjct = st.oldestProject();
+        Pair<String, LocalDateTime> oldPrjct = st.oldestLDT(ProjectJSONKeyz.BDTKey);
         
         assert(oldPrjct.getKey().equals(newPrjctName));
         
