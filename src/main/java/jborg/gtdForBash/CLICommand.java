@@ -3,6 +3,7 @@ package jborg.gtdForBash;
 
 import java.io.IOException;
 
+import jborg.gtdForBash.exceptions.CLICMDException;
 import someMath.NaturalNumberException;
 
 

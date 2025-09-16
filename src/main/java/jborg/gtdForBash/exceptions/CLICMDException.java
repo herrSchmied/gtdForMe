@@ -1,4 +1,4 @@
-package jborg.gtdForBash;
+package jborg.gtdForBash.exceptions;
 
 @SuppressWarnings("serial")
 public class CLICMDException extends Exception

@@ -31,7 +31,7 @@ import allgemein.LittleTimeTools;
 import consoleTools.BashSigns;
 import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
-
+import jborg.gtdForBash.exceptions.CLICMDException;
 import someMath.NaturalNumberException;
 
 import static fileShortCuts.TextAndObjSaveAndLoad.*;
@@ -92,7 +92,7 @@ public class GTDCLI implements Beholder<String>
 	private final String dataFolderFound = "Data Folder found.";
 	private final String thereIsNoDataFolder = "There is no Data Folder";
 	private final String failedToCreateDirectory = "Failed to create the directory.";
-
+	
 	public final int jsonPrintStyle = 4;
 	
     public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException
@@ -275,6 +275,22 @@ public class GTDCLI implements Beholder<String>
     	return StatusMGMT.getInstance();
     }
 
+    public void checkAllForDLDTAbuse()
+    {
+    	
+    	for(JSONObject pJSON: knownProjects.values())
+    	{
+
+    		if(ProjectJSONToolbox.activeProject.test(pJSON))
+    		{
+    			boolean stepDidIt = ProjectJSONToolbox.checkStepForDeadlineAbuse(pJSON);
+    			boolean projectDidIt = ProjectJSONToolbox.checkProjectForDeadlineAbuse(pJSON);
+    		
+    			if(stepDidIt|| projectDidIt)ProjectJSONToolbox.alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+    		}
+    	}
+    }
+    
     public static Set<JSONObject> loadProjects() throws IOException, URISyntaxException
     {
     	
@@ -365,19 +381,6 @@ public class GTDCLI implements Beholder<String>
     {
     	return iss;
     }
-    
-	public static JSONObject pickProjectByName(String pName, Set<JSONObject> projects)
-	{
-
-		for(JSONObject pJSON: projects)
-		{
-			assert(pJSON.has(ProjectJSONKeyz.nameKey));
-			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
-			if(name.equals(pName)) return pJSON;
-		}
-		
-		return null;
-	}
 }
 
 

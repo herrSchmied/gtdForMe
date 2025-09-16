@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import allgemein.LittleTimeTools;
 import javafx.util.Pair;
 import jborg.gtdForBash.exceptions.WeekDataException;
+import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
 public class StatisticalTools
 {
@@ -177,7 +178,7 @@ public class StatisticalTools
 		{
 
 			if(jsonKey.equals(ProjectJSONKeyz.TDTKey)&&
-					!SomeCommands.projectIsTerminated.test(pJSON))
+					!projectIsTerminated.test(pJSON))
 						break;
 
 			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
@@ -227,7 +228,7 @@ public class StatisticalTools
 		
         Set<JSONObject> jsonSet = GTDCLI.loadProjects();
 
-	    JSONObject pJSON = GTDCLI.pickProjectByName(name, jsonSet);
+	    JSONObject pJSON = pickProjectByName(name, jsonSet);
 
 		return  extractLDT(pJSON, key);
 	}
@@ -291,7 +292,17 @@ public class StatisticalTools
 		
 		if(cu.equals(ChronoUnit.WEEKS))
 		{
-			
+
+			WeekData wd = weekDatas.get(unitNr);
+			prjctBDTs = wd.getProjectsBorn().size();
+			prjctNDDTs = wd.getProjectsWrittenDown().size();
+			for(String pName: wd.getProjectsTerminated())
+			{
+				JSONObject pJSON = pickProjectByName(pName, prjctSet);
+				String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+				if(StatusMGMT.success.equals(status))prjctsSucceded++;
+				if(StatusMGMT.failed.equals(status))prjctsFailed++;
+			}
 		}
 		
 		String s = "\nProjects:"

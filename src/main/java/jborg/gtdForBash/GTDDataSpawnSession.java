@@ -1,5 +1,7 @@
 package jborg.gtdForBash;
 
+import static jborg.gtdForBash.ProjectJSONToolbox.*;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 
@@ -37,18 +39,6 @@ public class GTDDataSpawnSession
 	public static final String prjctNameError = "Name already in use.";	
 	/** Project time and/or Goal not valid Error.*/
 	public static final String prjctTimeOrGoalNotValideError = "Time and/or Goal of Project not valide.";
-	/** Project time Error Array.*/
-	public static final String prjctTimeError[] = new String[] 
-			{"Project needs Deadline.", "Project dead before Living.", "Project Born after Now.", 
-					"Project needs a Goal."};
-	/** Project time Error index, Project needs DLDT*/
-	public static final int indexOfPrjctTimeErrorNeedsDLDT = 0;
-	/** Project time Error index, Project dead before born.*/
-	public static final int indexOfPrjctTimeErrorDeadBeforeBorn = 1;
-	/** Project time Error index, Project born after now.*/
-	public static final int indexOfPrjctTimeErrorBornAfterNow = 2;
-	/** Project time Error index, Project needs valid Goal.*/
-	public static final int indexOfPrjctTimeErrorNeedsGoal = 3;
 
 	/** Project Min. Deadline Prefix*/
 	public static final String prjctDLDTHintPrefix = "Project Deadline. Min.: ";
@@ -95,8 +85,6 @@ public class GTDDataSpawnSession
 	/** Project TDT Request, Prompt.*/
 	public final static String prjctWhenTDTR = "When took the Termination of this Project place?";
 
-	/** Possible Project Deadline Status.*/
-	public static final String prjctDeadlineNone = "No got no Deadline!";
 
 	/** Step got Deadline Question, Prompt.*/
 	public final static String stepDeadlineQ = "Step got Deadline?";
@@ -110,11 +98,6 @@ public class GTDDataSpawnSession
 	/** Step Deadline Request, Prompt.*/
 	public static final String stepDeadlineR = "Step DeadLine Please.";
 
-	/** Possible Status for Step Deadline*/
-	public final static String stepDeadlineNone = "No Step Deadline!";	
-
-	/** first Step Index.*/
-	public static final int firstStepIndex = 0;
 
 	/** The minimal Minutes a Deadline has to be in the Future*/
 	public static final int minMinutesInFutureDLDT = 5;
@@ -170,26 +153,19 @@ public class GTDDataSpawnSession
 	public static final String invalidePrjctName = "There is already a Project with that Name.";
 	public static final String invalideStep = "Invalide Step.";
 	
-	public static final String deadLineUnknownStr = "UNKNOWN";
 	public static final String stepSpawnExceptionFormerStepIsntTerminated = "Sorry former Step isn't Terminated.";
 	public static final String stepSpawnExceptionStepAintValide = "Step ain't valide";
 
-	public static final String stepIsNotViolatingTimeframeOfProjectMsg = "Step is not violating Timeframe of Project.";
-	public static final String stepIsViolatingTimeframeOfProjectMsg = "Step is violating timeframe of former Step";
 
-	public static final String stepIsViolatingTimeframeOfFormerStepMsg = "Step is violating timeframe of former Step";
-	public static final String stepIsNotViolatingTimeframeOfFormerStepMsg = "Step is not violating timeframe of former Step";
 	
 	public static final String stepTExcIllglArmntPrefix = "IllegalArgument!!!";
 	public static final String stepTExcJSONErrorMsg = "JSON macht Probleme";
-	public static final String stepTimeDataIsValide = "Step Time Data is valide.";
 	
 	public static final String prjctTExcAllreadyDeadMsg = "Project Already Terminated.";
 	public static final String prjctTDTAfterDLDTMsg = "Termination can't be after Deadline.";
 	public static final String prjctTDTBeforeNDDT = "Termination can't be before Note-Down-Date-Time";
 	public static final String prjctTDTAfterNow = "TDT can't be after now.";
 	
-	public static final String stepIsOkToItSelfMsg = "Step is Ok to it Self.";
 	
 	public static final String lastStepIsNotTerminated = "Last Step is not Terminated.";
 	public static final String projectHasNoStepArrayOrHasNoSteps = "Project Has no Step Array or Has no Steps.";
@@ -199,21 +175,6 @@ public class GTDDataSpawnSession
 	public static final String stepJSONIsNull = "Project JSON is Null.";
 	public static final String prjctAlreadyTerminated = "Project Already Terminated.";
 	public static final String stepAlreadyTerminated = "Step Already Terminated.";
-
-	
-	List<String> stepIsNotOkayToItSelfMsgList = 
-			new ArrayList<>(Arrays.asList("Step is Born after Now.",
-							"Step has no Description. Please write a Description",
-							"Deadline of Step can't be before Step Born.", 
-							"Step can't be noted down before Born.",
-							"Step can't have deadline before noted down."
-							));
-	
-	public static final int indexOfStpIsBornAfterNow = 0;
-	public static final int indexOfStpHasNoDesc = 1;
-	public static final int indexOfStpDLDTBeforeBDT = 2;
-	public static final int indexOfStpNotedBeforeBorn = 3;
-	public static final int indexOfStpDLDTBeforeNDDT = 4;
 	
 	public static final String stpTerminationExceptionMsg = "Sorry Step is Already Terminated.";
 	
@@ -367,7 +328,7 @@ public class GTDDataSpawnSession
 		}
 		else pJson.put(ProjectJSONKeyz.DLDTKey, prjctDeadlineNone);
 
-		if(timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))
+		if(ProjectJSONToolbox.timeAndGoalOfActiveProjectIsValide(nddt, bdt, dldt, goal))
 		{
 			
 			spawnStep(pJson);//Here status will be overwritten. Here step status will be equal project status.
@@ -382,46 +343,6 @@ public class GTDDataSpawnSession
 	}
 	
 	/**
-	 * Checks if Goal and the DateTimes make Sense.
-	 * The oldest DateTime is BirthDateTime (bdt). The equally old or younger NoteDownDateTime (nddt).
-	 * The youngest always younger than nddt is if exists DeadlineDateTime (dldt).
-	 * 
-	 * @param nddt NoteDownDateTime. Always close to now.
-	 * @param bdt BirthDateTime. Supposed to be the Time when Project was born.
-	 * @param dldt DeadlineDateTime. If exists it is the in the Future and will be checked from Time to time. If a "Check"
-	 * finds out dldt of Project X is no longer in the Future it will Terminate this Project.
-	 * @param goal. The Goal of Project can't be just whitespace or just nothing.
-	 * 
-	 * @return true if DateTimes make Sense and the Goal is not nothing or whitespace.
-	 */
-	private boolean timeAndGoalOfActiveProjectIsValide(LocalDateTime nddt, LocalDateTime bdt, 
-			LocalDateTime dldt, String goal)
-	{
-		
-		if(dldt!=null&&bdt.isAfter(dldt))//Maybe it is mod Project!!!
-		{
-			System.out.println(prjctTimeError[indexOfPrjctTimeErrorDeadBeforeBorn]);
-			return false;
-		}
-		
-		LocalDateTime jetzt = LocalDateTime.now();
-		
-		if(jetzt.isBefore(bdt))
-		{
-			System.out.println(prjctTimeError[indexOfPrjctTimeErrorBornAfterNow]);
-			return false;
-		}
-		
-		if(goal.trim().equals(""))
-		{
-			System.out.println(prjctTimeError[indexOfPrjctTimeErrorNeedsGoal]);
-			return false;
-		}
-		
-		return true;
-	}
-
-	/**
 	 * Every non MOD-Project has at least one Step. With Project progress
 	 * more Steps might be noted. This Method provides the Data for Steps
 	 * it does so by asking the User via InputStreamSession.
@@ -435,9 +356,9 @@ public class GTDDataSpawnSession
 
 
 		JSONObject newStep = new JSONObject();
-		int index = getIndexOfLastStepInPrjct(pJson);
+		int index = ProjectJSONToolbox.getIndexOfLastStepInPrjct(pJson);
 		JSONObject oldStep;
-		boolean isFirstStep = (index==firstStepIndex-1);
+		boolean isFirstStep = (index==ProjectJSONToolbox.firstStepIndex-1);
 		
 		JSONArray steps;
 		if(isFirstStep)
@@ -448,8 +369,8 @@ public class GTDDataSpawnSession
 		else
 		{
 			steps = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-			oldStep = getLastStepOfProject(pJson);
-			if(!stepIsAlreadyTerminated(oldStep))
+			oldStep = ProjectJSONToolbox.getLastStepOfProject(pJson);
+			if(!ProjectJSONToolbox.stepIsAlreadyTerminated(oldStep))
 			{
 				System.out.println(stepSpawnExceptionFormerStepIsntTerminated);
 				return;
@@ -534,7 +455,7 @@ public class GTDDataSpawnSession
 		newStep.put(StepJSONKeyz.NDDTKey, LittleTimeTools.timeString(nddtOfStep));
 		newStep.put(StepJSONKeyz.BDTKey, LittleTimeTools.timeString(bdtOfStep));
 		
-		if(stepDataIsValide(pJson, newStep))
+		if(ProjectJSONToolbox.stepDataIsValide(pJson, newStep))
 		{
 			pJson.put(ProjectJSONKeyz.statusKey, stepStatus);//this overwrites old status!
 						
@@ -550,146 +471,6 @@ public class GTDDataSpawnSession
 		}
 	}
 
-	/**
-	 * Checks if the DateTimes of the Project and the last two Steps make Sense.
-	 * 
-	 * @param pJson Project-Data. Before the new Step is noted in Project-JSON.
-	 * @param newStep last Step. Not noted in Project-JSON yet. Here to test if
-	 * that is Okay.
-	 * 
-	 * @return true if adding the new Step to Project doesn't create a Time Paradox.
-	 */
-	public boolean stepDataIsValide(JSONObject pJson, JSONObject newStep)
-	{
-	
-		int index = getIndexOfLastStepInPrjct(pJson);
-		JSONObject oldStep = null;
-		if(index>firstStepIndex)oldStep = getLastStepOfProject(pJson);
-			
-		String msg = stepIsOkToItsSelf(newStep);
-		System.out.println("");
-		if(!msg.equals(stepIsOkToItSelfMsg))
-		{
-			System.out.println(msg);
-			return false;
-		}
-		else System.out.println(msg);
-
-		msg = stepIsNotViolatingTimeframeOfProject(newStep, pJson);
-		if(msg.equals(stepIsViolatingTimeframeOfProjectMsg))
-		{
-			System.out.println(msg);
-			return false;
-		}
-		else System.out.println(msg);
-
-		if(index>firstStepIndex)
-		{
-			msg = stepIsNotViolatingTimeframeOfFormerStep(oldStep, newStep);
-			if(msg.equals(stepIsViolatingTimeframeOfFormerStepMsg))
-			{
-				System.out.println(msg);
-				return false;
-			}
-			else System.out.println(msg);
-		}
-		
-		System.out.println(stepTimeDataIsValide);
-		return true;
-	}
-	
-	/**
-	 * As the name suggest this Method checks if the Step given does not violate
-	 * Project Time Frame.
-	 * 
-	 * @param step not yet added to Project.
-	 * @param pJson Project-Data.
-	 *
-	 * @return boolean if and only if step does not violate the given Projects 
-	 * Time Frame by adding it to it.
-	 */
-	public String stepIsNotViolatingTimeframeOfProject(JSONObject step, JSONObject pJson)
-	{
-		
-
-			
-		String prjctDLStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
-		if(prjctDLStr.equals(prjctDeadlineNone))return stepIsNotViolatingTimeframeOfProjectMsg;
-
-		LocalDateTime prjctDeadLine = LittleTimeTools.LDTfromTimeString(prjctDLStr);
-
-		String dldtOfStepStr = step.getString(StepJSONKeyz.DLDTKey);
-		LocalDateTime dldtOfStep = LittleTimeTools.LDTfromTimeString(dldtOfStepStr);
-		
-		if(prjctDeadLine.isBefore(dldtOfStep))return stepIsViolatingTimeframeOfProjectMsg;
-
-		return stepIsNotViolatingTimeframeOfProjectMsg;
-	}
-
-	/**
-	 * A Simple Test if oldStep is terminated before newStep is born.
-	 * 
-	 * @param oldStep former Step of a Project
-	 * @param newStep successor of oldStep.
-	 *
-	 * @return stepIsNotViolatingTimeframeOfFormerStepMsg if DateTimes are Okay.
-	 * else stepIsViolatingTimeframeOfFormerStepMsg.
-	 */
-	public String stepIsNotViolatingTimeframeOfFormerStep(JSONObject oldStep, JSONObject newStep)
-	{
-		
-		String tdtOfOldStepStr = oldStep.getString(StepJSONKeyz.TDTKey);
-		LocalDateTime tdtOfOldStep = LittleTimeTools.LDTfromTimeString(tdtOfOldStepStr);
-		
-		String bdtOfNewStepStr = newStep.getString(StepJSONKeyz.BDTKey);
-		LocalDateTime bdtOfNewStep = LittleTimeTools.LDTfromTimeString(bdtOfNewStepStr);
-		
-		if(bdtOfNewStep.isBefore(tdtOfOldStep))return stepIsViolatingTimeframeOfFormerStepMsg;
-		
-		return stepIsNotViolatingTimeframeOfFormerStepMsg;
-	}
-	
-	/**
-	 * Checks if bdt, nddt and dldt make sense.
-	 * 
-	 * @param step Data in question.
-	 * 
-	 * @return if everything is alright: stepIsOkToItSelfMsg.
-	 * else some: stepIsNotOkayToItSelfMsgList.get(x).
-	 */
-	public String stepIsOkToItsSelf(JSONObject step)
-	{
-
-		//stepIsNotOkayToitSelfMsgSet
-		String bdtOfStepStr = step.getString(StepJSONKeyz.BDTKey);
-		LocalDateTime bdtOfStep = LittleTimeTools.LDTfromTimeString(bdtOfStepStr);
-		
-		if(LocalDateTime.now().isBefore(bdtOfStep))return stepIsNotOkayToItSelfMsgList.get(indexOfStpIsBornAfterNow);
-
-		String deadLineStr = step.getString(StepJSONKeyz.DLDTKey);
-		String desc= step.getString(StepJSONKeyz.descKey);
-		String nddtStr = step.getString(StepJSONKeyz.NDDTKey);
-		String bdtStr = step.getString(StepJSONKeyz.BDTKey);
-
-		if(desc.equals(""))return stepIsNotOkayToItSelfMsgList.get(indexOfStpHasNoDesc);
-
-		LocalDateTime born = LittleTimeTools.LDTfromTimeString(bdtStr);
-		
-		LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
-		
-		if(nddt.isBefore(born)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpNotedBeforeBorn);
-		
-		if(!deadLineStr.equals(stepDeadlineNone)&&!deadLineStr.equals(deadLineUnknownStr))
-		{
-			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(deadLineStr);
-			
-			if(dldt.isBefore(born)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpDLDTBeforeBDT);
-			if(dldt.isBefore(nddt)) return stepIsNotOkayToItSelfMsgList.get(indexOfStpDLDTBeforeNDDT);
-		}
-
-		return stepIsOkToItSelfMsg;
-	}
-	
 	/**
 	 * Receives A text from the User via InputStreamSession. If
 	 * the text is equal to whitespace only or just nothing. then
@@ -760,26 +541,6 @@ public class GTDDataSpawnSession
 		}
 	}
 	
-	/**
-	 * Simple check if Status of Step is a terminal one.
-	 * 
-	 * @param sJson Step Data.
-	 * 
-	 * @return true if Status of Step is a terminal one.
-	 */
-	public boolean stepIsAlreadyTerminated(JSONObject sJson)
-	{
-		
-		String status = sJson.getString(StepJSONKeyz.statusKey);
-		StatusMGMT statusMGMT = StatusMGMT.getInstance();
-		String terminalSetName = StatusMGMT.terminalSetName;
-		
-		Set<String> terminalSet = statusMGMT.getStatesOfASet(terminalSetName);
-		if(terminalSet.contains(status))return true;
-		
-		return false;
-	}
-
 	/**
 	 * Might terminate the last Step of Project. Obstacles are:
 	 * 1.Project or last Step already Terminated.
@@ -853,26 +614,6 @@ public class GTDDataSpawnSession
 		if(!terminalNote.trim().equals(""))sJson.put(StepJSONKeyz.TDTNoteKey, terminalNote);
 	}
 
-	/**
-	 * Simple Check does what the Name suggests.
-	 *
-	 * @param pJson Project-Data.
-	 *
-	 * @return the answer to the question: "Is Project Terminated".
-	 */
-	public boolean projectIsAlreadyTerminated(JSONObject pJson)
-	{
-		
-		String status = pJson.getString(ProjectJSONKeyz.statusKey);
-		StatusMGMT statusMGMT = StatusMGMT.getInstance();
-		String terminalSetName = StatusMGMT.terminalSetName;		
-		Set<String> terminalSet = statusMGMT.getStatesOfASet(terminalSetName);
-		
-		if(terminalSet.contains(status))return true;
-		
-		return false;
-	}
-	
 	/**
 	 * If U Invoke this Method a give it a Project JSONObject. It will ask
 	 * a few Informations from U. If the Project isn't already Terminated.
@@ -969,54 +710,5 @@ public class GTDDataSpawnSession
 		pJson.put(ProjectJSONKeyz.TDTKey, tdtStr);
 
 		if(!terminalNote.trim().equals(""))pJson.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);
-	}
-	
-	/**
-	 * Returns the Index of last(youngest) Step JSON Object in
-	 * Project JSON Object. If there is no StepArray or no Steps
-	 * it returns a negative value;
-	 * 
-	 * @param pJson Project-Data.
-	 * 
-	 * @return int index of last Step.
-	 */
-	public int getIndexOfLastStepInPrjct(JSONObject pJson)
-	{
-		JSONArray stepArray;
-		
-		if(pJson.has(ProjectJSONKeyz.stepArrayKey))
-		{
-			stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-			return stepArray.length()-1;
-		}
-		
-		return firstStepIndex-1;
-	}
-	
-	/**
-	 * This gets u the last (youngest) step of the Project in question.
-	 * If for some Reason the Project has no StepArray or no Step JSON
-	 * Objects in that Array it returns null.
-	 * 
-	 * @param pJson Project JSONObject
-	 * 
-	 * @return step JSONObject
-	 */
-	public JSONObject getLastStepOfProject(JSONObject pJson)
-	{
-		int indexOfLastStep = getIndexOfLastStepInPrjct(pJson);
-		if(indexOfLastStep<firstStepIndex)return null;
-		
-		JSONArray stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-
-		return stepArray.getJSONObject(indexOfLastStep);
-	}
-	
-	public LocalDateTime getLastDateTimeOfProject(JSONObject pJson)
-	{
-		JSONObject step = getLastStepOfProject(pJson);
-		String tdtStr = step.getString(StepJSONKeyz.TDTKey);
-		
-		return LittleTimeTools.LDTfromTimeString(tdtStr);
 	}
 }

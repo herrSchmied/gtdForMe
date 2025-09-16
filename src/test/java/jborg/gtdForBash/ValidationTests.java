@@ -1,7 +1,7 @@
 package jborg.gtdForBash;
 
 import static jborg.gtdForBash.SequenzesForISS.sequenzManyProjects;
-
+import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class ValidationTests
 	@Test
 	public void test()
 	{
-		JSONObject pJSON = GTDCLI.pickProjectByName(SequenzesForISS.newPrjctName, projects);
+		JSONObject pJSON = pickProjectByName(SequenzesForISS.newPrjctName, projects);
 		ProjectJSONValidator pjv = new ProjectJSONValidator();
 		
 		assert(pjv.validate(pJSON.toString()));

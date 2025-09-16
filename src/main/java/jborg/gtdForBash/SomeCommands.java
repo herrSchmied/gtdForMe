@@ -26,8 +26,11 @@ import allgemein.SimpleLogger;
 import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
+import jborg.gtdForBash.ProjectJSONKeyz;
 import jborg.gtdForBash.DBIssues.DBSink;
+import jborg.gtdForBash.exceptions.CLICMDException;
 import jborg.gtdForBash.exceptions.WeekDataException;
+import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import someMath.NaturalNumberException;
 
 public class SomeCommands
@@ -95,8 +98,6 @@ public class SomeCommands
 	private final String noNotActiveProjects = "No not active Projects!";
 	private final String noSuchProject = "No such Project: ";
 	public final String newPrjctStgClsd = "New Project Stage closed.";
-	public final String tdtNoteStpDLDTAbuse = "Step Deadline abuse!";
-	public final String tdtNotePrjctDLDTAbuse = "Project Deadline abuse!";
 	
 	private final String projectStr = "Project";
 	private final String nearestDeadlineStr = "nearest Deadline of Last Steps.";
@@ -165,46 +166,7 @@ public class SomeCommands
     private final InputStreamSession iss;
     private final Map<String, JSONObject> knownProjects;
     
-    public static final Predicate<JSONObject> isMODProject = (pJSON)->
-    {
-    	String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-    	return status.equals(StatusMGMT.mod);
-    };
-
-    public static final Predicate<JSONObject> projectIsTerminated = (jo)->
-	{
-
-	    String status = jo.getString(ProjectJSONKeyz.statusKey);
-	    
-	    StatusMGMT states = StatusMGMT.getInstance();
-	   
-	    Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
-	    	
-	    return terminalSet.contains(status);
-	};
-    
-	public static final Predicate<JSONObject> stepIsTerminated = (step)->
-	{
-
-	   	String status = step.getString(StepJSONKeyz.statusKey);
-	   	
-	   	StatusMGMT states = StatusMGMT.getInstance();
-
-	   	Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
-	    	
-	   	return terminalSet.contains(status);
-	};
-
-	public static final Predicate<JSONObject> activeProject = (jo)->
-	{
-		if(projectIsTerminated.test(jo))return false;
-		
-		if(isMODProject.test(jo))return false;
-		
-		return true;
-	};
-
-	private final Predicate<String> activePrjctName;
+    private final Predicate<String> activePrjctName;
 	
 	private final Predicate<String> notActivePrjctName;
 
@@ -230,8 +192,6 @@ public class SomeCommands
 			
 			return !activePrjctName.test(s);
 		};
-
-    	checkAllForDLDTAbuse();
 
     	MeatOfCLICmd<String> oldestPrjct = (s)->
     	{
@@ -390,7 +350,7 @@ public class SomeCommands
     			JSONObject lastStep = getLastStep(pJSON);
     				
     			String stepDLDTStr = lastStep.getString(StepJSONKeyz.DLDTKey);
-    			if(stepDLDTStr.equals(GTDDataSpawnSession.stepDeadlineNone))continue;
+    			if(stepDLDTStr.equals(stepDeadlineNone))continue;
     			LocalDateTime stepDLDT = LittleTimeTools.LDTfromTimeString(stepDLDTStr);
     				
     			String dauer = new ExactPeriode(jetzt, stepDLDT).toString();
@@ -1149,95 +1109,12 @@ public class SomeCommands
     	return commandMap;
     }
     
-    private void checkAllForDLDTAbuse()
-    {
-    	
-    	for(JSONObject pJSON: knownProjects.values())
-    	{
-
-    		if(activeProject.test(pJSON))
-    		{
-    			boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
-    			boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
-    		
-    			if(stepDidIt|| projectDidIt)alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
-    		}
-    	}
-    }
+ 
     
-    public boolean checkStepForDeadlineAbuse(JSONObject pJSON)
-    {
 
-    	if(projectIsTerminated.test(pJSON))return false;
-    	
-    	LocalDateTime jetzt = LocalDateTime.now();
-			
-		JSONObject step = getLastStep(pJSON);
-
-    	if(stepIsTerminated.test(step))return false;
-    	
-    	String dldtStr = step.getString(StepJSONKeyz.DLDTKey);
-    	if(dldtStr.equals(GTDDataSpawnSession.stepDeadlineNone))return false;
-    	
-    	LocalDateTime stepDLDT = LittleTimeTools.LDTfromTimeString(dldtStr);
-    			
-    	if(stepDLDT.isBefore(jetzt)) return true;//Is Step DLDT abused?
-    	
-    	return false;
-    }
         
-    public boolean checkProjectForDeadlineAbuse(JSONObject pJSON)
-    {
-    		
-    	if(projectIsTerminated.test(pJSON))return false;
-
-    	LocalDateTime jetzt = LocalDateTime.now();
-
-    	String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
-    	if(projectDLDTStr.equals(GTDDataSpawnSession.prjctDeadlineNone))return false;
-    	
-    	LocalDateTime projectDLDT = LittleTimeTools.LDTfromTimeString(projectDLDTStr);
-
-    	if(projectDLDT.isBefore(jetzt)) return true;//Is Project DLDT abused?
-
-    	return false;
-    }
     
-    public void alterProjectAfterDLDTAbuse(JSONObject pJSON, boolean stepDidIt, boolean projectDidIt)
-    {
-    	
-    	JSONObject step = getLastStep(pJSON);
-    	
-    	
-    	if(stepDidIt)
-    	{
-        	step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-        	pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
-        			
-        	String stepDLDTStr = step.getString(StepJSONKeyz.DLDTKey);
-        	step.put(StepJSONKeyz.TDTKey, stepDLDTStr);
-        	step.put(StepJSONKeyz.TDTNoteKey, tdtNoteStpDLDTAbuse);
-    	}
-    	
-    	if(projectDidIt)
-    	{
-    		
-        	String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
-        	
-    		pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
-    		pJSON.put(ProjectJSONKeyz.TDTKey, projectDLDTStr);
-    		pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
-    		
-    		if(!stepIsTerminated.test(step))//if step is not already Terminal alter step status and TDT(Note) too.
-    		{
-    			
-        		step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
-        		step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-        		step.put(StepJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
-    		}
-    	}
-    }
-
+ 
     public String showProjectDetail(JSONObject pJSON)
     {
     	String gpx = BashSigns.boldGBCPX;
@@ -1367,14 +1244,6 @@ public class SomeCommands
 		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
 		
 		System.out.println(ttd.toString());
-    }
-    
-    public static JSONObject getLastStep(JSONObject pJSON)
-    {
-    	JSONArray stepArr = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-    	int l = stepArr.length();
-    	
-    	return stepArr.getJSONObject(l-1);
     }
     
 

@@ -11,7 +11,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import jborg.gtdForBash.GTDDataSpawnSession;
+import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import jborg.gtdForBash.ProjectJSONKeyz;
 import jborg.gtdForBash.StepJSONKeyz;
 
@@ -59,7 +59,7 @@ public class DBSink
 		String nddtStr = pJSON.getString(ProjectJSONKeyz.NDDTKey);
 		String bdtStr = pJSON.getString(ProjectJSONKeyz.BDTKey);
 		
-		String dldtStr = GTDDataSpawnSession.deadLineUnknownStr;
+		String dldtStr = deadLineUnknownStr;
 		if(pJSON.has(ProjectJSONKeyz.DLDTKey))dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
 
 		String tdtStr="";
