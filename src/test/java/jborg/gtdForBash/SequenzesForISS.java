@@ -1,24 +1,6 @@
 package jborg.gtdForBash;
 
 
-import static jborg.gtdForBash.SequenzesForISS.addNotePrjctName;
-import static jborg.gtdForBash.SequenzesForISS.appendStpPrjctName;
-import static jborg.gtdForBash.SequenzesForISS.killPrjctName;
-import static jborg.gtdForBash.SequenzesForISS.killPrjctNameNoDLDT;
-import static jborg.gtdForBash.SequenzesForISS.killStepPrjctName;
-import static jborg.gtdForBash.SequenzesForISS.modPrjctName;
-import static jborg.gtdForBash.SequenzesForISS.newPrjctName;
-import static jborg.gtdForBash.SequenzesForISS.newPrjctNoDLDT;
-import static jborg.gtdForBash.SequenzesForISS.sequenzAddNote;
-import static jborg.gtdForBash.SequenzesForISS.sequenzKillProject;
-import static jborg.gtdForBash.SequenzesForISS.sequenzKillStep;
-import static jborg.gtdForBash.SequenzesForISS.sequenzMODProject;
-import static jborg.gtdForBash.SequenzesForISS.sequenzNXTStep;
-import static jborg.gtdForBash.SequenzesForISS.sequenzNewProject;
-import static jborg.gtdForBash.SequenzesForISS.sequenzNewProjectNoDLDT;
-import static jborg.gtdForBash.SequenzesForISS.sequenzWakeMODProject;
-import static jborg.gtdForBash.SequenzesForISS.wakeProjectName;
-
 import java.time.LocalDateTime;
 import java.time.Month;
 

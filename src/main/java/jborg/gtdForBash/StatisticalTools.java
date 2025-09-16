@@ -8,8 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONObject;
@@ -166,23 +168,24 @@ public class StatisticalTools
     	return output;
     }
 
-    public List<LocalDateTime> allLDTs(String jsonKey) throws IOException, URISyntaxException
+    public Map<String, LocalDateTime> allLDTs(String jsonKey) throws IOException, URISyntaxException
     {
 
-    	List<LocalDateTime> list = new ArrayList<>();
+    	Map<String, LocalDateTime> map = new HashMap<>();
 		
 		for(JSONObject pJSON: prjctSet)
 		{
 
 			if(jsonKey.equals(ProjectJSONKeyz.TDTKey)&&
 					!SomeCommands.projectIsTerminated.test(pJSON))
-						continue;
+						break;
 
 			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
-			list.add(ldt);
+			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+			map.put(name, ldt);
 		}
 
-    	return list;
+    	return map;
     }
 
     public boolean isInThatWeek(int weekNr, LocalDateTime ldt)
@@ -196,9 +199,9 @@ public class StatisticalTools
     	
     	LocalDate ld = ldt.toLocalDate();
     	
-    	return ld.isAfter(beginLD)&&ld.isBefore(endLD);
+    	return (ld.isAfter(beginLD)&&ld.isBefore(endLD));
     }
-    
+
     public int isInWhichWeek(LocalDateTime ldt) throws IOException, URISyntaxException
     {
     	List<Pair<LocalDate, LocalDate>> weeks = computeWeekSpans();
