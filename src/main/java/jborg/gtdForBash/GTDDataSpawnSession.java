@@ -369,8 +369,8 @@ public class GTDDataSpawnSession
 		else
 		{
 			steps = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-			oldStep = ProjectJSONToolbox.getLastStepOfProject(pJson);
-			if(!ProjectJSONToolbox.stepIsAlreadyTerminated(oldStep))
+			oldStep = getLastStepOfProject(pJson);
+			if(!stepIsAlreadyTerminated(oldStep))
 			{
 				System.out.println(stepSpawnExceptionFormerStepIsntTerminated);
 				return;

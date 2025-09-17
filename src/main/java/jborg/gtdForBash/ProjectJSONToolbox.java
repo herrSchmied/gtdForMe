@@ -1,16 +1,23 @@
 package jborg.gtdForBash;
 
+
+
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
 import allgemein.LittleTimeTools;
+
+
 
 public class ProjectJSONToolbox
 {
@@ -465,5 +472,4 @@ public class ProjectJSONToolbox
 	    	
 	   	return terminalSet.contains(status);
 	};
-
 }

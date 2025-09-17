@@ -14,11 +14,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import allgemein.ExactPeriode;
 import allgemein.LittleTimeTools;
 import javafx.util.Pair;
 import jborg.gtdForBash.exceptions.WeekDataException;
+import someMath.NaturalNumberException;
+
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
 public class StatisticalTools
@@ -265,7 +269,7 @@ public class StatisticalTools
 		return new Point(weekNr, howMany);
 	}
 	
-	public String periodeResume(ChronoUnit cu, int unitNr)
+	public String periodeResume(ChronoUnit cu, int unitNr) throws IOException, URISyntaxException, NaturalNumberException
 	{
 
 		
@@ -282,7 +286,7 @@ public class StatisticalTools
 		int prjctNDDTs = 0;
 		int prjctsSucceded = 0;
 		int prjctsFailed = 0;
-		int prjctDeadlineViolation = 0;
+		int prjctDeadlineViolations = 0;
 		int openPrjctDeadlines = 0;
 		int prjctDeadlinesHere = 0;
 		String prjctMostPressingDeadline = "";
@@ -301,7 +305,83 @@ public class StatisticalTools
 				JSONObject pJSON = pickProjectByName(pName, prjctSet);
 				String status = pJSON.getString(ProjectJSONKeyz.statusKey);
 				if(StatusMGMT.success.equals(status))prjctsSucceded++;
-				if(StatusMGMT.failed.equals(status))prjctsFailed++;
+				if(StatusMGMT.failed.equals(status))
+				{
+					prjctsFailed++;
+					
+					boolean gotNoteArray = pJSON.has(ProjectJSONKeyz.noteArrayKey);
+					
+					if(gotNoteArray)
+					{
+						JSONArray noteArray = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
+						
+						for(int n=0;n<noteArray.length();n++)
+						{
+							String note = noteArray.getString(n);
+							if(note.equals(tdtNotePrjctDLDTAbuse))
+							{
+								prjctDeadlineViolations++;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			int secs = 0;
+			Pair<String, Integer> pair = new Pair("", 0);
+			Set<String> activeProjects = wd.getActiveProjects();
+			for(String pName: activeProjects)
+			{
+				JSONObject pJSON = pickProjectByName(pName, prjctSet);
+				if(pJSON.has(ProjectJSONKeyz.DLDTKey))
+				{
+
+					openPrjctDeadlines++;
+					LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
+					if(isInThatWeek(unitNr, dldt))prjctDeadlinesHere++;
+					ExactPeriode ep = new ExactPeriode(LocalDateTime.now(), dldt);
+					if(Math.abs(secs)>Math.abs(ep.getAbsoluteSeconds()))
+					{
+						secs = ep.getAbsoluteSeconds();
+						pair = new Pair(pName, secs);
+					}
+				}
+			}
+			
+			prjctMostPressingDeadline = pair.getKey();
+		
+			Set<String> allTheNames = new HashSet<>();
+			allTheNames.addAll(wd.getActiveProjects());
+			allTheNames.addAll(wd.getProjectsBorn());
+			allTheNames.addAll(wd.getProjectsTerminated());
+			allTheNames.addAll(wd.getProjectsWrittenDown());
+			
+			for(String pName: allTheNames)
+			{
+				JSONObject pJSON = pickProjectByName(pName, prjctSet);
+				if(!pJSON.has(ProjectJSONKeyz.stepArrayKey))break;
+				JSONObject lastStep = getLastStepOfProject(pJSON);
+				
+				LocalDateTime bdt = extractLDT(lastStep, StepJSONKeyz.BDTKey);
+				if(isInThatWeek(unitNr, bdt))stepBDTs++;
+
+				LocalDateTime nddt = extractLDT(lastStep, StepJSONKeyz.NDDTKey);
+				if(isInThatWeek(unitNr, nddt))stepNDDTs++;
+				
+				if(stepIsAlreadyTerminated(lastStep))
+				{
+
+					String status = lastStep.getString(StepJSONKeyz.statusKey);
+					LocalDateTime dldt = extractLDT(lastStep, StepJSONKeyz.DLDTKey);
+					if(isInThatWeek(unitNr, dldt))
+					{
+						if(StatusMGMT.success.equals(status))stepsSucceded++;
+						if(StatusMGMT.failed.equals(status))stepsFailed++;
+					}
+					//TODO: compute the Rest then Test, Test and Test!!!!
+				}
+				
 			}
 		}
 		
@@ -310,7 +390,7 @@ public class StatisticalTools
 				 + "\nNew Projects written: " + prjctNDDTs
 				 + "\nSuccesses: " + prjctsSucceded
 				 + "\nFailed: " + prjctsFailed
-				 + "\nDeadlineViolations: " + prjctDeadlineViolation
+				 + "\nDeadlineViolations: " + prjctDeadlineViolations
 				 + "\nOpen Deadlines: " + openPrjctDeadlines
 				 + "\nDeadlines this " + unit + ": " + prjctDeadlinesHere
 				 + "\nMost pressing Deadline: " + prjctMostPressingDeadline
