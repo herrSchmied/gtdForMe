@@ -64,7 +64,8 @@ public class TestingStats
         
         assert(oldPrjct.getKey().equals(newPrjctName));
         
-        assert(st.pickAndCheckByName(newPrjctName, 0, gtdCli));
+        JSONObject oldPJSON = st.pickByName(newPrjctName);
+        assert(st.pickAndCheckByName(newPrjctName, 0, oldPJSON));
         
         List<Pair<LocalDate, LocalDate>> wochen = st.getWeekSpans();
         
@@ -76,14 +77,29 @@ public class TestingStats
         
         int weeksSize = wochen.size();
         
-		assert(st.pickAndCheckByName(wakeProjectName, weeksSize-1, gtdCli));
-		assert(st.pickAndCheckByName(modPrjctName, weeksSize-1, gtdCli));
-		assert(st.pickAndCheckByName(addNotePrjctName, weeksSize-1, gtdCli));
-		assert(st.pickAndCheckByName(killPrjctNameNoDLDT, weeksSize-1, gtdCli));
-		assert(st.pickAndCheckByName(killPrjctName, weeksSize-1, gtdCli));
-		assert(st.pickAndCheckByName(killStepPrjctName, weeksSize-1, gtdCli));
-		assert(st.pickAndCheckByName(appendStpPrjctName, weeksSize-1, gtdCli));
-		assert(st.pickAndCheckByName(newPrjctNoDLDT, weeksSize-1, gtdCli));
+        JSONObject pJSON = st.pickByName(wakeProjectName);
+		assert(st.pickAndCheckByName(wakeProjectName, weeksSize-1, pJSON));
+		
+		pJSON = st.pickByName(modPrjctName);
+		assert(st.pickAndCheckByName(modPrjctName, weeksSize-1, pJSON));
+		
+		pJSON = st.pickByName(addNotePrjctName);
+		assert(st.pickAndCheckByName(addNotePrjctName, weeksSize-1, pJSON));
+
+		pJSON = st.pickByName(killPrjctNameNoDLDT);
+		assert(st.pickAndCheckByName(killPrjctNameNoDLDT, weeksSize-1, pJSON));
+		
+		pJSON = st.pickByName(killPrjctName);
+		assert(st.pickAndCheckByName(killPrjctName, weeksSize-1, pJSON));
+
+		pJSON = st.pickByName(killStepPrjctName);
+		assert(st.pickAndCheckByName(killStepPrjctName, weeksSize-1, pJSON));
+
+		pJSON = st.pickByName(appendStpPrjctName);
+		assert(st.pickAndCheckByName(appendStpPrjctName, weeksSize-1, pJSON));
+	
+		pJSON = st.pickByName(newPrjctNoDLDT);
+		assert(st.pickAndCheckByName(newPrjctNoDLDT, weeksSize-1, pJSON));
 		
 		Point wknrAndN = st.weekWithMostBDTs();
 		System.out.println("Week with the most BDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Birthes.");

@@ -2,6 +2,8 @@ package jborg.gtdForBash;
 
 
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -472,4 +474,19 @@ public class ProjectJSONToolbox
 	    	
 	   	return terminalSet.contains(status);
 	};
+	
+	public LocalDateTime extractLDT(String name, String key) throws IOException, URISyntaxException
+	{
+		
+        Set<JSONObject> jsonSet = GTDCLI.loadProjects();
+
+	    JSONObject pJSON = pickProjectByName(name, jsonSet);
+
+		return  extractLDT(pJSON, key);
+	}
+	
+	public static LocalDateTime extractLDT(JSONObject pJSON, String key) throws IOException, URISyntaxException
+	{
+		return  LittleTimeTools.LDTfromTimeString(pJSON.getString(key));
+	}
 }

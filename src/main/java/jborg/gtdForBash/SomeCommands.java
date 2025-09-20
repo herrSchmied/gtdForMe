@@ -26,7 +26,7 @@ import allgemein.SimpleLogger;
 import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 import consoleTools.TerminalTableDisplay;
-import jborg.gtdForBash.ProjectJSONKeyz;
+
 import jborg.gtdForBash.DBIssues.DBSink;
 import jborg.gtdForBash.exceptions.CLICMDException;
 import jborg.gtdForBash.exceptions.WeekDataException;

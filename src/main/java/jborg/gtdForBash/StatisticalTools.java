@@ -14,11 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.json.JSONArray;
+
 import org.json.JSONObject;
 
-import allgemein.ExactPeriode;
-import allgemein.LittleTimeTools;
+
 import javafx.util.Pair;
 import jborg.gtdForBash.exceptions.WeekDataException;
 import someMath.NaturalNumberException;
@@ -77,26 +76,26 @@ public class StatisticalTools
 
 			Pair<LocalDate, LocalDate> span = weekSpans.get(n);
 
-			Set<String> activeProjects = new HashSet<>();
-			Set<String> bdtProjects = new HashSet<>();
-			Set<String> nddtProjects = new HashSet<>();
-			Set<String> terminatedProjects = new HashSet<>();
+			Set<JSONObject> activeProjects = new HashSet<>();
+			Set<JSONObject> bdtProjects = new HashSet<>();
+			Set<JSONObject> nddtProjects = new HashSet<>();
+			Set<JSONObject> terminatedProjects = new HashSet<>();
 			WeekData wd = new WeekData(span.getKey(), n);
 			if(span.getValue().isAfter(LocalDate.now()))continue;
 
 			for(JSONObject pJSON: prjctSet)
 			{
-				String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+
 				LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
 				if(isInThatWeek(n, bdt))
 				{
-					bdtProjects.add(name);
+					bdtProjects.add(pJSON);
 				}
 
 				LocalDateTime nddt = extractLDT(pJSON, ProjectJSONKeyz.NDDTKey);
 				if(isInThatWeek(n, nddt))
 				{
-					nddtProjects.add(name);
+					nddtProjects.add(pJSON);
 				}
 
 				String status = pJSON.getString(ProjectJSONKeyz.statusKey);
@@ -108,12 +107,12 @@ public class StatisticalTools
 					LocalDateTime tdt = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
 					if(isInThatWeek(n, tdt))
 					{
-						terminatedProjects.add(name);
+						terminatedProjects.add(pJSON);
 					}
 				}
 				else
 				{
-					if(span.getValue().isAfter(bdt.toLocalDate()))activeProjects.add(name);
+					if(span.getValue().isAfter(bdt.toLocalDate()))activeProjects.add(pJSON);
 				}
 			}
 			
@@ -159,7 +158,8 @@ public class StatisticalTools
 		
 		for(JSONObject pJSON: prjctSet)
 		{
-
+			if((jsonKey.equals(ProjectJSONKeyz.DLDTKey)&&!pJSON.has(ProjectJSONKeyz.DLDTKey)))continue;
+				
 			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
 			if(ldt.isAfter(youngest))
 			{
@@ -219,28 +219,15 @@ public class StatisticalTools
     }
 
     //Remember: should this Method be here?
-	public boolean pickAndCheckByName(String name, int weekNr, GTDCLI gtdCli) throws IOException, URISyntaxException
+	public boolean pickAndCheckByName(String name, int weekNr, JSONObject pJSON) throws IOException, URISyntaxException
 	{
 
-        LocalDateTime bdt = extractLDT(name, ProjectJSONKeyz.BDTKey);
+        LocalDateTime bdt = ProjectJSONToolbox.extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
 
 		return isInThatWeek(weekNr, bdt);
 	}
 	
-	private LocalDateTime extractLDT(String name, String key) throws IOException, URISyntaxException
-	{
-		
-        Set<JSONObject> jsonSet = GTDCLI.loadProjects();
 
-	    JSONObject pJSON = pickProjectByName(name, jsonSet);
-
-		return  extractLDT(pJSON, key);
-	}
-	
-	private LocalDateTime extractLDT(JSONObject pJSON, String key) throws IOException, URISyntaxException
-	{
-		return  LittleTimeTools.LDTfromTimeString(pJSON.getString(key));
-	}
 
 	public Point weekWithMostBDTs() throws IOException, URISyntaxException
 	{
@@ -276,12 +263,12 @@ public class StatisticalTools
 
 		int prjctBDTs = wd.getProjectsBorn().size();
 		int prjctNDDTs = wd.getProjectsWrittenDown().size();
-		int prjctsSucceded = projectsSucceededInWeek(wd);
-		int prjctsFailed = projectsFailedInWeek(wd);
-		int prjctDeadlineViolations = projectDeadlineViolationsInThatWeek(wd);
-		int openPrjctDeadlines = openProjectDeadlinesInWeek(wd);
-		int prjctDeadlinesHere = projectDeadlinesHere(wd);
-		String prjctMostPressingDeadline = mostPressingProjectDeadline(wd);
+		int prjctsSucceded = wd.projectNamesSucceededThisWeek().size();
+		int prjctsFailed = wd.projectNamesFailedThisWeek().size();
+		int prjctDeadlineViolations = wd.projectNamesDLViolationsThisWeek().size();
+		int openPrjctDeadlines = wd.allActiveProjectsWithDLs().size();
+		int prjctDeadlinesHere = wd.projectDLsThisWeek().size();
+		String prjctMostPressingDeadline = wd.mostPressingProjectDeadline();
 
 		int stepBDTs = 0;
 		int stepNDDTs = 0;
@@ -300,15 +287,11 @@ public class StatisticalTools
 
 		
 		
-			Set<String> allTheNames = new HashSet<>();
-			allTheNames.addAll(wd.getActiveProjects());
-			allTheNames.addAll(wd.getProjectsBorn());
-			allTheNames.addAll(wd.getProjectsTerminated());
-			allTheNames.addAll(wd.getProjectsWrittenDown());
+			Set<JSONObject> allTheNames = wd.allTheJSON();
 			
-			for(String pName: allTheNames)
+			for(JSONObject pJSON: allTheNames)
 			{
-				JSONObject pJSON = pickProjectByName(pName, prjctSet);
+		
 				if(!pJSON.has(ProjectJSONKeyz.stepArrayKey))break;
 				JSONObject lastStep = getLastStepOfProject(pJSON);
 				
@@ -347,7 +330,7 @@ public class StatisticalTools
 				}
 			}
 		}
-		
+
 		String s = "\nProjects:"
 				 + "\nBorn Projects: " + prjctBDTs
 				 + "\nNew Projects written: " + prjctNDDTs
@@ -370,139 +353,6 @@ public class StatisticalTools
 
 		return s;
 	}
-	
-	public int projectsSucceededInWeek(WeekData wd)
-	{
-		int successes=0;
-		
-		
-		for(String pName: wd.getProjectsTerminated())
-		{
-			JSONObject pJSON = pickProjectByName(pName, prjctSet);
-			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-			if(StatusMGMT.success.equals(status))successes++;
-		}
-
-		return successes;
-	}
-	
-	public int projectsFailedInWeek(WeekData wd)
-	{
-
-		int fails=0;
-
-		for(String pName: wd.getProjectsTerminated())
-		{
-			JSONObject pJSON = pickProjectByName(pName, prjctSet);
-			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-			if(StatusMGMT.failed.equals(status))fails++;
-		}
-
-		return fails;
-	}
-
-	public int projectDeadlineViolationsInThatWeek(WeekData wd)
-	{
-		
-		int violations = 0;
-
-		for(String pName: wd.getProjectsTerminated())
-		{
-			JSONObject pJSON = pickProjectByName(pName, prjctSet);
-			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-			if(StatusMGMT.failed.equals(status))
-			{
-				
-				boolean gotNoteArray = pJSON.has(ProjectJSONKeyz.noteArrayKey);
-				
-				if(gotNoteArray)
-				{
-					JSONArray noteArray = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
-					
-					for(int n=0;n<noteArray.length();n++)
-					{
-						String note = noteArray.getString(n);
-						if(note.equals(tdtNotePrjctDLDTAbuse))
-						{
-							violations++;
-							break;
-						}
-					}
-				}
-			}
-		}
-		
-		return violations;
-	}
-
-	public Map<String, LocalDateTime> allTheDeadlinesInThatWeek(WeekData wd) throws IOException, URISyntaxException
-	{
-
-		Map<String, LocalDateTime> output = new HashMap<>();
-
-		Set<String> activeProjects = wd.getActiveProjects();
-		for(String pName: activeProjects)
-		{
-			JSONObject pJSON = pickProjectByName(pName, prjctSet);
-			if(pJSON.has(ProjectJSONKeyz.DLDTKey))
-			{
-				
-				LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
-				output.put(pName, dldt);					
-			}
-		}
-	
-		return output;
-	}
-	
-	public int openProjectDeadlinesInWeek(WeekData wd) throws IOException, URISyntaxException
-	{
-		
-		Map<String, LocalDateTime> map = allTheDeadlinesInThatWeek(wd);
-		
-		return map.keySet().size();
-	}
-	
-	public int projectDeadlinesHere(WeekData wd) throws IOException, URISyntaxException
-	{
-
-		int cnt = 0;
-
-		Map<String, LocalDateTime> map = allTheDeadlinesInThatWeek(wd);
-		for(String pName: map.keySet())
-		{
-			LocalDateTime dldt = map.get(pName);
-			if(isInThatWeek(wd.getWeekNr(), dldt))cnt++;
-			
-		}
-
-		return cnt;
-	}
-	
-	public String mostPressingProjectDeadline(WeekData wd) throws IOException, URISyntaxException, NaturalNumberException
-	{
-
-		int secs = 0;
-		LocalDateTime jetzt = LocalDateTime.now();
-		String currentName = "";
-	
-		Map<String, LocalDateTime> map = allTheDeadlinesInThatWeek(wd);
-		
-		for(String pName: map.keySet())
-		{
-
-			JSONObject pJSON = pickProjectByName(pName, prjctSet);
-			LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
-			ExactPeriode ep = new ExactPeriode(jetzt, dldt);
-			if(Math.abs(secs)>Math.abs(ep.getAbsoluteSeconds()))
-			{
-				secs = ep.getAbsoluteSeconds();
-				currentName = pName;
-			}
-		}
-
-		return currentName;
-	}
 
 	public List<Pair<LocalDate, LocalDate>> getWeekSpans()
 	{
@@ -512,5 +362,17 @@ public class StatisticalTools
 	public Set<JSONObject> getPrjctSet()
 	{
 		return prjctSet;
+	}
+	
+	public JSONObject pickByName(String name)
+	{
+
+		for(JSONObject pJSON: prjctSet)
+		{
+			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
+			if(name.equals(pName))return pJSON;
+		}
+
+		return null;
 	}
 }
