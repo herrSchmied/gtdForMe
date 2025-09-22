@@ -61,10 +61,10 @@ public class ProjectJSONToolbox
 
 
 	/** Possible Project Deadline Status.*/
-	public static final String prjctDeadlineNone = "No got no Deadline!";
+	public static final String prjctDeadlineNone = "No_got_no_Deadline!";
 	/** Possible Status for Step Deadline*/
 	public final static String stepDeadlineNone = "No Step Deadline!";	
-	public static final String deadLineUnknownStr = "UNKNOWN";
+	public static final String deadLineUnknownStr = "UNKNOWN";//If MOD-Project
 
 	public static final String stepIsOkToItSelfMsg = "Step is Ok to it Self.";
 

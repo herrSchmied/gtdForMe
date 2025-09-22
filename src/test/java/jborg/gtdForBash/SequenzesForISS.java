@@ -225,7 +225,9 @@ public class SequenzesForISS
 	public static String sequenzManyProjects()
 	{
 
-		String data = sequenzNewProject(newPrjctName)
+		LocalDateTime bdt = LocalDateTime.now().minusDays(14);
+		
+		String data = sequenzNewProjectCustomBDT(newPrjctName, bdt)
 				+ sequenzMODProject(wakeProjectName)
 				+ sequenzWakeMODProject(wakeProjectName)
 				+ sequenzNewProject(addNotePrjctName)

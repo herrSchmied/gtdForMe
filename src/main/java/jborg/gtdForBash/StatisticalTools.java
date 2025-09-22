@@ -1,5 +1,6 @@
 package jborg.gtdForBash;
 
+
 import java.awt.Point;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,8 +20,13 @@ import org.json.JSONObject;
 
 
 import javafx.util.Pair;
+
+
 import jborg.gtdForBash.exceptions.WeekDataException;
+
+
 import someMath.NaturalNumberException;
+
 
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
@@ -173,26 +179,6 @@ public class StatisticalTools
     	return output;
     }
 
-    public Map<String, LocalDateTime> allLDTs(String jsonKey) throws IOException, URISyntaxException
-    {
-
-    	Map<String, LocalDateTime> map = new HashMap<>();
-		
-		for(JSONObject pJSON: prjctSet)
-		{
-
-			if(jsonKey.equals(ProjectJSONKeyz.TDTKey)&&
-					!projectIsTerminated.test(pJSON))
-						break;
-
-			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
-			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
-			map.put(name, ldt);
-		}
-
-    	return map;
-    }
-
     public boolean isInThatWeek(int weekNr, LocalDateTime ldt)
     {
 
@@ -219,43 +205,65 @@ public class StatisticalTools
     }
 
     //Remember: should this Method be here?
-	public boolean pickAndCheckByName(String name, int weekNr, JSONObject pJSON) throws IOException, URISyntaxException
+	public boolean pickAndCheckByName(String name, int weekNr, JSONObject pJSON, String jsonKey) throws IOException, URISyntaxException
 	{
 
-        LocalDateTime bdt = ProjectJSONToolbox.extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
+        LocalDateTime ldt = ProjectJSONToolbox.extractLDT(pJSON, jsonKey);
 
-		return isInThatWeek(weekNr, bdt);
+		return isInThatWeek(weekNr, ldt);
 	}
-	
 
-
-	public Point weekWithMostBDTs() throws IOException, URISyntaxException
+	public Map<Integer, Map<String, LocalDateTime>> weeksLDTs(String jsonKey) throws IOException, URISyntaxException
 	{
-		int bdt[] = new int[weekSpans.size()];
 		
-		for(int n=0;n<weekSpans.size();n++)bdt[n]=0;
+		Map<Integer, Map<String, LocalDateTime>> map = new HashMap<>();
+		List<Map<String, LocalDateTime>> listOfMaps = new ArrayList<>();
+		for(int n=0;n<weekSpans.size();n++)
+		{
+			listOfMaps.add(new HashMap<>());
+		}
 
 		for(JSONObject pJSON: prjctSet)
 		{
 			
-			LocalDateTime ldt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
-			bdt[isInWhichWeek(ldt)]++;
-		}
-		
-		int howMany = 0;
-		int weekNr = 0;
-		for(int n=0;n<weekSpans.size();n++)
-		{
-			if(bdt[n]>howMany)
-			{
-				howMany = bdt[n];
-				weekNr = n;
-			}
+			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
+			String value = pJSON.getString(jsonKey);
+			boolean modHasNoDLDT = value.equals(deadLineUnknownStr);
+			boolean noProjectDLDT = value.equals(prjctDeadlineNone);
+			if(noProjectDLDT||modHasNoDLDT)continue;
+
+			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
+			Map<String, LocalDateTime> innerMap = listOfMaps.get(isInWhichWeek(ldt));
+			innerMap.put(pName, ldt);
 		}
 
-		return new Point(weekNr, howMany);
+		for(int n=0;n<weekSpans.size();n++)
+		{
+			map.put(n, listOfMaps.get(n));
+		}
+
+		return map;
 	}
 	
+	public Point weekWithMostLDTs(String jsonKey) throws IOException, URISyntaxException
+	{
+		Map<Integer, Map<String, LocalDateTime>> map = weeksLDTs(jsonKey);
+		
+		int whichOne = 0;
+		int howMany = 0;
+		for(Integer n: map.keySet())
+		{
+			Map<String, LocalDateTime> set = map.get(n);
+			int size = set.size();
+			if(size>howMany)
+			{
+				howMany=size;
+				whichOne=n;
+			}
+		}
+		return new Point(whichOne, howMany);
+	}
+
 	public String periodeResume(ChronoUnit cu, int unitNr) throws IOException, URISyntaxException, NaturalNumberException
 	{
 

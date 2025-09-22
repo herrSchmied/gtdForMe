@@ -117,9 +117,7 @@ public class GTDDataSpawnSession
 	public static final LocalDateTime farInFuture = LocalDateTime.of(maxDLDTYear, minMonth, minDay, minHour, minMinute);
 
 	public static final int dldtRange = 100;
-	
 
-	
 	public static final String illAExceMsg = "Don't know that Beholder.";
 	
 	public static final String differentBDTQstn = "Do You want change BDT of Step?";
@@ -305,8 +303,6 @@ public class GTDDataSpawnSession
 		pJson.put(ProjectJSONKeyz.nameKey, name);
 		pJson.put(ProjectJSONKeyz.goalKey, goal);
 		pJson.put(ProjectJSONKeyz.statusKey, status);
-
-		pJson.put(ProjectJSONKeyz.DLDTKey, deadLineUnknownStr);
 
 		String bdtStr = LittleTimeTools.timeString(bdt);
 		pJson.put(ProjectJSONKeyz.BDTKey, bdtStr);
