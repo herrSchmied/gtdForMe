@@ -205,9 +205,12 @@ public class StatisticalTools
 		{
 			
 			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
+			if(!projectIsTerminated.test(pJSON)&&
+					jsonKey.equals(ProjectJSONKeyz.TDTKey))continue;
 			String value = pJSON.getString(jsonKey);
 			boolean modHasNoDLDT = value.equals(deadLineUnknownStr);
 			boolean noProjectDLDT = value.equals(prjctDeadlineNone);
+			
 			if(noProjectDLDT||modHasNoDLDT)continue;
 
 			LocalDateTime ldt = extractLDT(pJSON, jsonKey);

@@ -46,7 +46,7 @@ public class TestingStats
     		if(file.isFile())file.delete();
     	}
     	
-		String data = sequenzManyProjects();
+		String data = sequenzManyProjects(LocalDateTime.now().minusDays(14));
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -87,37 +87,79 @@ public class TestingStats
         }
         
         int weeksSize = wochen.size();
+        int lastWeekIndex = weeksSize-1;
         String bdtKey = ProjectJSONKeyz.BDTKey;
         
         JSONObject pJSON = st.pickByName(wakeProjectName);
-		assert(st.pickAndCheckByName(wakeProjectName, weeksSize-1, pJSON, bdtKey));
+		assert(st.pickAndCheckByName(wakeProjectName, lastWeekIndex, pJSON, bdtKey));
 		
 		pJSON = st.pickByName(modPrjctName);
-		assert(st.pickAndCheckByName(modPrjctName, weeksSize-1, pJSON, bdtKey));
+		assert(st.pickAndCheckByName(modPrjctName, lastWeekIndex, pJSON, bdtKey));
 		
 		pJSON = st.pickByName(addNotePrjctName);
-		assert(st.pickAndCheckByName(addNotePrjctName, weeksSize-1, pJSON, bdtKey));
+		assert(st.pickAndCheckByName(addNotePrjctName, lastWeekIndex, pJSON, bdtKey));
 
 		pJSON = st.pickByName(killPrjctNameNoDLDT);
-		assert(st.pickAndCheckByName(killPrjctNameNoDLDT, weeksSize-1, pJSON, bdtKey));
+		assert(st.pickAndCheckByName(killPrjctNameNoDLDT, lastWeekIndex, pJSON, bdtKey));
 		
 		pJSON = st.pickByName(killPrjctName);
-		assert(st.pickAndCheckByName(killPrjctName, weeksSize-1, pJSON, bdtKey));
+		assert(st.pickAndCheckByName(killPrjctName, lastWeekIndex, pJSON, bdtKey));
 		assert(projectIsTerminated.test(pJSON));
 		
 		pJSON = st.pickByName(killStepPrjctName);
-		assert(st.pickAndCheckByName(killStepPrjctName, weeksSize-1, pJSON, bdtKey));
+		assert(st.pickAndCheckByName(killStepPrjctName, lastWeekIndex, pJSON, bdtKey));
 
 		pJSON = st.pickByName(appendStpPrjctName);
-		assert(st.pickAndCheckByName(appendStpPrjctName, weeksSize-1, pJSON, bdtKey));
+		assert(st.pickAndCheckByName(appendStpPrjctName, lastWeekIndex, pJSON, bdtKey));
 	
 		pJSON = st.pickByName(newPrjctNoDLDT);
-		assert(st.pickAndCheckByName(newPrjctNoDLDT, weeksSize-1, pJSON, bdtKey));
+		assert(st.pickAndCheckByName(newPrjctNoDLDT, lastWeekIndex, pJSON, bdtKey));
 
-		int projectsBornInLastWeek = st.getWeekDatas().get(weeksSize-1).getProjectsBorn().size();
-		System.out.println("Projects born in last Week: " + projectsBornInLastWeek);
-		int projectsSucceededInLastWeek = st.getWeekDatas().get(2).projectsSucceededThisWeek().size();
-		System.out.println("Projects succeeded in last Week: " + projectsSucceededInLastWeek);
+		for(int n=0;n<weeksSize;n++)
+		{
+	
+			int projectsBorn = st.getWeekDatas().get(n).getProjectsBorn().size();
+			int projectsWritten = st.getWeekDatas().get(n).getProjectsWrittenDown().size();
+			int projectsActive = st.getWeekDatas().get(n).getActiveProjects().size();
+			int projectsSucceeded = st.getWeekDatas().get(n).projectsSucceededThisWeek().size();
+			int projectsFailed = st.getWeekDatas().get(n).projectsFailedThisWeek().size();
+			
+			System.out.println("\nWeekNr.: " + n);
+			System.out.println("Projects born: " + projectsBorn);
+			System.out.println("Projects written: " + projectsWritten);
+			System.out.println("Projects active: " + projectsActive);
+			System.out.println("Projects succeeded: " + projectsSucceeded);
+			System.out.println("Projects failed: " + projectsFailed);
+
+			
+			if(n==lastWeekIndex)
+			{
+				assert(projectsBorn==8);
+				assert(projectsWritten==9);
+				assert(projectsActive==7);
+				assert(projectsSucceeded==1);
+				assert(projectsFailed==1);
+			}
+			
+			if(n==1)
+			{
+				assert(projectsBorn==0);
+				assert(projectsWritten==0);
+				assert(projectsActive==1);
+				assert(projectsSucceeded==0);
+				assert(projectsFailed==0);
+
+			}
+			
+			if(n==0)
+			{
+				assert(projectsBorn==1);
+				assert(projectsWritten==0);
+				assert(projectsActive==1);
+				assert(projectsSucceeded==0);
+				assert(projectsFailed==0);
+			}
+		}
 	}
 
 	@Test
@@ -125,25 +167,33 @@ public class TestingStats
 	{
 
         StatisticalTools st = new StatisticalTools(prjctSet);
+        System.out.println("\nNr. of Projects: " + prjctSet.size());
 
         List<Pair<LocalDate, LocalDate>> wochen = st.getWeekSpans();
 
         int weeksSize = wochen.size();
+        int lastWeekIndex = weeksSize-1;
+
         System.out.println("Number of weeks: " + weeksSize);
 
 		Point wknrAndN = st.weekWithMostLDTs(ProjectJSONKeyz.BDTKey);
 		System.out.println("Week with the most BDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Birthes.");
-		assert((wknrAndN.x)==(weeksSize-1));
+		assert((wknrAndN.x)==(lastWeekIndex));
 		assert((wknrAndN.y)==(prjctSet.size()-1));
 
 		wknrAndN = st.weekWithMostLDTs(ProjectJSONKeyz.NDDTKey);
 		System.out.println("Week with the most NDDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written.");
-		assert((wknrAndN.x)==(weeksSize-1));
+		assert((wknrAndN.x)==(lastWeekIndex));
 		assert((wknrAndN.y)==(prjctSet.size()));
 
 		wknrAndN = st.weekWithMostLDTs(ProjectJSONKeyz.DLDTKey);
 		System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
-		assert((wknrAndN.x)==(weeksSize-1));
-		assert((wknrAndN.y)==(6));//TODO:Why Six?
+		assert((wknrAndN.x)==(lastWeekIndex));
+		assert((wknrAndN.y)==(6));
+
+		wknrAndN = st.weekWithMostLDTs(ProjectJSONKeyz.TDTKey);
+		System.out.println("Week with the most TDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
+		assert((wknrAndN.x)==(lastWeekIndex));
+		assert((wknrAndN.y)==(2));//TODO:Why Six?
 	}
 }

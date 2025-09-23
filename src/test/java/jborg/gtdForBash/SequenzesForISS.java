@@ -207,7 +207,7 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String sequenzKillProject(String prjctName)
+	public static String sequenzProjectSucceeds(String prjctName)
 	{
 
 		String projectWasSuccessQstn  = "Yes";
@@ -222,22 +222,35 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String sequenzManyProjects()
+	public static String sequenzProjectFails(String prjctName)
 	{
 
-		LocalDateTime bdt = LocalDateTime.now().minusDays(14);
+		String projectWasSuccessQstn  = "No";
+		String wantToMakeTDTNote = "No";
+		String wantToChangeTDT = "No";
+
+		String data = SomeCommands.terminate_Project + " " + prjctName + '\n'
+				+ projectWasSuccessQstn + '\n'
+				+ wantToMakeTDTNote + '\n'
+				+ wantToChangeTDT + '\n';
+
+		return data;
+	}
+
+	public static String sequenzManyProjects(LocalDateTime thatOneBDTOff)
+	{
 		
-		String data = sequenzNewProjectCustomBDT(newPrjctName, bdt)
+		String data = sequenzNewProjectCustomBDT(newPrjctName, thatOneBDTOff)
 				+ sequenzMODProject(wakeProjectName)
 				+ sequenzWakeMODProject(wakeProjectName)
 				+ sequenzNewProject(addNotePrjctName)
 				+ sequenzAddNote(addNotePrjctName)
 				+ sequenzNewProjectNoDLDT(killPrjctNameNoDLDT)
 				+ sequenzKillStep(killPrjctNameNoDLDT)
-				+ sequenzKillProject(killPrjctNameNoDLDT)
+				+ sequenzProjectSucceeds(killPrjctNameNoDLDT)
 				+ sequenzNewProject(killPrjctName)
 				+ sequenzKillStep(killPrjctName)
-				+ sequenzKillProject(killPrjctName)
+				+ sequenzProjectFails(killPrjctName)
 				+ sequenzNewProject(killStepPrjctName)
 				+ sequenzKillStep(killStepPrjctName)
 				+ sequenzNewProject(appendStpPrjctName)

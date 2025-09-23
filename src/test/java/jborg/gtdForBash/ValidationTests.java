@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -25,7 +26,7 @@ public class ValidationTests
 	private static void doCLI() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(sequenzManyProjects().getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(sequenzManyProjects(LocalDateTime.now()).getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 
         gtdCli = new GTDCLI(iss);				

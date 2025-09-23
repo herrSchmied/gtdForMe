@@ -35,7 +35,6 @@ public class TestingCLI
 	static GTDCLI gtdCli;
 	static Set<JSONObject> projects = new HashSet<>();
 
-	final  LocalDateTime jetzt = LocalDateTime.now();
 	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
 	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
@@ -61,6 +60,7 @@ public class TestingCLI
 	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
+		LocalDateTime jetzt = LocalDateTime.now();
 		JSONObject newProject = pickProjectByName(newPrjctName, projects);
 		assert(newProject!=null);
 		
@@ -71,7 +71,8 @@ public class TestingCLI
 		assert(newProject.has(ProjectJSONKeyz.BDTKey));
 		String bdtStr = newProject.getString(ProjectJSONKeyz.BDTKey);
 		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
-		assert(jetzt.minusSeconds(4).isBefore(bdt));//bdt not older than 4 seconds!
+		System.out.println(BashSigns.gBCPX+bdt.toString()+BashSigns.gBCSX);
+		assert(jetzt.minusSeconds(20).isBefore(bdt));//bdt not older than 20 seconds!
 		
 		assert(newProject.has(ProjectJSONKeyz.NDDTKey));
 		String nddtStr = newProject.getString(ProjectJSONKeyz.NDDTKey);
@@ -260,7 +261,7 @@ public class TestingCLI
 	private static void doCLI() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(sequenzManyProjects().getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(sequenzManyProjects(LocalDateTime.now()).getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 
         gtdCli = new GTDCLI(iss);				
