@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -26,7 +25,7 @@ import jborg.gtdForBash.exceptions.WeekDataException;
 import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.SequenzesForISS.*;
-
+import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
 public class TestingStats
 {
@@ -104,7 +103,8 @@ public class TestingStats
 		
 		pJSON = st.pickByName(killPrjctName);
 		assert(st.pickAndCheckByName(killPrjctName, weeksSize-1, pJSON, bdtKey));
-
+		assert(projectIsTerminated.test(pJSON));
+		
 		pJSON = st.pickByName(killStepPrjctName);
 		assert(st.pickAndCheckByName(killStepPrjctName, weeksSize-1, pJSON, bdtKey));
 
@@ -113,8 +113,13 @@ public class TestingStats
 	
 		pJSON = st.pickByName(newPrjctNoDLDT);
 		assert(st.pickAndCheckByName(newPrjctNoDLDT, weeksSize-1, pJSON, bdtKey));
+
+		int projectsBornInLastWeek = st.getWeekDatas().get(weeksSize-1).getProjectsBorn().size();
+		System.out.println("Projects born in last Week: " + projectsBornInLastWeek);
+		int projectsSucceededInLastWeek = st.getWeekDatas().get(2).projectsSucceededThisWeek().size();
+		System.out.println("Projects succeeded in last Week: " + projectsSucceededInLastWeek);
 	}
-	
+
 	@Test
 	public void statsTest() throws IOException, URISyntaxException, WeekDataException
 	{
@@ -131,42 +136,14 @@ public class TestingStats
 		assert((wknrAndN.x)==(weeksSize-1));
 		assert((wknrAndN.y)==(prjctSet.size()-1));
 
-		Map<Integer, Map<String, LocalDateTime>> map = st.weeksLDTs(ProjectJSONKeyz.BDTKey);
-		printMap(map);
-
 		wknrAndN = st.weekWithMostLDTs(ProjectJSONKeyz.NDDTKey);
 		System.out.println("Week with the most NDDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written.");
 		assert((wknrAndN.x)==(weeksSize-1));
 		assert((wknrAndN.y)==(prjctSet.size()));
 
-		map = st.weeksLDTs(ProjectJSONKeyz.NDDTKey);
-		printMap(map);
-
 		wknrAndN = st.weekWithMostLDTs(ProjectJSONKeyz.DLDTKey);
 		System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
 		assert((wknrAndN.x)==(weeksSize-1));
 		assert((wknrAndN.y)==(6));//TODO:Why Six?
-		
-		map = st.weeksLDTs(ProjectJSONKeyz.DLDTKey);
-		printMap(map);
-	}
-	
-	public void printMap(Map<Integer, Map<String, LocalDateTime>> map)
-	{
-		int s = map.size();
-		for(int n=0;n<s;n++)
-		{
-			int ds = map.get(n).size();
-			System.out.println("WeekNr: " + n + ". LDTs: " + ds);
-			if(ds>0)
-			{
-				Map<String, LocalDateTime> innerMap = map.get(n);
-				for(String pName: innerMap.keySet())
-				{
-					LocalDateTime ldt = innerMap.get(pName);
-					System.out.println("Project Name: " + pName+ ". LDT: " + ldt);
-				}
-			}
-		}
 	}
 }

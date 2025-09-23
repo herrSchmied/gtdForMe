@@ -210,7 +210,7 @@ public class SequenzesForISS
 	public static String sequenzKillProject(String prjctName)
 	{
 
-		String projectWasSuccessQstn  = "No";
+		String projectWasSuccessQstn  = "Yes";
 		String wantToMakeTDTNote = "No";
 		String wantToChangeTDT = "No";
 

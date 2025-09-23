@@ -18,7 +18,7 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
-
+import consoleTools.BashSigns;
 import javafx.util.Pair;
 
 
@@ -42,7 +42,7 @@ public class StatisticalTools
 
 		this.prjctSet = prjctSet;
 		weekSpans = computeWeekSpans();
-		weekDatas = getWeekDataList();
+		weekDatas = computeWeekDataList();
 	}
 	
 	public List<Pair<LocalDate, LocalDate>> computeWeekSpans() throws IOException, URISyntaxException
@@ -71,63 +71,55 @@ public class StatisticalTools
     	return weekSpans;
 	}
 	
-	public List<WeekData> getWeekDataList() throws IOException, URISyntaxException, WeekDataException
+	public List<WeekData> computeWeekDataList() throws IOException, URISyntaxException, WeekDataException
 	{
 
 		List<WeekData> outputList = new ArrayList<>();
-		int s = weekSpans.size();
+		int weekSpansSize = weekSpans.size();
 
-		for(int n=0;n<s;n++)
+		for(int weekNr=0;weekNr<weekSpansSize;weekNr++)
 		{
 
-			Pair<LocalDate, LocalDate> span = weekSpans.get(n);
+			Pair<LocalDate, LocalDate> span = weekSpans.get(weekNr);
+			LocalDate wStart = span.getKey();
+			LocalDate wEnd = span.getValue();
 
 			Set<JSONObject> activeProjects = new HashSet<>();
 			Set<JSONObject> bdtProjects = new HashSet<>();
 			Set<JSONObject> nddtProjects = new HashSet<>();
 			Set<JSONObject> terminatedProjects = new HashSet<>();
-			WeekData wd = new WeekData(span.getKey(), n);
-			if(span.getValue().isAfter(LocalDate.now()))continue;
+			WeekData wd = new WeekData(wStart, weekNr);
+			
+			outputList.add(wd);
 
 			for(JSONObject pJSON: prjctSet)
 			{
 
 				LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
-				if(isInThatWeek(n, bdt))
-				{
-					bdtProjects.add(pJSON);
-				}
+				if(wd.isInThisWeek(bdt))bdtProjects.add(pJSON);
 
 				LocalDateTime nddt = extractLDT(pJSON, ProjectJSONKeyz.NDDTKey);
-				if(isInThatWeek(n, nddt))
-				{
-					nddtProjects.add(pJSON);
-				}
+				if(wd.isInThisWeek(nddt))nddtProjects.add(pJSON);
 
-				String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-				
-				StatusMGMT statusMGMT = StatusMGMT.getInstance();
-				if(statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName).contains(status))
+				if(projectIsTerminated.test(pJSON))
 				{
-					
 					LocalDateTime tdt = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
-					if(isInThatWeek(n, tdt))
+					if(wd.isInThisWeek(tdt))
 					{
 						terminatedProjects.add(pJSON);
 					}
 				}
 				else
 				{
-					if(span.getValue().isAfter(bdt.toLocalDate()))activeProjects.add(pJSON);
+					if(wEnd.isAfter(bdt.toLocalDate()))activeProjects.add(pJSON);
 				}
 			}
-			
+
 			wd.setProjectsActive(activeProjects);
 			wd.setProjectsBorn(bdtProjects);
 			wd.setProjectsWrittenDown(nddtProjects);
 			wd.setProjectsTerminated(terminatedProjects);
-			
-			outputList.add(wd);
+
 		}
 
 		return outputList;
@@ -179,26 +171,12 @@ public class StatisticalTools
     	return output;
     }
 
-    public boolean isInThatWeek(int weekNr, LocalDateTime ldt)
-    {
-
-    	if((weekNr<0)&&(weekNr>weekSpans.size()-1))throw new RuntimeException("weekNr does not exist.");
-    	Pair<LocalDate, LocalDate> week = weekSpans.get(weekNr);
-    	
-    	LocalDate beginLD = week.getKey().minusDays(1);
-    	LocalDate endLD = week.getValue().plusDays(1);
-    	
-    	LocalDate ld = ldt.toLocalDate();
-    	
-    	return (ld.isAfter(beginLD)&&ld.isBefore(endLD));
-    }
-
     public int isInWhichWeek(LocalDateTime ldt) throws IOException, URISyntaxException
     {
     	List<Pair<LocalDate, LocalDate>> weeks = computeWeekSpans();
-    	for(int n=0;n<weeks.size();n++)
+    	for(WeekData wd: weekDatas)
     	{
-    		if(isInThatWeek(n, ldt))return n;
+    		if(wd.isInThisWeek(ldt))return wd.getWeekNr();
     	}
     	
     	throw new RuntimeException("This should not happen.");
@@ -209,8 +187,8 @@ public class StatisticalTools
 	{
 
         LocalDateTime ldt = ProjectJSONToolbox.extractLDT(pJSON, jsonKey);
-
-		return isInThatWeek(weekNr, ldt);
+        WeekData wd = weekDatas.get(weekNr);
+		return wd.isInThisWeek(ldt);
 	}
 
 	public Map<Integer, Map<String, LocalDateTime>> weeksLDTs(String jsonKey) throws IOException, URISyntaxException
@@ -244,7 +222,26 @@ public class StatisticalTools
 
 		return map;
 	}
-	
+
+	public void printMap(Map<Integer, Map<String, LocalDateTime>> map)
+	{
+		int s = map.size();
+		for(int n=0;n<s;n++)
+		{
+			int ds = map.get(n).size();
+			System.out.println("WeekNr: " + n + ". LDTs: " + ds);
+			if(ds>0)
+			{
+				Map<String, LocalDateTime> innerMap = map.get(n);
+				for(String pName: innerMap.keySet())
+				{
+					LocalDateTime ldt = innerMap.get(pName);
+					System.out.println("Project Name: " + pName+ ". LDT: " + ldt);
+				}
+			}
+		}
+	}
+
 	public Point weekWithMostLDTs(String jsonKey) throws IOException, URISyntaxException
 	{
 		Map<Integer, Map<String, LocalDateTime>> map = weeksLDTs(jsonKey);
@@ -271,9 +268,9 @@ public class StatisticalTools
 
 		int prjctBDTs = wd.getProjectsBorn().size();
 		int prjctNDDTs = wd.getProjectsWrittenDown().size();
-		int prjctsSucceded = wd.projectNamesSucceededThisWeek().size();
-		int prjctsFailed = wd.projectNamesFailedThisWeek().size();
-		int prjctDeadlineViolations = wd.projectNamesDLViolationsThisWeek().size();
+		int prjctsSucceded = wd.projectsSucceededThisWeek().size();
+		int prjctsFailed = wd.projectsFailedThisWeek().size();
+		int prjctDeadlineViolations = wd.projectsViolatedDLThisWeek().size();
 		int openPrjctDeadlines = wd.allActiveProjectsWithDLs().size();
 		int prjctDeadlinesHere = wd.projectDLsThisWeek().size();
 		String prjctMostPressingDeadline = wd.mostPressingProjectDeadline();
@@ -304,10 +301,10 @@ public class StatisticalTools
 				JSONObject lastStep = getLastStepOfProject(pJSON);
 				
 				LocalDateTime bdt = extractLDT(lastStep, StepJSONKeyz.BDTKey);
-				if(isInThatWeek(unitNr, bdt))stepBDTs++;
+				if(wd.isInThisWeek(bdt))stepBDTs++;
 
 				LocalDateTime nddt = extractLDT(lastStep, StepJSONKeyz.NDDTKey);
-				if(isInThatWeek(unitNr, nddt))stepNDDTs++;
+				if(wd.isInThisWeek(nddt))stepNDDTs++;
 				
 				LocalDateTime dldt = null;
 				if(lastStep.has(StepJSONKeyz.DLDTKey))dldt = extractLDT(lastStep, StepJSONKeyz.DLDTKey);
@@ -317,7 +314,7 @@ public class StatisticalTools
 					String status = lastStep.getString(StepJSONKeyz.statusKey);
 					
 
-					if(isInThatWeek(unitNr, dldt))
+					if(wd.isInThisWeek(dldt))
 					{
 						if(StatusMGMT.success.equals(status))stepsSucceded++;
 						if(StatusMGMT.failed.equals(status))
@@ -334,7 +331,7 @@ public class StatisticalTools
 				else
 				{
 					if(dldt!=null)openStepDeadlines++;
-					if(isInThatWeek(unitNr, dldt))stepDeadlinesHere++;
+					if(wd.isInThisWeek(dldt))stepDeadlinesHere++;
 				}
 			}
 		}
@@ -372,6 +369,11 @@ public class StatisticalTools
 		return prjctSet;
 	}
 	
+	public List<WeekData> getWeekDatas()//Faster
+	{
+		return weekDatas;
+	}
+
 	public JSONObject pickByName(String name)
 	{
 

@@ -160,7 +160,7 @@ public class WeekData
 		return Set.copyOf(projectsTerminated);
 	}
 
-	public Set<String> projectNamesSucceededThisWeek()
+	public Set<String> projectsSucceededThisWeek()
 	{
 		
 		Set<String> successes = new HashSet<>();
@@ -176,7 +176,7 @@ public class WeekData
 		return successes;
 	}
 	
-	public Set<String> projectNamesFailedThisWeek()
+	public Set<String> projectsFailedThisWeek()
 	{
 
 		Set<String> fails= new HashSet<>();
@@ -192,7 +192,7 @@ public class WeekData
 		return fails;
 	}
 
-	public Set<String> projectNamesDLViolationsThisWeek()
+	public Set<String> projectsViolatedDLThisWeek()
 	{
 		
 		Set<String> violations = new HashSet<>();
