@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 
@@ -217,7 +218,21 @@ public class ProjectJSONToolbox
 	    	
 	    return terminalSet.contains(status);
 	};
+
+	public static final Predicate<JSONObject> lastStepIsTerminated = (jo)->
+	{
 	
+		JSONObject sJSON = getLastStepOfProject(jo);
+		
+	    String status = sJSON.getString(StepJSONKeyz.statusKey);
+	    
+	    StatusMGMT states = StatusMGMT.getInstance();
+	
+	    Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
+	    	
+	    return terminalSet.contains(status);
+	};
+
 	public static final Predicate<JSONObject> activeProject = (jo)->
 	{
 		if(projectIsTerminated.test(jo))return false;
@@ -488,5 +503,17 @@ public class ProjectJSONToolbox
 	public static LocalDateTime extractLDT(JSONObject pJSON, String key) throws IOException, URISyntaxException
 	{
 		return  LittleTimeTools.LDTfromTimeString(pJSON.getString(key));
+	}
+	
+	public static void iterateOverSteps(JSONObject pJSON, Consumer<JSONObject> jsonConsumer)
+	{
+		JSONArray stepArray = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+		int s = stepArray.length();
+		
+		for(int n=0;n<s;n++)
+		{
+			JSONObject step = stepArray.getJSONObject(n);
+			jsonConsumer.accept(step);
+		}
 	}
 }

@@ -18,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import allgemein.ExactPeriode;
+import allgemein.LittleTimeTools;
 import jborg.gtdForBash.exceptions.WeekDataException;
 import someMath.NaturalNumberException;
 
@@ -158,6 +159,202 @@ public class WeekData
 	public Set<JSONObject> getProjectsTerminated()
 	{
 		return Set.copyOf(projectsTerminated);
+	}
+
+	public Map<String, Integer> getStepsTerminated()
+	{
+
+		Map<String, Integer> terminated = new HashMap<>();
+
+		for(JSONObject pJSON: allTheJSON())
+		{
+			if(isMODProject.test(pJSON))continue;
+			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
+			terminated.put(pName, 0);
+		}
+
+		for(JSONObject pJSON: allTheJSON())
+		{
+			if(isMODProject.test(pJSON))continue;
+			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
+			iterateOverSteps(pJSON, (jo)->
+			{
+				if(stepIsTerminated.test(jo))
+				{
+					int k = terminated.get(pName);
+					k++;
+					terminated.put(pName, k);
+				}
+			});
+		}
+
+		return terminated;
+	}
+
+	public Map<String, Integer> stepsSucceededThisWeek()
+	{
+
+		Map<String, Integer> successes = new HashMap<>();
+		Map<String, Integer> terminated = getStepsTerminated();
+
+		for(String pName: terminated.keySet())
+		{
+			successes.put(pName, 0);
+		}
+
+		for(String pName: terminated.keySet())
+		{
+			int k = terminated.get(pName);
+			if(k==0)continue;
+			JSONObject pJSON = pickProjectByName(pName);
+			iterateOverSteps(pJSON, (jo)->
+			{
+				String stepStatus = jo.getString(StepJSONKeyz.statusKey);
+				if(StatusMGMT.success.equals(stepStatus))
+				{
+					int m = successes.get(pName)+1;
+					successes.put(pName, m);
+				}
+
+			});
+		}
+
+		return successes;
+	}
+	
+	public Map<String, Integer> stepsFailedThisWeek()
+	{
+
+		Map<String, Integer> fails = new HashMap<>();
+		Map<String, Integer> terminated = getStepsTerminated();
+
+		for(String pName: terminated.keySet())
+		{
+			fails.put(pName, 0);
+		}
+
+		for(String pName: terminated.keySet())
+		{
+			int k = terminated.get(pName);
+			if(k==0)continue;
+			JSONObject pJSON = pickProjectByName(pName);
+			iterateOverSteps(pJSON, (jo)->
+			{
+				String stepStatus = jo.getString(StepJSONKeyz.statusKey);
+				if(StatusMGMT.failed.equals(stepStatus))
+				{
+					int m = fails.get(pName)+1;
+					fails.put(pName, m);
+				}
+
+			});
+		}
+
+		return fails;
+	}
+	
+	public Map<String, Integer> stepsViolatedDLThisWeek()
+	{
+
+		Map<String, Integer> violations = new HashMap<>();
+		Map<String, Integer> howManyInWichProjectMap = stepsFailedThisWeek();
+		
+		for(String pName: howManyInWichProjectMap.keySet())
+		{
+			violations.put(pName, 0);
+		}
+
+		for(String pName: howManyInWichProjectMap.keySet())
+		{
+
+			int h = howManyInWichProjectMap.get(pName);
+			if(h==0)continue;
+			JSONObject pJSON = pickProjectByName(pName);
+			iterateOverSteps(pJSON, (sJSON)->
+			{
+				if(sJSON.has(StepJSONKeyz.TDTNoteKey)&&
+					(sJSON.getString(StepJSONKeyz.TDTNoteKey).equals(tdtNoteStpDLDTAbuse)))
+				{
+					
+					int m = violations.get(pName)+1;
+					violations.put(pName, m);
+				}
+
+			});
+		}
+		
+		return violations;
+	}
+
+	public Map<String, JSONObject> allActiveStepsWithDLs() throws IOException, URISyntaxException
+	{
+
+		Map<String, JSONObject> output = new HashMap<>();
+
+		for(JSONObject pJSON: allTheJSON())
+		{
+
+			if(isMODProject.test(pJSON))continue;
+			if(!lastStepIsTerminated.test(pJSON))
+			{
+
+				String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
+				JSONObject sJSON = getLastStepOfProject(pJSON);
+				String dldtStr = sJSON.getString(StepJSONKeyz.DLDTKey);
+				if(!dldtStr.equals(stepDeadlineNone))output.put(pName, sJSON);					
+			}
+		}
+	
+		return output;
+	}
+
+	public Map<String, LocalDateTime> stepDLsThisWeek() throws IOException, URISyntaxException
+	{
+
+		Map<String, LocalDateTime> outputMap = new HashMap<>();
+
+		Map<String, JSONObject> map = allActiveStepsWithDLs();
+		for(String pName: map.keySet())
+		{
+
+			String dldtStr = map.get(pName).getString(StepJSONKeyz.DLDTKey);
+			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
+			if(isInThisWeek(dldt))outputMap.put(pName, dldt);
+		}
+
+		return outputMap;
+	}
+	
+	//TODO: Maybe a list in case it is more than one?
+	public Map<String, LocalDateTime> mostPressingStepDeadline() throws IOException, URISyntaxException, NaturalNumberException
+	{
+
+		Map<String, LocalDateTime> output  = new HashMap<>();
+
+		int secs = 0;
+		LocalDateTime jetzt = LocalDateTime.now();
+	
+		Map<String, JSONObject> map = allActiveStepsWithDLs();
+		
+		for(String pName: map.keySet())
+		{
+
+			JSONObject sJSON = map.get(pName);
+			LocalDateTime dldt = extractLDT(sJSON, StepJSONKeyz.DLDTKey);
+			ExactPeriode ep = new ExactPeriode(jetzt, dldt);
+			if(Math.abs(secs)>Math.abs(ep.getAbsoluteSeconds()))
+			{
+				secs = ep.getAbsoluteSeconds();
+				output.clear();
+				output.put(pName, dldt);
+			}
+			if(Math.abs(secs)==Math.abs(ep.getAbsoluteSeconds()))
+			{
+				output.put(pName, dldt);
+			}
+		}
+
+		return output;
 	}
 
 	public Set<String> projectsSucceededThisWeek()

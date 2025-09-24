@@ -18,7 +18,7 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
-import consoleTools.BashSigns;
+
 import javafx.util.Pair;
 
 
@@ -173,13 +173,12 @@ public class StatisticalTools
 
     public int isInWhichWeek(LocalDateTime ldt) throws IOException, URISyntaxException
     {
-    	List<Pair<LocalDate, LocalDate>> weeks = computeWeekSpans();
-    	for(WeekData wd: weekDatas)
-    	{
-    		if(wd.isInThisWeek(ldt))return wd.getWeekNr();
-    	}
-    	
-    	throw new RuntimeException("This should not happen.");
+
+    	return weekDatas.stream()
+    		    .filter(wd -> wd.isInThisWeek(ldt))
+    		    .map(WeekData::getWeekNr)
+    		    .findFirst()
+    		    .orElseThrow(() -> new IllegalArgumentException("No week found for given date: " + ldt));
     }
 
     //Remember: should this Method be here?
@@ -247,8 +246,9 @@ public class StatisticalTools
 
 	public Point weekWithMostLDTs(String jsonKey) throws IOException, URISyntaxException
 	{
+
 		Map<Integer, Map<String, LocalDateTime>> map = weeksLDTs(jsonKey);
-		
+
 		int whichOne = 0;
 		int howMany = 0;
 		for(Integer n: map.keySet())
