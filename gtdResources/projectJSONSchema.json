@@ -19,7 +19,30 @@
 		{
 			"description": "Goal of the Project",
             "type": "string"
-        }
+        },
+		"BDT_of_Project":
+		{
+			"description": "BirthdateTime",
+			"type": "string",
+			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}\\s[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+		},
+		"NDDT_of_Project":
+		{
+			"description": "Noted Down Date Time. Project written here Datetime",
+			"type": "string",
+			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}\\s[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+		},
+		"Steps":
+		{
+			"description": "Steps to further the Project.",
+			"type": "array"
+		},
+		"Project_Deadline":
+		{
+			"description": "Selfexplainatorish",
+			"type": "string",
+			"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}\\s[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+		}
     },
-    "required": ["Project_Name", "Project_Status", "Goal"]
-}
+    "required": ["Project_Name", "Project_Status", "Goal", "BDT_of_Project", "NDDT_of_Project", "Steps", "Project_Deadline"]
+	}
