@@ -3,7 +3,7 @@ package jborg.gtdForBash;
 
 
 import java.awt.Point;
-import java.io.ByteArrayInputStream;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 
-import consoleTools.InputStreamSession;
+
 
 
 import javafx.util.Pair;
@@ -35,7 +35,7 @@ import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import static jborg.gtdForBash.WeekData.mapJSONToName;
-import static jborg.gtdForBash.StatisticalTools.*;
+
 import jborg.gtdForBash.exceptions.WeekDataException;
 
 public class TestingStats
@@ -57,13 +57,7 @@ public class TestingStats
     		if(file.isFile())file.delete();
     	}
     	
-		String data = sequenzManyProjects(LocalDateTime.now().minusDays(14));
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
-		InputStreamSession iss = new InputStreamSession(bais);
-
-        gtdCli = new GTDCLI(iss);			
-        prjctSet = GTDCLI.loadProjects();
+    	prjctSet = ProjectSetForTesting.get();
 	}
 	
 	@Test

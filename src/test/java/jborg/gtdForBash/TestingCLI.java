@@ -1,7 +1,6 @@
 package jborg.gtdForBash;
 
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -20,12 +19,11 @@ import org.junit.jupiter.api.Test;
 import allgemein.LittleTimeTools;
 
 import consoleTools.BashSigns;
-import consoleTools.InputStreamSession;
+
 
 import someMath.NaturalNumberException;
 
-import jborg.gtdForBash.StepJSONKeyz;
-import jborg.gtdForBash.ProjectJSONKeyz;
+
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
@@ -51,9 +49,7 @@ public class TestingCLI
     		if(file.isFile())file.delete();
     	}
     	
-    	doCLI();
-    	
-		projects = GTDCLI.loadProjects();
+		projects = ProjectSetForTesting.get();
 	}
 
 	@Test
@@ -256,14 +252,5 @@ public class TestingCLI
 
 		String stepDesc2 = step.getString(StepJSONKeyz.descKey);
 		assert(stepDesc2.equals(stepDesc));
-	}
-
-	private static void doCLI() throws JSONException, IOException, URISyntaxException, NaturalNumberException
-	{
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(sequenzManyProjects(LocalDateTime.now()).getBytes());
-		InputStreamSession iss = new InputStreamSession(bais);
-
-        gtdCli = new GTDCLI(iss);				
 	}
 }
