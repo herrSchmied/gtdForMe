@@ -112,7 +112,9 @@ public class StatisticalTools
 					if(wd.isInThisWeek(tdt))
 					{
 						terminatedProjects.add(pJSON);
+						activeProjects.add(pJSON);
 					}
+					if(wd.isAfterThisWeek(tdt))activeProjects.add(pJSON);
 				}
 				else
 				{

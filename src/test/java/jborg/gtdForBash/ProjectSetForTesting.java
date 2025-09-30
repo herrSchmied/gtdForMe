@@ -16,7 +16,8 @@ import org.json.JSONObject;
 import allgemein.LittleTimeTools;
 import consoleTools.InputStreamSession;
 import someMath.NaturalNumberException;
-
+import static jborg.gtdForBash.ProjectJSONToolbox.extractLDT;
+import static jborg.gtdForBash.ProjectJSONKeyz.BDTKey;
 public class ProjectSetForTesting
 {
 
@@ -38,8 +39,7 @@ public class ProjectSetForTesting
         for(int m=1;m<5;m++)
         {
             JSONObject pJSON = pickProjectByName(SequenzesForISS.getNewProjectName(m));
-            String bdtStr = pJSON.getString(ProjectJSONKeyz.BDTKey);
-            LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
+            LocalDateTime bdt = extractLDT(pJSON, BDTKey);
             alterProjectNDDT(pJSON, bdt);
         }
         

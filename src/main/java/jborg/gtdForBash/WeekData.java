@@ -522,6 +522,19 @@ public class WeekData
 		LocalDate ld = ldt.toLocalDate();
 		return ld.isAfter(begin.minusDays(1))&&ld.isBefore(end.plusDays(1));
 	}
+	
+	public boolean isAfterThisWeek(LocalDateTime ldt)
+	{
+		LocalDate ld = ldt.toLocalDate();
+		return ld.isAfter(end);
+	}
+	
+	public boolean isBeforeThisWeek(LocalDateTime ldt)
+	{
+		LocalDate ld = ldt.toLocalDate();
+		return ld.isBefore(begin);
+	}
+
 
 	public int getHowManyStepsDone()
 	{
