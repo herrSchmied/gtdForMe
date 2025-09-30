@@ -25,7 +25,7 @@ public class ProjectSetForTesting
 	public static Set<JSONObject> get() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 		
-		String data = sequenzManyProjects(LocalDateTime.now().minusDays(14));
+		String data = sequenzManyProjects();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -33,6 +33,8 @@ public class ProjectSetForTesting
         new GTDCLI(iss);
         prjctSet = GTDCLI.loadProjects();
         
+        //just the first four.
+        //Remember: there are 8 Project-JSONObjects in that prjctSet!!!
         for(int m=1;m<5;m++)
         {
             JSONObject pJSON = pickProjectByName(SequenzesForISS.getNewProjectName(m));

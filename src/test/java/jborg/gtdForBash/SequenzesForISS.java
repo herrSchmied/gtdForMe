@@ -1,8 +1,11 @@
 package jborg.gtdForBash;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
+
 
 import consoleTools.InputStreamSession;
 
@@ -14,19 +17,12 @@ public class SequenzesForISS
 
 	public static final String terminatePrjctName = "Terminate_Project";
 	
-	//public static final String addNotePrjctName = "Add_Note_Project";
-	
-	//public static final String appendStpPrjctName = "Append_Step_Project";
-	
-	public static final  String killStepPrjctName = "Kill_Step_Project";
 	
 	public static final  String killPrjctNameNoDLDT = "Kill_Project_NODLDT";
-	//public static final  String killPrjctName = "Kill_Project";
 	
 	public static final  String modPrjctName = "MOD_Project";
 	public static final  String modPrjctGoal = "MOD-Project Test";
 	
-	//public static final  String newPrjctName = "Project_Nuovo";
 	public static final  String newPrjctGoal = "Testing this here";
 	
 	public static final  String newPrjctNoDLDT = "No_DLDT_Project";
@@ -127,10 +123,11 @@ public class SequenzesForISS
 				
 		return data;
 	}
-	public static String sequenzNewProjectNoDLDT(String prjctName)
+	public static String sequenzNewProjectNoDLDTCustomBDT(String prjctName, LocalDateTime bdt)
 	{
 		
-		String changePrjctBDT = "No";
+		String changePrjctBDT = "Yes";
+		String bdtStr = translateTimeToAnswerString(bdt);
 		String dldtQuestion = "no";
 		String changeStepBDT = "No";
 		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
@@ -139,6 +136,7 @@ public class SequenzesForISS
 				+ prjctName + '\n'
 				+ newPrjctGoal + '\n'
 				+ changePrjctBDT + '\n'
+				+ bdtStr + '\n'
 				+ dldtQuestion + '\n'
 				+ changeStepBDT + '\n'
 				+ chosenFromStatieList + '\n'
@@ -238,12 +236,13 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String sequenzOfABunchOfNewProjects(int n)
+	public static String sequenzOfFourNewProjects()
 	{
+		int s = 4;
 		String data = "";
 		
 		//starts and ends not like usually.
-		for(int m=1;m<n+1;m++)
+		for(int m=1;m<s+1;m++)
 		{
 			
 			LocalDateTime bdt = getBDT(m);
@@ -256,29 +255,28 @@ public class SequenzesForISS
 	
 	public static LocalDateTime getBDT(int n)
 	{
-		return LocalDateTime.of(2000, 1, 1, 0, n);
-
+		LocalDate mLDT = StatisticalTools.getLastMonday(jetzt);
+		
+		return LocalDateTime.of(mLDT, LocalTime.of(0, n)).minusDays(14);
 	}
 
-	public static String sequenzManyProjects(LocalDateTime thatOneBDTOff)
+	public static String sequenzManyProjects()
 	{
+
 		
-		String data = sequenzOfABunchOfNewProjects(4)
-				+ sequenzMODProject(wakeProjectName)
-				+ sequenzWakeMODProject(wakeProjectName)
+		String data = sequenzOfFourNewProjects()
 				+ sequenzAddNote(getNewProjectName(2))
-				+ sequenzNewProjectNoDLDT(killPrjctNameNoDLDT)
-				+ sequenzKillStep(killPrjctNameNoDLDT)
-				+ sequenzProjectSucceeds(killPrjctNameNoDLDT)
 				+ sequenzKillStep(getNewProjectName(3))
 				+ sequenzProjectFails(getNewProjectName(3))
-				/*
-				 * + sequenzNewProject(killStepPrjctName) + sequenzKillStep(killStepPrjctName)
-				 */
 				+ sequenzKillStep(getNewProjectName(4))
 				+ sequenzNXTStep(getNewProjectName(4))
-				+ sequenzNewProjectNoDLDT(newPrjctNoDLDT)
-				+ sequenzMODProject(modPrjctName)
+				+ sequenzNewProjectNoDLDTCustomBDT(killPrjctNameNoDLDT, getBDT(5))
+				+ sequenzKillStep(killPrjctNameNoDLDT)
+				+ sequenzProjectSucceeds(killPrjctNameNoDLDT)
+				+ sequenzNewProjectNoDLDTCustomBDT(newPrjctNoDLDT, getBDT(6))
+				+ sequenzMODProjectCustomBDT(modPrjctName, getBDT(7))
+				+ sequenzMODProjectCustomBDT(wakeProjectName, getBDT(8))
+				+ sequenzWakeMODProject(wakeProjectName)
 				+ SomeCommands.exit + '\n';
 
 		return data;

@@ -96,35 +96,36 @@ public class TestingStats
         
         int weeksSize = wochen.size();
         int lastWeekIndex = weeksSize-1;
-     
+        int firstWeekIndex = 0;
         
         JSONObject pJSON = st.pickByName(wakeProjectName);
-		assert(st.pickAndCheckByName(wakeProjectName, lastWeekIndex, pJSON, BDTKey));
+		assert(st.pickAndCheckByName(wakeProjectName, firstWeekIndex, pJSON, BDTKey));
 		
 		pJSON = st.pickByName(modPrjctName);
-		assert(st.pickAndCheckByName(modPrjctName, lastWeekIndex, pJSON, BDTKey));
+		assert(st.pickAndCheckByName(modPrjctName, firstWeekIndex, pJSON, BDTKey));
 		
 		String addNotePrjctName = SequenzesForISS.getNewProjectName(2);
 		pJSON = st.pickByName(addNotePrjctName);
-		assert(st.pickAndCheckByName(addNotePrjctName, lastWeekIndex, pJSON, BDTKey));
+		assert(st.pickAndCheckByName(addNotePrjctName, firstWeekIndex, pJSON, BDTKey));
 
 		pJSON = st.pickByName(killPrjctNameNoDLDT);
-		assert(st.pickAndCheckByName(killPrjctNameNoDLDT, lastWeekIndex, pJSON, BDTKey));
+		assert(st.pickAndCheckByName(killPrjctNameNoDLDT, firstWeekIndex, pJSON, BDTKey));
 		
 		String killPrjctName = SequenzesForISS.getNewProjectName(3);
 		pJSON = st.pickByName(killPrjctName);
-		assert(st.pickAndCheckByName(killPrjctName, lastWeekIndex, pJSON, BDTKey));
+		assert(st.pickAndCheckByName(killPrjctName, firstWeekIndex, pJSON, BDTKey));
 		assert(projectIsTerminated.test(pJSON));
 		
+		String killStepPrjctName = SequenzesForISS.getNewProjectName(3);
 		pJSON = st.pickByName(killStepPrjctName);
-		assert(st.pickAndCheckByName(killStepPrjctName, lastWeekIndex, pJSON, BDTKey));
+		assert(st.pickAndCheckByName(killStepPrjctName, firstWeekIndex, pJSON, BDTKey));
 
 		String appendStpPrjctName = SequenzesForISS.getNewProjectName(4);
 		pJSON = st.pickByName(appendStpPrjctName);
-		assert(st.pickAndCheckByName(appendStpPrjctName, lastWeekIndex, pJSON, BDTKey));
+		assert(st.pickAndCheckByName(appendStpPrjctName, firstWeekIndex, pJSON, BDTKey));
 	
 		pJSON = st.pickByName(newPrjctNoDLDT);
-		assert(st.pickAndCheckByName(newPrjctNoDLDT, lastWeekIndex, pJSON, BDTKey));
+		assert(st.pickAndCheckByName(newPrjctNoDLDT, firstWeekIndex, pJSON, BDTKey));
 
 		for(int n=0;n<weeksSize;n++)
 		{
@@ -167,31 +168,35 @@ public class TestingStats
 			names.addAll(st.getWeekDatas().get(n).projectsFailedThisWeek());
 			System.out.println(names);
 
-			if(n==lastWeekIndex)
-			{
-				assert(projectsBorn==8);
-				assert(projectsWritten==9);
-				assert(projectsActive==7);
-				assert(projectsSucceeded==1);
-				assert(projectsFailed==1); }
+			  if(n==0)
+			  {
+				  assert(projectsBorn==8);
+				  assert(projectsWritten==4);
+				  assert(projectsActive==6);
+				  assert(projectsSucceeded==0); 
+				  assert(projectsFailed==0);
+			  }
+
 			  
 			  if(n==1)
 			  {
 				  assert(projectsBorn==0);
 				  assert(projectsWritten==0);
-				  assert(projectsActive==1);
+				  assert(projectsActive==6);
 				  assert(projectsSucceeded==0);
 				  assert(projectsFailed==0);		  
 			  }
 			  
-			  if(n==0)
+			  if(n==lastWeekIndex)
 			  {
-				  assert(projectsBorn==1);
-				  assert(projectsWritten==0);
-				  assert(projectsActive==1);
-				  assert(projectsSucceeded==0); 
-				  assert(projectsFailed==0);
+					assert(projectsBorn==0);
+					assert(projectsWritten==4);
+					assert(projectsActive==6);
+					assert(projectsSucceeded==1);
+					assert(projectsFailed==1);	
 			  }
+
+			  
 		}
 	}
 

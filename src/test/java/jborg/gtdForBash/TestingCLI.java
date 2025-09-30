@@ -73,7 +73,7 @@ public class TestingCLI
 
 		String dldtStr = newProject.getString(ProjectJSONKeyz.DLDTKey);
 		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-		assert(jetzt.isAfter(dldt));
+		assert(jetzt.isBefore(dldt));
 		
 		JSONArray stpArr = newProject.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 		JSONObject step = stpArr.getJSONObject(0);
@@ -88,7 +88,7 @@ public class TestingCLI
 		
 		dldtStr = step.getString(StepJSONKeyz.DLDTKey);
 		dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-		assert(jetzt.isAfter(dldt));//dldt is not older than 5 seconds.
+		assert(jetzt.isBefore(dldt));
 
 		String goal = newProject.getString(ProjectJSONKeyz.goalKey);
 		assert(goal.equals(newPrjctGoal));
@@ -219,12 +219,10 @@ public class TestingCLI
 
 		String bdtStr = newProject.getString(ProjectJSONKeyz.BDTKey);
 		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
-		assert(jetzt.minusSeconds(4).isBefore(bdt));//bdt not older than 4 seconds!
 		assert(newProject.has(ProjectJSONKeyz.NDDTKey));
 
 		String nddtStr = newProject.getString(ProjectJSONKeyz.NDDTKey);
 		LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
-		assert(jetzt.minusSeconds(4).isBefore(nddt));//nddt ist nicht älter als 4 Sekunden.
 		assert(newProject.has(ProjectJSONKeyz.DLDTKey));
 		assert(prjctDeadlineNone.equals(newProject.getString(ProjectJSONKeyz.DLDTKey)));
 		assert(newProject.has(ProjectJSONKeyz.stepArrayKey)); 
@@ -233,11 +231,9 @@ public class TestingCLI
 		JSONObject step = stpArr.getJSONObject(0);
 		bdtStr = step.getString(StepJSONKeyz.BDTKey);
 		bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
-		assert(jetzt.minusSeconds(5).isBefore(bdt));//bdt not older than 5 seconds!
 
 		nddtStr = step.getString(StepJSONKeyz.NDDTKey);
 		nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
-		assert(jetzt.minusSeconds(5).isBefore(nddt));//nddt ist nicht älter als 5 Sekunden.
 		assert(step.has(StepJSONKeyz.DLDTKey));
 		assert(stepDeadlineNone.equals(step.getString(StepJSONKeyz.DLDTKey)));
 		

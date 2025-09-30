@@ -52,12 +52,9 @@ public class StatisticalTools
 		
 	    LocalDateTime old = oldestLDT(ProjectJSONKeyz.BDTKey).getValue();
 	    	
-	   	DayOfWeek dow = old.getDayOfWeek();
-	   	int dowNr = dow.getValue();
-	    	
-	   	LocalDate mondayOne = old.minusDays(dowNr-1).toLocalDate();
-	   	LocalDate jetzt = LocalDate.now();
-    	LocalDate currentMonday = mondayOne;
+	    LocalDate jetzt = LocalDate.now();
+	    
+	   	LocalDate currentMonday = getLastMonday(old);
 	    	
     	while(true)
 	   	{
@@ -71,6 +68,14 @@ public class StatisticalTools
     	return weekSpans;
 	}
 	
+	public static LocalDate getLastMonday(LocalDateTime ldt)
+	{
+
+		DayOfWeek dow = ldt.getDayOfWeek();
+		int dowNr = dow.getValue();
+	   	return ldt.minusDays(dowNr-1).toLocalDate();
+	}
+
 	public List<WeekData> computeWeekDataList() throws IOException, URISyntaxException, WeekDataException
 	{
 
