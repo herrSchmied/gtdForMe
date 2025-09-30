@@ -41,6 +41,8 @@ public class WeekData
 	
 	public static final String weekBeginExceptionMsg = "Week must begin Monday.";
 
+	public static final Function<JSONObject, String> mapJSONToName = obj->obj.getString(ProjectJSONKeyz.nameKey);
+
 	public WeekData(LocalDate begin, int weekNr) throws WeekDataException
 	{
 		
@@ -508,11 +510,8 @@ public class WeekData
 	public Set<String> allTheNames()
 	{
 		
-		
-		Function<JSONObject, String> f = obj->obj.getString(ProjectJSONKeyz.nameKey);
-		
 		Set<String> names = new HashSet<>();
-	    names.addAll(allTheJSON().stream().map(f)
+	    names.addAll(allTheJSON().stream().map(mapJSONToName)
 	    		.collect(Collectors.toSet()));
 
 		return names;
