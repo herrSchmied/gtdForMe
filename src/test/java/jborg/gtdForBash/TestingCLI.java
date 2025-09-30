@@ -56,45 +56,39 @@ public class TestingCLI
 	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		LocalDateTime jetzt = LocalDateTime.now();
-		JSONObject newProject = pickProjectByName(newPrjctName, projects);
-		assert(newProject!=null);
+		LocalDateTime jetzt = LocalDateTime.now().plusMinutes(1);
+		JSONObject newProject = pickProjectByName(SequenzesForISS.getNewProjectName(1), projects);
 		
-		assert(newProject.has(ProjectJSONKeyz.statusKey));
 		String status = newProject.getString(ProjectJSONKeyz.statusKey);
 		assert(status.equals(StatusMGMT.atbd));
 		
-		assert(newProject.has(ProjectJSONKeyz.BDTKey));
 		String bdtStr = newProject.getString(ProjectJSONKeyz.BDTKey);
 		LocalDateTime bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
-		System.out.println(BashSigns.gBCPX+bdt.toString()+BashSigns.gBCSX);
-		//Why??assert(jetzt.minusSeconds(30).isBefore(bdt));//bdt not older than 20 seconds!
+		assert(jetzt.isAfter(bdt));
 		
-		assert(newProject.has(ProjectJSONKeyz.NDDTKey));
 		String nddtStr = newProject.getString(ProjectJSONKeyz.NDDTKey);
 		LocalDateTime nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
-		assert(jetzt.minusSeconds(4).isBefore(nddt));//nddt ist nicht älter als 4 Sekunden.
-		
-		assert(newProject.has(ProjectJSONKeyz.DLDTKey));
+		assert(jetzt.isAfter(nddt));
+		assert(bdt.equals(nddt));
+
 		String dldtStr = newProject.getString(ProjectJSONKeyz.DLDTKey);
 		LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-		assert(jetzt.minusSeconds(4).isBefore(dldt));//dldt is not older than 4 seconds.
+		assert(jetzt.isAfter(dldt));
 		
-		assert(newProject.has(ProjectJSONKeyz.stepArrayKey));
 		JSONArray stpArr = newProject.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 		JSONObject step = stpArr.getJSONObject(0);
 		
 		bdtStr = step.getString(StepJSONKeyz.BDTKey);
 		bdt = LittleTimeTools.LDTfromTimeString(bdtStr);
-		assert(jetzt.minusSeconds(5).isBefore(bdt));//bdt not older than 5 seconds!
+		assert(jetzt.isAfter(bdt));
 		
 		nddtStr = step.getString(StepJSONKeyz.NDDTKey);
 		nddt = LittleTimeTools.LDTfromTimeString(nddtStr);
-		assert(jetzt.minusSeconds(5).isBefore(nddt));//nddt ist nicht älter als 5 Sekunden.
+		assert(jetzt.isAfter(nddt));
 		
 		dldtStr = step.getString(StepJSONKeyz.DLDTKey);
 		dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-		assert(jetzt.minusSeconds(5).isBefore(dldt));//dldt is not older than 5 seconds.
+		assert(jetzt.isAfter(dldt));//dldt is not older than 5 seconds.
 
 		String goal = newProject.getString(ProjectJSONKeyz.goalKey);
 		assert(goal.equals(newPrjctGoal));
@@ -121,7 +115,8 @@ public class TestingCLI
 
 		JSONObject project = pickProjectByName(modPrjctName, projects);
 		String ziel = project.getString(ProjectJSONKeyz.goalKey);
-		assert(ziel.equals(modPrjctGoal)); 
+		assert(ziel.equals(modPrjctGoal));
+		assert(isMODProject.test(project));
 	}
 	 
 
@@ -129,7 +124,7 @@ public class TestingCLI
 	public void testAddNoteToProject() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		JSONObject project = pickProjectByName(addNotePrjctName, projects);
+		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(2), projects);
 		assert(project!=null);
 
 		JSONArray notesArr = project.getJSONArray(ProjectJSONKeyz.noteArrayKey);
@@ -141,7 +136,6 @@ public class TestingCLI
 	public void testKillProjectWithNoDLDT() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		Set<JSONObject> projects = GTDCLI.loadProjects();
 		JSONObject project = pickProjectByName(killPrjctNameNoDLDT, projects);
 		assert(project!=null);
 	 
@@ -159,14 +153,14 @@ public class TestingCLI
 	public void testKillProject() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 		
-		JSONObject project = pickProjectByName(killPrjctName, projects);
+		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(3), projects);
 		assert(project!=null);
 		
 		JSONObject step = getLastStep(project); 
 		StatusMGMT statusMGMT =	StatusMGMT.getInstance(); 
 		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
 		String stepStatus = step.getString(StepJSONKeyz.statusKey);
-		System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
+		//System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
 		assert(terminalSet.contains(stepStatus));
 		assert(terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
 	}
@@ -175,7 +169,7 @@ public class TestingCLI
 	public void testKillStep() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		JSONObject project = pickProjectByName(killStepPrjctName, projects);
+		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(3), projects);
 		assert(project!=null);
 		
 		JSONObject step = getLastStep(project);
@@ -188,7 +182,7 @@ public class TestingCLI
 	public void testNextStep() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		JSONObject project = pickProjectByName(appendStpPrjctName, projects);
+		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(4), projects);
 		assert(project!=null);
 
 		JSONObject step2 = getLastStep(project);

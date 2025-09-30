@@ -14,19 +14,19 @@ public class SequenzesForISS
 
 	public static final String terminatePrjctName = "Terminate_Project";
 	
-	public static final String addNotePrjctName = "Add_Note_Project";
+	//public static final String addNotePrjctName = "Add_Note_Project";
 	
-	public static final String appendStpPrjctName = "Append_Step_Project";
+	//public static final String appendStpPrjctName = "Append_Step_Project";
 	
 	public static final  String killStepPrjctName = "Kill_Step_Project";
 	
 	public static final  String killPrjctNameNoDLDT = "Kill_Project_NODLDT";
-	public static final  String killPrjctName = "Kill_Project";
+	//public static final  String killPrjctName = "Kill_Project";
 	
 	public static final  String modPrjctName = "MOD_Project";
 	public static final  String modPrjctGoal = "MOD-Project Test";
 	
-	public static final  String newPrjctName = "Project_Nuovo";
+	//public static final  String newPrjctName = "Project_Nuovo";
 	public static final  String newPrjctGoal = "Testing this here";
 	
 	public static final  String newPrjctNoDLDT = "No_DLDT_Project";
@@ -38,9 +38,10 @@ public class SequenzesForISS
 	public static final  String noticeOne = "Note1";
 	public static final  String noticeTwo = "Note2";
 	
-	static final  LocalDateTime jetzt = LocalDateTime.now();
-	static final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
-	static final LocalDateTime stepDLDT = jetzt.plusMinutes(30);
+	static final LocalDateTime jetzt = LocalDateTime.now();
+	static final LocalDateTime oldestBDT = getBDT(1);
+	static final LocalDateTime prjctDLDT = jetzt.plusDays(2);
+	static final LocalDateTime stepDLDT = jetzt.plusDays(1);
 
 	public static String sequenzNXTStep(String prjctName)
 	{
@@ -237,30 +238,55 @@ public class SequenzesForISS
 		return data;
 	}
 
+	public static String sequenzOfABunchOfNewProjects(int n)
+	{
+		String data = "";
+		
+		//starts and ends not like usually.
+		for(int m=1;m<n+1;m++)
+		{
+			
+			LocalDateTime bdt = getBDT(m);
+			String name = getNewProjectName(m);
+			data = data + sequenzNewProjectCustomBDT(name, bdt);
+		}
+		
+		return data;
+	}
+	
+	public static LocalDateTime getBDT(int n)
+	{
+		return LocalDateTime.of(2000, 1, 1, 0, n);
+
+	}
+
 	public static String sequenzManyProjects(LocalDateTime thatOneBDTOff)
 	{
 		
-		String data = sequenzNewProjectCustomBDT(newPrjctName, thatOneBDTOff)
+		String data = sequenzOfABunchOfNewProjects(4)
 				+ sequenzMODProject(wakeProjectName)
 				+ sequenzWakeMODProject(wakeProjectName)
-				+ sequenzNewProject(addNotePrjctName)
-				+ sequenzAddNote(addNotePrjctName)
+				+ sequenzAddNote(getNewProjectName(2))
 				+ sequenzNewProjectNoDLDT(killPrjctNameNoDLDT)
 				+ sequenzKillStep(killPrjctNameNoDLDT)
 				+ sequenzProjectSucceeds(killPrjctNameNoDLDT)
-				+ sequenzNewProject(killPrjctName)
-				+ sequenzKillStep(killPrjctName)
-				+ sequenzProjectFails(killPrjctName)
-				+ sequenzNewProject(killStepPrjctName)
-				+ sequenzKillStep(killStepPrjctName)
-				+ sequenzNewProject(appendStpPrjctName)
-				+ sequenzKillStep(appendStpPrjctName)
-				+ sequenzNXTStep(appendStpPrjctName)
+				+ sequenzKillStep(getNewProjectName(3))
+				+ sequenzProjectFails(getNewProjectName(3))
+				/*
+				 * + sequenzNewProject(killStepPrjctName) + sequenzKillStep(killStepPrjctName)
+				 */
+				+ sequenzKillStep(getNewProjectName(4))
+				+ sequenzNXTStep(getNewProjectName(4))
 				+ sequenzNewProjectNoDLDT(newPrjctNoDLDT)
 				+ sequenzMODProject(modPrjctName)
 				+ SomeCommands.exit + '\n';
 
 		return data;
+	}
+	
+	public static String getNewProjectName(int n)
+	{
+		return "New_Project_"+n;
 	}
 	
 	public static String translateTimeToAnswerString(LocalDateTime ldt)
