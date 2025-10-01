@@ -62,48 +62,48 @@ public class WeekData
 		return end.isBefore(LocalDate.now());
 	}
 
-	/**
-	 * Can only be uses once.
-	 * @param projectNames
-	 * @throws WeekDataException
-	 */
-	public void setProjectsActive(Set<JSONObject> projectNames) throws WeekDataException
+	public void addProjectActive(JSONObject pJSON)
 	{
-		projectsActive.addAll(projectNames);
-	}
-
-	/**
-	 * Can only be uses once.
-	 * @param projectNames
-	 * @throws WeekDataException
-	 */
-	public void setProjectsWrittenDown(Set<JSONObject> projectNames) throws WeekDataException
-	{
-		newProjectsWrittenDown.addAll(projectNames);
-	}
-
-	/**
-	 * Can only be uses once.
-	 * @param projectNames
-	 * @throws WeekDataException
-	 */
-	public void setProjectsBorn(Set<JSONObject> projectNames) throws WeekDataException
-	{
-		projectsBorn.addAll(projectNames);
+		projectsActive.add(pJSON);
 	}
 	
-	/**
-	 * Can only be used once.
-	 * @param projectNames
-	 * @throws WeekDataException
-	 */
-	public void setProjectsTerminated(Set<JSONObject> projectNames) throws WeekDataException
+	public void setProjectsActive(Set<JSONObject> pJSONs) throws WeekDataException
+	{
+		projectsActive.addAll(pJSONs);
+	}
+
+	public void addProjectWrittenDown(JSONObject pJSON)
+	{
+		newProjectsWrittenDown.add(pJSON);
+	}
+
+	public void setProjectsWrittenDown(Set<JSONObject> pJSONs) throws WeekDataException
+	{
+		newProjectsWrittenDown.addAll(pJSONs);
+	}
+
+	public void addProjectBorn(JSONObject pJSON)
+	{
+		projectsBorn.add(pJSON);
+	}
+	
+	public void setProjectsBorn(Set<JSONObject> pJSONs) throws WeekDataException
+	{
+		projectsBorn.addAll(pJSONs);
+	}
+	
+	public void addProjectTerminated(JSONObject pJSON)
+	{
+		projectsTerminated.add(pJSON);
+	}
+
+	public void setProjectsTerminated(Set<JSONObject> projectNames)
 	{
 		projectsTerminated.addAll(projectNames);
 	}
 
 	/**
-	 * Can only be used once.
+	 *
 	 * @param n
 	 * @throws WeekDataException
 	 */
