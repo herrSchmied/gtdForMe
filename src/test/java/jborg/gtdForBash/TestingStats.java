@@ -172,7 +172,7 @@ public class TestingStats
 			  {
 				  assert(projectsBorn==8);
 				  assert(projectsWritten==4);
-				  assert(projectsActive==8);
+				  assert(projectsActive==7);
 				  assert(projectsSucceeded==0); 
 				  assert(projectsFailed==0);
 			  }
@@ -182,7 +182,7 @@ public class TestingStats
 			  {
 				  assert(projectsBorn==0);
 				  assert(projectsWritten==0);
-				  assert(projectsActive==8);
+				  assert(projectsActive==7);
 				  assert(projectsSucceeded==0);
 				  assert(projectsFailed==0);		  
 			  }
@@ -191,7 +191,7 @@ public class TestingStats
 			  {
 					assert(projectsBorn==0);
 					assert(projectsWritten==4);
-					assert(projectsActive==8);
+					assert(projectsActive==7);
 					assert(projectsSucceeded==1);
 					assert(projectsFailed==1);	
 			  }

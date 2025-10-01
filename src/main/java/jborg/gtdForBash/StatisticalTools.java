@@ -89,79 +89,65 @@ public class StatisticalTools
 			LocalDate wStart = span.getKey();
 			LocalDate wEnd = span.getValue();
 			WeekData wd = new WeekData(wStart, weekNr);
-			setProjectsBornInThisWeek(wd);
-			setProjectsWrittenInThisWeek(wd);
-			setProjectsActiveInThisWeek(wd);
-			setProjectsTerminatedInThisWeek(wd);
+
+			for(JSONObject pJSON: prjctSet)
+			{
+				if(isBornGivenWeek(pJSON, wd))wd.addProjectBorn(pJSON);
+				if(isActiveGivenWeek(pJSON, wd))wd.addProjectActive(pJSON);
+				if(isWrittenGivenWeek(pJSON, wd))wd.addProjectWrittenDown(pJSON);
+				if(isTerminatedGivenWeek(pJSON, wd))wd.addProjectTerminated(pJSON);
+			}
 			outputList.add(wd);
 		}
 
 		return outputList;
 	}
 	
-	private void setProjectsBornInThisWeek(WeekData wd) throws IOException, URISyntaxException
+	public static boolean isBornGivenWeek(JSONObject pJSON, WeekData wd) throws IOException, URISyntaxException
 	{
-
-		for(JSONObject pJSON: prjctSet)
-		{
-			LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
-			if(wd.isInThisWeek(bdt))wd.addProjectBorn(pJSON);
-		}
+		LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
+		return wd.isInThisWeek(bdt);
 	}
 
-	private void setProjectsWrittenInThisWeek(WeekData wd) throws IOException, URISyntaxException
+	public static boolean isWrittenGivenWeek(JSONObject pJSON, WeekData wd) throws IOException, URISyntaxException
 	{
-
-		for(JSONObject pJSON: prjctSet)
-		{
-			LocalDateTime nddt = extractLDT(pJSON, ProjectJSONKeyz.NDDTKey);
-			if(wd.isInThisWeek(nddt))wd.addProjectWrittenDown(pJSON);
-		}
+		LocalDateTime nddt = extractLDT(pJSON, ProjectJSONKeyz.NDDTKey);
+		return wd.isInThisWeek(nddt);
 	}
 
-	private void setProjectsActiveInThisWeek(WeekData wd) throws IOException, URISyntaxException
+	public static boolean isActiveGivenWeek(JSONObject pJSON, WeekData wd) throws IOException, URISyntaxException
 	{
 
-		for(JSONObject pJSON: prjctSet)
-		{
-			if(isMODProject.test(pJSON))continue;
-			LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
-			if(wd.isInThisWeek(bdt))
-			{
-				wd.addProjectActive(pJSON);
-				return;
-			}
+		if(isMODProject.test(pJSON))return false;
+		
+		LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
+		
+		if(wd.isAfterThisWeek(bdt))return false;
+		
+		if(wd.isInThisWeek(bdt))return true;
 	
-			if(wd.isBeforeThisWeek(bdt)&&!projectIsTerminated.test(pJSON))
-			{
-				wd.addProjectActive(pJSON);
-				return;
-			}
-			
-			if(wd.isBeforeThisWeek(bdt)&&projectIsTerminated.test(pJSON))
-			{
-				
-				LocalDateTime tdt = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
-				if(wd.isInThisWeek(tdt)||wd.isAfterThisWeek(tdt))
-				{
-					wd.addProjectActive(pJSON);
-				}
+		if(wd.isBeforeThisWeek(bdt)&&!(projectIsTerminated.test(pJSON)))
+			return true;
 
-			}
+		if(wd.isBeforeThisWeek(bdt)&&projectIsTerminated.test(pJSON))
+		{
+			LocalDateTime tdt = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
+			if(wd.isInThisWeek(tdt)||wd.isAfterThisWeek(tdt))return true;
 		}
+		
+		return false;
 	}
 
-	private void setProjectsTerminatedInThisWeek(WeekData wd) throws IOException, URISyntaxException
+	public static boolean isTerminatedGivenWeek(JSONObject pJSON, WeekData wd) throws IOException, URISyntaxException
 	{
-		for(JSONObject pJSON: prjctSet)
+		if(isMODProject.test(pJSON))return false;
+		if(projectIsTerminated.test(pJSON))
 		{
-			if(isMODProject.test(pJSON))continue;
-			if(projectIsTerminated.test(pJSON))
-			{
-				LocalDateTime tdt = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
-				if(wd.isInThisWeek(tdt))wd.addProjectTerminated(pJSON);
-			}
+			LocalDateTime tdt = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
+			return wd.isInThisWeek(tdt);
 		}
+		
+		return false;
 	}
 
     public Pair<String, LocalDateTime> oldestLDT(String jsonKey) throws IOException, URISyntaxException
