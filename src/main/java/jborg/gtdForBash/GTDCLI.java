@@ -187,7 +187,7 @@ public class GTDCLI implements Beholder<String>
     	
     	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
-    	
+    	checkAllForDLDTAbuse();
     	try
     	{
         	int numberOfCmds = commandMap.size();
