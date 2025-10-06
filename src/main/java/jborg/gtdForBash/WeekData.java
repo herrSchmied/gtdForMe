@@ -436,7 +436,8 @@ public class WeekData
 
 			if(pJSON.has(ProjectJSONKeyz.DLDTKey))
 			{
-
+				String dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
+				if(dldtStr.equals(deadLineUnknownStr)||dldtStr.equals(prjctDeadlineNone))continue;
 				String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 				LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
 				output.put(pName, dldt);					
@@ -466,7 +467,7 @@ public class WeekData
 	public String mostPressingProjectDeadline() throws IOException, URISyntaxException, NaturalNumberException
 	{
 
-		int secs = 0;
+		int secs = (int) Math.pow(10, 12);
 		LocalDateTime jetzt = LocalDateTime.now();
 		String currentName = "";
 	
@@ -477,6 +478,7 @@ public class WeekData
 
 			JSONObject pJSON = pickProjectByName(pName);
 			LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
+			if(dldt.isBefore(jetzt))continue;
 			ExactPeriode ep = new ExactPeriode(jetzt, dldt);
 			if(Math.abs(secs)>Math.abs(ep.getAbsoluteSeconds()))
 			{

@@ -187,7 +187,10 @@ public class GTDCLI implements Beholder<String>
     	
     	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
+    	
     	checkAllForDLDTAbuse();
+    	saveAll();
+    	
     	try
     	{
         	int numberOfCmds = commandMap.size();
@@ -244,7 +247,6 @@ public class GTDCLI implements Beholder<String>
     	return projectDataFolderRelativePath;
     }
 
-    
     public StatusMGMT loadStates()
     {
     	
@@ -298,6 +300,7 @@ public class GTDCLI implements Beholder<String>
     	
     	return loadProjects(path);
     }
+    
     
     public static Set<JSONObject> loadProjects(String path) throws IOException, URISyntaxException
     {

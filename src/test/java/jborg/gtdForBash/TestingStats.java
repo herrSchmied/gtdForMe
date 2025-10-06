@@ -81,7 +81,7 @@ public class TestingStats
 	}
 
 	@Test
-	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException
+	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException
 	{
 
         StatisticalTools st = new StatisticalTools(prjctSet);
@@ -135,39 +135,41 @@ public class TestingStats
 			int projectsActive = st.getWeekDatas().get(n).getActiveProjects().size();
 			int projectsSucceeded = st.getWeekDatas().get(n).projectsSucceededThisWeek().size();
 			int projectsFailed = st.getWeekDatas().get(n).projectsFailedThisWeek().size();
+			WeekData wd = st.getWeekDatas().get(n);
 			
 			System.out.println("\nWeekNr.: " + n);
 			System.out.println("Projects born: " + projectsBorn);
 			Set<String> names = new HashSet<>();
-		    names.addAll(st.getWeekDatas().get(n).getProjectsBorn().stream()
-		    		.map(mapJSONToName)
-		    		.collect(Collectors.toSet()));
+		    names.addAll(wd.getProjectsBorn().stream()
+		    				.map(mapJSONToName)
+		    				.collect(Collectors.toSet()));
 			System.out.println(names);
 
 			System.out.println("Projects written: " + projectsWritten);
 			names.clear();
-			names.addAll(st.getWeekDatas().get(n).getProjectsWrittenDown().stream()
+			names.addAll(wd.getProjectsWrittenDown().stream()
 					.map(mapJSONToName)
 					.collect(Collectors.toSet()));
 			System.out.println(names);
 			
 			System.out.println("Projects active: " + projectsActive);
 			names.clear();
-			names.addAll(st.getWeekDatas().get(n).getActiveProjects().stream()
+			names.addAll(wd.getActiveProjects().stream()
 					.map(mapJSONToName)
 					.collect(Collectors.toSet()));
 			System.out.println(names);
 
 			System.out.println("Projects succeeded: " + projectsSucceeded);
 			names.clear();
-			names.addAll(st.getWeekDatas().get(n).projectsSucceededThisWeek());
+			names.addAll(wd.projectsSucceededThisWeek());
 			System.out.println(names);
 
 			System.out.println("Projects failed: " + projectsFailed);
 			names.clear();
-			names.addAll(st.getWeekDatas().get(n).projectsFailedThisWeek());
+			names.addAll(wd.projectsFailedThisWeek());
 			System.out.println(names);
-
+			String pressing = wd.mostPressingProjectDeadline();
+			System.out.println("Most Pressing Deadline: " + pressing);
 			  if(n==0)
 			  {
 				  assert(projectsBorn==8);
