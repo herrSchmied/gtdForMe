@@ -7,8 +7,10 @@ import java.net.URISyntaxException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -464,12 +466,12 @@ public class WeekData
 	}
 	
 	//TODO: Maybe a list in case it is more than one?
-	public String mostPressingProjectDeadline() throws IOException, URISyntaxException, NaturalNumberException
+	public Set<String> mostPressingProjectDeadline() throws IOException, URISyntaxException, NaturalNumberException
 	{
 
 		int secs = (int) Math.pow(10, 12);
 		LocalDateTime jetzt = LocalDateTime.now();
-		String currentName = "";
+		Set<String> currentName = new HashSet<>();
 	
 		Map<String, LocalDateTime> map = allActiveProjectsWithDLs();
 		
@@ -483,7 +485,12 @@ public class WeekData
 			if(Math.abs(secs)>Math.abs(ep.getAbsoluteSeconds()))
 			{
 				secs = ep.getAbsoluteSeconds();
-				currentName = pName;
+				currentName.clear();
+				currentName.add(pName);
+			}
+			if(Math.abs(secs)==Math.abs(ep.getAbsoluteSeconds()))
+			{
+				currentName.add(pName);
 			}
 		}
 

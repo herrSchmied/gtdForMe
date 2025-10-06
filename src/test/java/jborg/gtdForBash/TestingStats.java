@@ -168,7 +168,7 @@ public class TestingStats
 			names.clear();
 			names.addAll(wd.projectsFailedThisWeek());
 			System.out.println(names);
-			String pressing = wd.mostPressingProjectDeadline();
+			Set<String> pressing = wd.mostPressingProjectDeadline();
 			System.out.println("Most Pressing Deadline: " + pressing);
 			  if(n==0)
 			  {

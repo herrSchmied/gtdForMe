@@ -300,7 +300,7 @@ public class StatisticalTools
 		int prjctDeadlineViolations = wd.projectsViolatedDLThisWeek().size();
 		int openPrjctDeadlines = wd.allActiveProjectsWithDLs().size();
 		int prjctDeadlinesHere = wd.projectDLsThisWeek().size();
-		String prjctMostPressingDeadline = wd.mostPressingProjectDeadline();
+		Set<String> prjctMostPressingDeadline = wd.mostPressingProjectDeadline();
 
 		int stepBDTs = 0;
 		int stepNDDTs = 0;
