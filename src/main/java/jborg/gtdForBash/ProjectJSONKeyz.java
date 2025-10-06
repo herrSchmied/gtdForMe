@@ -14,5 +14,6 @@ public class ProjectJSONKeyz
 	public static final String DLDTKey = "Project_Deadline";
 	public static final String TDTKey = "ProjecTerminationDateTime";
 	public static final String TDTNoteKey = "ProjectTDTNote";
+	public static final String wasMODProject = "Was_MOD_Project";
 
 }

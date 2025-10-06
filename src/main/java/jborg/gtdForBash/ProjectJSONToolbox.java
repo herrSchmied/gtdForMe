@@ -241,6 +241,18 @@ public class ProjectJSONToolbox
 		
 		return true;
 	};
+	
+	public static final Predicate<JSONObject> wasMODProject = (jo)->
+	{
+
+		if(jo.has(ProjectJSONKeyz.wasMODProject))
+		{
+			boolean q = jo.getBoolean(ProjectJSONKeyz.wasMODProject);
+			return q;
+		}
+
+		return false;
+	};
 
 	/**
 	 * Simple Check does what the Name suggests.

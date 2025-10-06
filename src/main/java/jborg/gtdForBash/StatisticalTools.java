@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +86,6 @@ public class StatisticalTools
 
 			Pair<LocalDate, LocalDate> span = weekSpans.get(weekNr);
 			LocalDate wStart = span.getKey();
-			LocalDate wEnd = span.getValue();
 			WeekData wd = new WeekData(wStart, weekNr);
 
 			for(JSONObject pJSON: prjctSet)
@@ -119,22 +117,23 @@ public class StatisticalTools
 	{
 
 		if(isMODProject.test(pJSON))return false;
+		LocalDateTime ldt;
+		if(wasMODProject.test(pJSON))ldt = extractLDT(pJSON, ProjectJSONKeyz.NDDTKey);
+		else ldt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
 		
-		LocalDateTime bdt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
+		if(wd.isAfterThisWeek(ldt))return false;
 		
-		if(wd.isAfterThisWeek(bdt))return false;
-		
-		if(wd.isInThisWeek(bdt))return true;
+		if(wd.isInThisWeek(ldt))return true;
 	
-		if(wd.isBeforeThisWeek(bdt)&&!(projectIsTerminated.test(pJSON)))
+		if(wd.isBeforeThisWeek(ldt)&&!(projectIsTerminated.test(pJSON)))
 			return true;
 
-		if(wd.isBeforeThisWeek(bdt)&&projectIsTerminated.test(pJSON))
+		if(wd.isBeforeThisWeek(ldt)&&projectIsTerminated.test(pJSON))
 		{
 			LocalDateTime tdt = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
 			if(wd.isInThisWeek(tdt)||wd.isAfterThisWeek(tdt))return true;
 		}
-		
+
 		return false;
 	}
 
