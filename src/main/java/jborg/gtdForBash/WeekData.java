@@ -439,7 +439,7 @@ public class WeekData
 			if(pJSON.has(ProjectJSONKeyz.DLDTKey))
 			{
 				String dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
-				if(dldtStr.equals(deadLineUnknownStr)||dldtStr.equals(prjctDeadlineNone))continue;
+				if(dldtStr.equals(prjctDeadlineNone))continue;
 				String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 				LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
 				output.put(pName, dldt);					
