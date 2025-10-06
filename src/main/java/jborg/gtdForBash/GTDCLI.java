@@ -280,6 +280,7 @@ public class GTDCLI implements Beholder<String>
     public void checkAllForDLDTAbuse()
     {
     	
+    	System.out.println(BashSigns.boldYBCPX + "Checking for DLDT-Abuse." + BashSigns.boldYBCSX);
     	for(JSONObject pJSON: knownProjects.values())
     	{
 

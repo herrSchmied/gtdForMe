@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import allgemein.LittleTimeTools;
+import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 import someMath.NaturalNumberException;
 import static jborg.gtdForBash.ProjectJSONToolbox.extractLDT;
@@ -34,7 +35,9 @@ public class ProjectSetForTesting
         new GTDCLI(iss);
         prjctSet = GTDCLI.loadProjects();
         
-        //just the first four.
+        //TODO:alterFirstProjectsDLDT();
+
+        //just the first five.
         //Remember: there are 8 Project-JSONObjects in that prjctSet!!!
         for(int m=1;m<5;m++)
         {
@@ -43,9 +46,21 @@ public class ProjectSetForTesting
             alterProjectNDDT(pJSON, bdt);
         }
         
+        
         return prjctSet;
 	}
 	
+	/*
+	 * public static void alterFirstProjectsDLDT() throws IOException,
+	 * URISyntaxException {
+	 * 
+	 * String pName = SequenzesForISS.getNewProjectName(1); JSONObject pJSON =
+	 * pickProjectByName(pName); System.out.println(BashSigns.boldRBCPX + pName +
+	 * BashSigns.boldRBCSX); LocalDateTime bdt = extractLDT(pJSON,
+	 * ProjectJSONKeyz.BDTKey); LocalDateTime newDLDT = bdt.plusHours(1); String
+	 * newDLDTStr = LittleTimeTools.timeString(newDLDT);
+	 * pJSON.put(ProjectJSONKeyz.DLDTKey, newDLDTStr); }
+	 */
 	public static void alterNthStepNDDT(JSONObject pJSON, LocalDateTime newNDDT, int n)
 	{
 		JSONArray stpArr = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
