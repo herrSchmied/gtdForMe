@@ -118,7 +118,7 @@ public class StatisticalTools
 
 		if(isMODProject.test(pJSON))return false;
 		LocalDateTime ldt;
-		if(wasMODProject.test(pJSON))ldt = extractLDT(pJSON, ProjectJSONKeyz.NDDTKey);
+		if(wasMODProject.test(pJSON))ldt = extractLDT(pJSON, ProjectJSONKeyz.WDTKey);
 		else ldt = extractLDT(pJSON, ProjectJSONKeyz.BDTKey);
 		
 		if(wd.isAfterThisWeek(ldt))return false;

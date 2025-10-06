@@ -526,7 +526,8 @@ public class GTDDataSpawnSession
 			
 			pJson.put(ProjectJSONKeyz.NDDTKey, nddtStr);
 			pJson.put(ProjectJSONKeyz.DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
-			pJson.put(ProjectJSONKeyz.wasMODProject, true);
+			String wdt = LittleTimeTools.timeString(LocalDateTime.now());
+			pJson.put(ProjectJSONKeyz.WDTKey, wdt);
 			spawnStep(pJson);//Here status will be overwritten.;
 		}
 		else

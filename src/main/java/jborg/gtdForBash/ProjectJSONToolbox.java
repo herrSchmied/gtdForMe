@@ -244,14 +244,7 @@ public class ProjectJSONToolbox
 	
 	public static final Predicate<JSONObject> wasMODProject = (jo)->
 	{
-
-		if(jo.has(ProjectJSONKeyz.wasMODProject))
-		{
-			boolean q = jo.getBoolean(ProjectJSONKeyz.wasMODProject);
-			return q;
-		}
-
-		return false;
+		return jo.has(ProjectJSONKeyz.WDTKey) ;
 	};
 
 	/**
