@@ -201,8 +201,8 @@ public class SomeCommands
 			{
 				st = new StatisticalTools(GTDCLI.loadProjects(GTDCLI.getPathToDataFolder()));
 			
-	    		String name = st.oldestLDT(ADTKey).getKey();
-	    		LocalDateTime oldestADT = st.oldestLDT(ADTKey).getValue();
+	    		String name = st.oldestProjectLDT(ADTKey).getKey();
+	    		LocalDateTime oldestADT = st.oldestProjectLDT(ADTKey).getValue();
 	    		
 	    		String output = name + "\nNDT: " + LittleTimeTools.timeString(oldestADT);
 	    		System.out.println(output);

@@ -49,9 +49,9 @@ public class StatisticalTools
 
 		List<Pair<LocalDate, LocalDate>> weekSpans = new ArrayList<>();
 		
-	    LocalDateTime old = oldestLDT(NDTKey).getValue();
+	    LocalDateTime old = oldestProjectLDT(NDTKey).getValue();
 	 
-	    LocalDateTime maxDLDT = youngestLDT(ProjectJSONKeyz.DLDTKey).getValue();
+	    LocalDateTime maxDLDT = youngestProjectLDT(ProjectJSONKeyz.DLDTKey).getValue();
 	    LocalDateTime jetzt = LocalDateTime.now();
 	    
 	    LocalDate maxLD;
@@ -154,57 +154,7 @@ public class StatisticalTools
 		return false;
 	}
 
-    public Pair<String, LocalDateTime> oldestLDT(String jsonKey) throws IOException, URISyntaxException
-    {
-		LocalDateTime oldestLDT = LocalDateTime.now();
-		
-		String name = "";
-		
-		for(JSONObject pJSON: prjctSet)
-		{
 
-			if((projectHasNoDLDT.test(pJSON))&&(jsonKey.equals(DLDTKey)))continue;
-			if((!projectIsTerminated.test(pJSON))&&(jsonKey.equals(TDTKey)))continue;
-			if((isMODProject.test(pJSON))&&(jsonKey.equals(ADTKey)))continue;
-			
-			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
-			if(ldt.isBefore(oldestLDT))
-			{
-				oldestLDT = ldt;
-				name = pJSON.getString(nameKey);
-			}
-		}
-		
-    	Pair<String, LocalDateTime> output = new Pair<>(name, oldestLDT);
-    	
-    	return output;
-    }
-    
-    public Pair<String, LocalDateTime> youngestLDT(String jsonKey) throws IOException, URISyntaxException
-    {
-
-		LocalDateTime youngest = oldestLDT(jsonKey).getValue();
-		
-		String name = "";
-		
-		for(JSONObject pJSON: prjctSet)
-		{
-			if((jsonKey.equals(DLDTKey)&&projectHasNoDLDT.test(pJSON)))continue;
-			if((jsonKey.equals(ADTKey)&&isMODProject.test(pJSON)))continue;
-			if((jsonKey.equals(TDTKey)&&!projectIsTerminated.test(pJSON)))continue;
-				
-			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
-			if(ldt.isAfter(youngest))
-			{
-				youngest = ldt;
-				name = pJSON.getString(ProjectJSONKeyz.nameKey);
-			}
-		}
-		
-    	Pair<String, LocalDateTime> output = new Pair<>(name, youngest);
-    	
-    	return output;
-    }
 
     public int isInWhichWeek(LocalDateTime ldt) throws IOException, URISyntaxException, StatisticalToolsException
     {

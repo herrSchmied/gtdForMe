@@ -106,11 +106,20 @@ public class ProjectJSONToolbox
 	public static JSONObject getLastStepOfProject(JSONObject pJson)
 	{
 		int indexOfLastStep = getIndexOfLastStepInPrjct(pJson);
-		if(indexOfLastStep<firstStepIndex)return null;
 		
 		JSONArray stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 	
 		return stepArray.getJSONObject(indexOfLastStep);
+	}
+
+	public static JSONObject getStepOfIndexN(int n, JSONObject pJson)
+	{
+		int indexOfLastStep = getIndexOfLastStepInPrjct(pJson);
+		if(n>indexOfLastStep)return null;
+		
+		JSONArray stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+	
+		return stepArray.getJSONObject(n);
 	}
 
 	public static boolean checkProjectForDeadlineAbuse(JSONObject pJSON)
