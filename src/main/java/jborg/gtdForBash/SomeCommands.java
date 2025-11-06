@@ -33,6 +33,7 @@ import jborg.gtdForBash.exceptions.WeekDataException;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import someMath.NaturalNumberException;
+import someMath.exceptions.ConsoleToolsException;
 
 public class SomeCommands
 {
@@ -193,35 +194,31 @@ public class SomeCommands
 			return !activePrjctName.test(s);
 		};
 
-    	MeatOfCLICmd<String> oldestPrjct = (s)->
-    	{
-    		
-    		StatisticalTools st;
-			try
-			{
-				st = new StatisticalTools(GTDCLI.loadProjects(GTDCLI.getPathToDataFolder()));
-			
-	    		String name = st.oldestProjectLDT(ADTKey).getKey();
-	    		LocalDateTime oldestADT = st.oldestProjectLDT(ADTKey).getValue();
-	    		
-	    		String output = name + "\nNDT: " + LittleTimeTools.timeString(oldestADT);
-	    		System.out.println(output);
-	    		
-	    		return name;
+		List<Boolean> ioArray;
 
-			}
-			catch (URISyntaxException | WeekDataException e)
-			{
-				e.printStackTrace();
-			}
-
-    		throw new RuntimeException("This should not happen.");
-    	};
-    	
-		List<Boolean> ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
-		
-		registerCmd(oldest, sdcSetName, ioArray, oldestPrjct);
-
+		/*
+		 * MeatOfCLICmd<String> oldestPrjct = (s)-> {
+		 * 
+		 * StatisticalTools st; try { st = new
+		 * StatisticalTools(GTDCLI.loadProjects(GTDCLI.getPathToDataFolder()));
+		 * 
+		 * String name = st.oldestProjectLDT(ADTKey).getKey(); LocalDateTime oldestADT =
+		 * st.oldestProjectLDT(ADTKey).getValue();
+		 * 
+		 * String output = name + "\nNDT: " + LittleTimeTools.timeString(oldestADT);
+		 * System.out.println(output);
+		 * 
+		 * return name;
+		 * 
+		 * } catch (URISyntaxException | WeekDataException e) { e.printStackTrace(); }
+		 * 
+		 * throw new RuntimeException("This should not happen."); };
+		 * 
+		 * ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
+		 * 
+		 * registerCmd(oldest, sdcSetName, ioArray, oldestPrjct);
+		 */
+	
     	MeatOfCLICmd<String> transSteps = (s)->
 		{
 			
@@ -391,7 +388,17 @@ public class SomeCommands
     		}
 
     		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestDeadlineStr));
-    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+    		
+    		TerminalTableDisplay ttd;
+			try
+			{
+				ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+			}
+			catch (ConsoleToolsException e)
+			{
+				throw new RuntimeException("TerminalTableDisplay did it!");
+			}
+			
     		System.out.println(ttd);
 			
     		return ttd.toString();
@@ -522,7 +529,19 @@ public class SomeCommands
     			map.put(prjctName, pJSON);
     		}
     		
-    		showProjectMapAsTable(map);
+    		try
+			{
+				showProjectMapAsTable(map);
+			}
+    		catch (JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		catch(ConsoleToolsException e)
+			{
+				throw new RuntimeException("TerminalTableDisplay did it!");
+			}
     		
     		return "";
        	};
@@ -553,7 +572,19 @@ public class SomeCommands
 				map.put(prjctName, pJSON);
 			}
 			
-			showProjectMapAsTable(map);
+			try
+			{
+				showProjectMapAsTable(map);
+			}
+			catch(JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			catch(ConsoleToolsException e)
+			{
+				throw new RuntimeException("TerminalTableDisplay did it!");
+			}
 			
 			return "";
 		};
@@ -599,7 +630,16 @@ public class SomeCommands
 			}
 			
 			
-			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 12);
+			TerminalTableDisplay ttd;
+			try
+			{
+				ttd = new TerminalTableDisplay(headers, rows,'|', 12);
+			}
+			catch(ConsoleToolsException e)
+			{
+				throw new RuntimeException("TerminalTableDisplay did it!");
+			}
+			
 			System.out.println(ttd);
 			
 			return ttd.toString();
@@ -796,7 +836,20 @@ public class SomeCommands
     			map.put(prjctName, pJSON);
     		}
     		
-    		showProjectMapAsTable(map);
+    		try
+			{
+				showProjectMapAsTable(map);
+			}
+    		catch(JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		catch(ConsoleToolsException e)
+			{
+				throw new RuntimeException("TerminalTableDisplay did it!");
+			}
+    
     		return "";
 		};
 		
@@ -1021,7 +1074,20 @@ public class SomeCommands
     				map.put(prjctName, pJSON);
     		}
     		
-    		showProjectMapAsTable(map);
+    		try
+			{
+				showProjectMapAsTable(map);
+			}
+    		catch(JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		catch(ConsoleToolsException e)
+			{
+				throw new RuntimeException("TerminalTableDisplay did it!");
+			}
+    		
     		if(map.isEmpty())sLog.logNow("No Successes.");
     		else sLog.logNow("Displayed Successes.");
     		
@@ -1054,7 +1120,20 @@ public class SomeCommands
     				map.put(prjctName, pJSON);
     		}
     		
-    		showProjectMapAsTable(map);
+    		try
+			{
+				showProjectMapAsTable(map);
+			}
+    		catch(JSONException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		catch(ConsoleToolsException e)
+			{
+				throw new RuntimeException("TerminalTableDisplay did it!");
+			}
+   
     		if(map.isEmpty())sLog.logNow("No fails.");
     		else sLog.logNow("Displayed fails.");
  
@@ -1079,8 +1158,16 @@ public class SomeCommands
 			
 			JSONObject pJSON = knownProjects.get(t);
 
-			showProjectStepsAsTable(pJSON);
+			try
+			{
+				showProjectStepsAsTable(pJSON);
+			}
+			catch(ConsoleToolsException e)
+			{
+				throw new RuntimeException("TerminalTableDisplay did it!");
+			}
 			sLog.logNow("Displayed Steps of Project: " + s);
+			
     		return "";
 		};
 
@@ -1172,7 +1259,7 @@ public class SomeCommands
     	return output;
     }
 
-    public void showProjectStepsAsTable(JSONObject pJSON)
+    public void showProjectStepsAsTable(JSONObject pJSON) throws ConsoleToolsException
     {
     	
 		List<String> headers = stepColumns;
@@ -1215,7 +1302,7 @@ public class SomeCommands
 
     }
     
-    public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, NaturalNumberException
+    public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, NaturalNumberException, ConsoleToolsException
     {
  
 		List<String> headers = columnList;

@@ -199,7 +199,7 @@ public class SequenzesForISS
 	
 	public static LocalDateTime getBDT(int n)
 	{
-		LocalDate mLDT = StatisticalTools.getLastMonday(jetzt);
+		LocalDate mLDT = TimeSpanCreator.getLastMonday(jetzt).toLocalDate();
 		
 		return LocalDateTime.of(mLDT, LocalTime.of(0, n)).minusDays(14);
 	}

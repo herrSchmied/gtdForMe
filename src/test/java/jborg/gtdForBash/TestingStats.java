@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import static jborg.gtdForBash.WeekData.mapJSONToName;
 
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
+import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.WeekDataException;
 
 public class TestingStats
@@ -62,31 +64,34 @@ public class TestingStats
 	}
 
 	@Test
-	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException
+	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException
 	{
 
         StatisticalTools st = new StatisticalTools(prjctSet);
-
-        Pair<String, LocalDateTime> oldPrjct = st.oldestLDT(ADTKey);
+        TimeSpanCreator tsc = st.getTimeSpanCreator();
+        
+        Pair<String, LocalDateTime> oldPrjct = tsc.oldestLDTOverall();
         String newPrjctName = SequenzesForISS.getNewProjectName(1);
 
         assert(oldPrjct.getKey().equals(newPrjctName));
  
         JSONObject oldPJSON = st.pickByName(newPrjctName);
-        assert(st.pickAndCheckByName(newPrjctName, 0, oldPJSON, ADTKey));
+        assert(st.pickAndCheckByName(ChronoUnit.WEEKS, newPrjctName, 0, oldPJSON, ADTKey));
 
-        System.out.println("Youngest: " + st.youngestLDT(ADTKey));
+        System.out.println("Youngest: " + tsc.youngestLDTOverall());
 	}
 
 	@Test
-	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException
+	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException
 	{
 
         StatisticalTools st = new StatisticalTools(prjctSet);
-
-        List<Pair<LocalDate, LocalDate>> wochen = st.getWeekSpans();
+        TimeSpanCreator tsc = st.getTimeSpanCreator();
         
-        for(Pair<LocalDate, LocalDate> pair: wochen)
+        List<Pair<LocalDateTime, LocalDateTime>> wochen = tsc.createTimeSpanFrames(ChronoUnit.WEEKS);
+        List<TimeSpanData> weekDatas = tsc.getTimeSpanList(ChronoUnit.WEEKS);
+        
+        for(Pair<LocalDateTime, LocalDateTime> pair: wochen)
         {
         	assert(pair.getKey().getDayOfWeek().equals(DayOfWeek.MONDAY));
         	assert(pair.getValue().getDayOfWeek().equals(DayOfWeek.SUNDAY));
@@ -97,69 +102,69 @@ public class TestingStats
         int firstWeekIndex = 0;
         
         JSONObject pJSON = st.pickByName(wakeProjectName);
-		assert(st.pickAndCheckByName(wakeProjectName, firstWeekIndex, pJSON, ADTKey));
+		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, ADTKey));
 		
 		pJSON = st.pickByName(modPrjctName);
-		assert(st.pickAndCheckByName(modPrjctName, firstWeekIndex, pJSON, NDTKey));
+		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, modPrjctName, firstWeekIndex, pJSON, NDTKey));
 		
 		String addNotePrjctName = SequenzesForISS.getNewProjectName(2);
 		pJSON = st.pickByName(addNotePrjctName);
-		assert(st.pickAndCheckByName(addNotePrjctName, firstWeekIndex, pJSON, ADTKey));
+		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, addNotePrjctName, firstWeekIndex, pJSON, ADTKey));
 
 		pJSON = st.pickByName(killPrjctNameNoDLDT);
-		assert(st.pickAndCheckByName(killPrjctNameNoDLDT, firstWeekIndex, pJSON, ADTKey));
+		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, killPrjctNameNoDLDT, firstWeekIndex, pJSON, ADTKey));
 		
 		String killPrjctName = SequenzesForISS.getNewProjectName(3);
 		pJSON = st.pickByName(killPrjctName);
-		assert(st.pickAndCheckByName(killPrjctName, firstWeekIndex, pJSON, ADTKey));
+		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, killPrjctName, firstWeekIndex, pJSON, ADTKey));
 		assert(projectIsTerminated.test(pJSON));
 		
 		String killStepPrjctName = SequenzesForISS.getNewProjectName(3);
 		pJSON = st.pickByName(killStepPrjctName);
-		assert(st.pickAndCheckByName(killStepPrjctName, firstWeekIndex, pJSON, ADTKey));
+		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, killStepPrjctName, firstWeekIndex, pJSON, ADTKey));
 
 		String appendStpPrjctName = SequenzesForISS.getNewProjectName(4);
 		pJSON = st.pickByName(appendStpPrjctName);
-		assert(st.pickAndCheckByName(appendStpPrjctName, firstWeekIndex, pJSON, ADTKey));
+		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, appendStpPrjctName, firstWeekIndex, pJSON, ADTKey));
 	
 		pJSON = st.pickByName(newPrjctNoDLDT);
-		assert(st.pickAndCheckByName(newPrjctNoDLDT, firstWeekIndex, pJSON, ADTKey));
+		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, newPrjctNoDLDT, firstWeekIndex, pJSON, ADTKey));
 
 		for(int n=0;n<weeksSize;n++)
 		{
 	
-			int projectsWritten = st.getWeekDatas().get(n).getProjectsWrittenDown().size();
-			int projectsActive = st.getWeekDatas().get(n).getActiveProjects().size();
-			int projectsSucceeded = st.getWeekDatas().get(n).projectsSucceededThisWeek().size();
-			int projectsFailed = st.getWeekDatas().get(n).projectsFailedThisWeek().size();
-			WeekData wd = st.getWeekDatas().get(n);
+			int projectsWritten =  weekDatas.get(n).getProjectsWrittenDown().size();
+			int projectsActive = weekDatas.get(n).getActiveProjects().size();
+			int projectsSucceeded = weekDatas.get(n).projectsSucceededThisTimeSpan().size();
+			int projectsFailed =  weekDatas.get(n).projectsFailedThisTimeSpan().size();
+			TimeSpanData tsd = weekDatas.get(n);
 			
 			System.out.println("\nWeekNr.: " + n);
 			Set<String> names = new HashSet<>();
 			System.out.println("Projects written: " + projectsWritten);
 			names.clear();
-			names.addAll(wd.getProjectsWrittenDown().stream()
+			names.addAll(tsd.getProjectsWrittenDown().stream()
 					.map(mapJSONToName)
 					.collect(Collectors.toSet()));
 			System.out.println(names);
 			
 			System.out.println("Projects active: " + projectsActive);
 			names.clear();
-			names.addAll(wd.getActiveProjects().stream()
+			names.addAll(tsd.getActiveProjects().stream()
 					.map(mapJSONToName)
 					.collect(Collectors.toSet()));
 			System.out.println(names);
 
 			System.out.println("Projects succeeded: " + projectsSucceeded);
 			names.clear();
-			names.addAll(wd.projectsSucceededThisWeek());
+			names.addAll(tsd.projectsSucceededThisTimeSpan());
 			System.out.println(names);
 
 			System.out.println("Projects failed: " + projectsFailed);
 			names.clear();
-			names.addAll(wd.projectsFailedThisWeek());
+			names.addAll(tsd.projectsFailedThisTimeSpan());
 			System.out.println(names);
-			Set<String> pressing = wd.mostPressingProjectDeadline();
+			Set<String> pressing = tsd.mostPressingProjectDeadline();
 			System.out.println("Most Pressing Deadline: " + pressing);
 			
 			if(n==0)
@@ -186,13 +191,15 @@ public class TestingStats
 	}
 
 	@Test
-	public void statsTest() throws IOException, URISyntaxException, WeekDataException, StatisticalToolsException
+	public void statsTest() throws IOException, URISyntaxException, WeekDataException, StatisticalToolsException, TimeSpanException
 	{
 
         StatisticalTools st = new StatisticalTools(prjctSet);
+        TimeSpanCreator tsc = st.getTimeSpanCreator();
+ 
         System.out.println("\nNr. of Projects: " + prjctSet.size());
 
-        List<Pair<LocalDate, LocalDate>> wochen = st.getWeekSpans();
+        List<Pair<LocalDateTime, LocalDateTime>> wochen = tsc.createTimeSpanFrames(ChronoUnit.WEEKS);
 
         int weeksSize = wochen.size();
         //int lastWeekIndex = weeksSize-1;

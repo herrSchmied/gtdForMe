@@ -12,8 +12,10 @@ import static jborg.gtdForBash.ProjectJSONToolbox.projectIsTerminated;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -26,8 +28,9 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
-import allgemein.ExactPeriode;
+
 import javafx.util.Pair;
+
 import jborg.gtdForBash.exceptions.TimeSpanException;
 
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
@@ -38,19 +41,19 @@ public class TimeSpanCreator
 	private final LocalDateTime beginAnker;
 	private final LocalDateTime endAnker;
 	
-	private LocalDateTime begin;
-	private LocalDateTime end;
 
 	Set<JSONObject> prjctSet = new HashSet<>();
 	
 	Map<ChronoUnit, List<TimeSpanData>> chronoUnitTimeSpanMap = new HashMap<>();
+		
+	private List<TimeSpanData> yearList;
+	private List<TimeSpanData> monthList;
+	private List<TimeSpanData> weekList;
+	private List<TimeSpanData> dayList;
+	private List<TimeSpanData> hourList;
 	
-	
-	List<Pair<LocalDateTime, LocalDateTime>> yearFrames = new ArrayList<>();
-	List<Pair<LocalDateTime, LocalDateTime>> monthFrames = new ArrayList<>();
-	List<Pair<LocalDateTime, LocalDateTime>> weekFrames = new ArrayList<>();
-	List<Pair<LocalDateTime, LocalDateTime>> dayFrames = new ArrayList<>();
-	List<Pair<LocalDateTime, LocalDateTime>> hourFrames = new ArrayList<>();
+	private static final LocalTime earlyInTheDay = LocalTime.of(0, 0);
+
 	
 	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException
 	{
@@ -66,12 +69,15 @@ public class TimeSpanCreator
 	    
 	    this.beginAnker = old;
 		this.endAnker = young;
+		
+		createListsOfAllChronoUnitTimeSpans();
 	}
 	
-	public List<Pair<LocalDateTime, LocalDateTime>> createTimeSpansFrame(ChronoUnit cu) throws IOException, URISyntaxException
+	public List<Pair<LocalDateTime, LocalDateTime>> createTimeSpanFrames(ChronoUnit cu) throws IOException, URISyntaxException
 	{
 
 		List<Pair<LocalDateTime, LocalDateTime>> outputSpans = new ArrayList<>();
+		
 		
 		LocalDateTime start = null;
 		LocalDateTime end = null;
@@ -113,60 +119,121 @@ public class TimeSpanCreator
 
 		if(cu.equals(ChronoUnit.WEEKS))
 		{
-			
+
+		   	start = getLastMonday(beginAnker);
+		   	
+		   	//Get the very last Sunday. At the last NanoSeconde.
+		   	DayOfWeek dow = endAnker.getDayOfWeek();
+		   	int dowNr = dow.getValue();
+		   	//Next Monday
+		   	LocalDate endLD = endAnker.plusDays(8-dowNr).toLocalDate();
+		   	//Tada!!!
+		   	end = LocalDateTime.of(endLD, earlyInTheDay).minusNanos(1);
+		   	
+		   	int d = (int)ChronoUnit.WEEKS.between(start, end);
+		   	
+		   	for(int week=0;week<=d;week++)
+		   	{
+
+		   		LocalDateTime a = start.plusDays(week*7);
+		   		LocalDateTime b = a.plusDays(7).minusNanos(1);
+
+		   		Pair<LocalDateTime, LocalDateTime> pair = new Pair<>(a, b);
+
+		   		outputSpans.add(pair);
+		   	}
+
 		}
-		
+
 		if(cu.equals(ChronoUnit.DAYS))
 		{
+			start = LocalDateTime.of(beginAnker.getYear(), beginAnker.getMonthValue(), beginAnker.getDayOfMonth(), 0, 0);
+			end = LocalDateTime.of(endAnker.getYear(), endAnker.getMonthValue(), endAnker.getDayOfMonth(), 0, 0);
+		
+			int d=(int)ChronoUnit.DAYS.between(start, end);
 			
+			for(int day=0;day<=d;day++)
+			{
+				
+				LocalDateTime a = start.plusDays(day);
+				LocalDateTime b = a.plusDays(1);
+				
+				Pair<LocalDateTime, LocalDateTime> pair = new Pair<>(a, b);
+				
+				outputSpans.add(pair);
+			}
 		}
 
 		if(cu.equals(ChronoUnit.HOURS))
 		{
+			start = LocalDateTime.of(beginAnker.getYear(), beginAnker.getMonthValue(), beginAnker.getDayOfMonth(), beginAnker.getHour(), 0);
+			end = LocalDateTime.of(endAnker.getYear(), endAnker.getMonthValue(), endAnker.getDayOfMonth(), endAnker.getHour(), 0);
+
+			int d = (int)ChronoUnit.HOURS.between(start, end);
 			
+			for(int hour=0;hour<=d;hour++)
+			{
+				
+				LocalDateTime a = start.plusHours(hour);
+				LocalDateTime b = a.plusHours(1);
+				
+				Pair<LocalDateTime, LocalDateTime> pair = new Pair<>(a, b);
+				
+				outputSpans.add(pair);
+			}
 		}
 
     	return outputSpans;
 	}
 
-	private List<TimeSpanData> createListOfChronoUnitTimeSpan(ChronoUnit cu)
+	public static LocalDateTime getLastMonday(LocalDateTime ldt)
+	{
+
+		DayOfWeek dow = ldt.getDayOfWeek();
+		int dowNr = dow.getValue();
+	   	LocalDate startLD = ldt.minusDays(dowNr-1).toLocalDate();
+	   	return LocalDateTime.of(startLD, earlyInTheDay);
+	}
+
+	private List<TimeSpanData> createListOfChronoUnitTimeSpan(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
 	{
 
 		List<TimeSpanData> outputList = new ArrayList<>();
-
-		int weekSpansSize = 100; //TODO://Remember:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-
-		for(int weekNr=0;weekNr<weekSpansSize;weekNr++)
+		List<Pair<LocalDateTime, LocalDateTime>> frames = createTimeSpanFrames(cu);
+		
+		int howManyFrames = frames.size();
+		
+		for(int n=0;n<howManyFrames;n++)
 		{
 
-			Pair<LocalDate, LocalDate> span = weekSpans.get(weekNr);
-			LocalDate wStart = span.getKey();
-			WeekData wd = new WeekData(wStart, weekNr);
+			Pair<LocalDateTime, LocalDateTime> span = frames.get(n);
+			LocalDateTime start = span.getKey();
+			LocalDateTime end = span.getValue();
+
+			TimeSpanData tsd = new TimeSpanData(cu, start, end, n);
 
 			for(JSONObject pJSON: prjctSet)
 			{
-				if(isActiveGivenWeek(pJSON, wd))wd.addProjectActive(pJSON);
-				if(isWrittenGivenWeek(pJSON, wd))wd.addProjectWrittenDown(pJSON);
-				if(isTerminatedGivenWeek(pJSON, wd))wd.addProjectTerminated(pJSON);
+				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(pJSON);
+				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(pJSON);
+				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(pJSON);
 			}
-			outputList.add(wd);
+			outputList.add(tsd);
 		}
 
 		return outputList;
-
-		return list;
 	}
 	
-	public void createListsOfAllChronoUnitTimeSpans()
+	public void createListsOfAllChronoUnitTimeSpans() throws IOException, URISyntaxException, TimeSpanException
 	{
 		
 		Map<ChronoUnit, List<TimeSpanData>> outputMap = new HashMap<>();
 		
-		List<TimeSpanData> yearList = createListOfChronoUnitTimeSpan(ChronoUnit.YEARS);
-		List<TimeSpanData> monthList = createListOfChronoUnitTimeSpan(ChronoUnit.MONTHS);
-		List<TimeSpanData> weekList = createListOfChronoUnitTimeSpan(ChronoUnit.WEEKS);
-		List<TimeSpanData> dayList = createListOfChronoUnitTimeSpan(ChronoUnit.DAYS);
-		List<TimeSpanData> hourList = createListOfChronoUnitTimeSpan(ChronoUnit.HOURS);
+		yearList = createListOfChronoUnitTimeSpan(ChronoUnit.YEARS);
+		monthList = createListOfChronoUnitTimeSpan(ChronoUnit.MONTHS);
+		weekList = createListOfChronoUnitTimeSpan(ChronoUnit.WEEKS);
+		dayList = createListOfChronoUnitTimeSpan(ChronoUnit.DAYS);
+		hourList = createListOfChronoUnitTimeSpan(ChronoUnit.HOURS);
 		
 		outputMap.put(ChronoUnit.YEARS, yearList);
 		outputMap.put(ChronoUnit.MONTHS, monthList);
@@ -331,5 +398,89 @@ public class TimeSpanCreator
 	    if(name.trim().equals(""))throw new TimeSpanException("No Projects with Datetimes???");
 
 	    return new Pair<>(name, youngest);
+    }
+    
+	public static boolean isWrittenGivenTimeSpan(JSONObject pJSON, TimeSpanData tsd) throws IOException, URISyntaxException
+	{
+
+		LocalDateTime ldt  = extractLDT(pJSON, NDTKey);
+		return tsd.isInThisTimeSpan(ldt);
+	}
+
+	public static boolean isActiveGivenTimeSpan(JSONObject pJSON, TimeSpanData tsd) throws IOException, URISyntaxException
+	{
+
+		if(isMODProject.test(pJSON))return false;
+		
+		LocalDateTime activatedLDT;
+		activatedLDT = extractLDT(pJSON, ADTKey);
+		
+		if(tsd.isAfterThisTimeSpan(activatedLDT))return false;
+		
+		if(tsd.isInThisTimeSpan(activatedLDT))return true;
+
+		if(tsd.isBeforeThisTimeSpan(activatedLDT)&&projectIsTerminated.test(pJSON))
+		{
+			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
+			if(tsd.isInThisTimeSpan(tdt)||tsd.isAfterThisTimeSpan(tdt))return true;
+		}
+
+		if((tsd.isBeforeThisTimeSpan(activatedLDT))&&(!projectHasNoDLDT.test(pJSON)))
+		{
+			LocalDateTime dldt = extractLDT(pJSON, DLDTKey);
+			if((tsd.isInThisTimeSpan(dldt))||(tsd.isAfterThisTimeSpan(dldt)))return true;
+		}
+
+
+		return false;
+	}
+	
+	public static boolean isTerminatedGivenTimeSpan(JSONObject pJSON, TimeSpanData tsd) throws IOException, URISyntaxException
+	{
+		if(isMODProject.test(pJSON))return false;
+		if(projectIsTerminated.test(pJSON))
+		{
+			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
+			return tsd.isInThisTimeSpan(tdt);
+		}
+		
+		return false;
+	}
+
+    public int isInWhichTimeSpan(ChronoUnit cu, LocalDateTime ldt) throws IOException, URISyntaxException, TimeSpanException
+    {
+
+    	if(cu==null)throw new TimeSpanException("Null is not a ChronoUnit.");
+    	if(ldt==null)throw new TimeSpanException("Can't use LDT to evaluate because its null.");
+
+    	List<TimeSpanData> list = null;
+
+    	if(cu.equals(ChronoUnit.YEARS))list = yearList;
+    	if(cu.equals(ChronoUnit.MONTHS))list = monthList;
+    	if(cu.equals(ChronoUnit.WEEKS))list = weekList;
+    	if(cu.equals(ChronoUnit.DAYS))list = dayList;
+    	if(cu.equals(ChronoUnit.HOURS))list = hourList;
+
+    	if(list==null)throw new TimeSpanException("Unsupported ChronoUnit.");
+    	
+    	return list.stream()
+    		    .filter(tsd -> tsd.isInThisTimeSpan(ldt))
+    		    .map(TimeSpanData::getTimeNr)
+    		    .findFirst()
+    		    .orElseThrow(() -> new TimeSpanException("No TimeSpan found for given date: " + ldt));
+    }
+
+    public List<TimeSpanData> getTimeSpanList(ChronoUnit cu) throws TimeSpanException
+    {
+    	
+    	if(cu==null)throw new TimeSpanException("Null is not a ChronoUnit.");
+    	
+       	if(cu.equals(ChronoUnit.YEARS))return yearList;
+    	if(cu.equals(ChronoUnit.MONTHS))return monthList;
+    	if(cu.equals(ChronoUnit.WEEKS))return weekList;
+    	if(cu.equals(ChronoUnit.DAYS))return dayList;
+    	if(cu.equals(ChronoUnit.HOURS))return hourList;
+    	
+    	throw new TimeSpanException("Unsupported ChronoUnit.");
     }
 }
