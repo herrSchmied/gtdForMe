@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import javafx.util.Pair;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
+import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.WeekDataException;
 
 
@@ -33,45 +34,15 @@ public class StatisticalTools
 {
 
 	final Set<JSONObject> prjctSet;
-	final List<Pair<LocalDate, LocalDate>> weekSpans;
-	final List<WeekData> weekDatas;
 
-	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException
+	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException
 	{
 
 		this.prjctSet = prjctSet;
-		weekSpans = computeWeekSpans();
-		weekDatas = computeWeekDataList();
+		TimeSpanCreator tsc = new TimeSpanCreator(prjctSet);
 	}
 	
-	public List<Pair<LocalDate, LocalDate>> computeWeekSpans() throws IOException, URISyntaxException
-	{
 
-		List<Pair<LocalDate, LocalDate>> weekSpans = new ArrayList<>();
-		
-	    LocalDateTime old = oldestProjectLDT(NDTKey).getValue();
-	 
-	    LocalDateTime maxDLDT = youngestProjectLDT(ProjectJSONKeyz.DLDTKey).getValue();
-	    LocalDateTime jetzt = LocalDateTime.now();
-	    
-	    LocalDate maxLD;
-	    if(jetzt.isBefore(maxDLDT))maxLD = maxDLDT.toLocalDate();
-	    else maxLD = jetzt.toLocalDate();
-	    
-
-	   	LocalDate currentMonday = getLastMonday(old);
-	    	
-    	while(true)
-	   	{
-	   		LocalDate currentSunday = currentMonday.plusDays(6);
-	   		Pair<LocalDate, LocalDate> week = new Pair<>(currentMonday, currentSunday);
-	   		weekSpans.add(week);
-    		currentMonday = currentMonday.plusDays(7);
-    		if(currentMonday.isAfter(maxLD))break;
-    	}
-	    	
-    	return weekSpans;
-	}
 	
 	public static LocalDate getLastMonday(LocalDateTime ldt)
 	{
@@ -84,26 +55,6 @@ public class StatisticalTools
 	public List<WeekData> computeWeekDataList() throws IOException, URISyntaxException, WeekDataException
 	{
 
-		List<WeekData> outputList = new ArrayList<>();
-		int weekSpansSize = weekSpans.size();
-
-		for(int weekNr=0;weekNr<weekSpansSize;weekNr++)
-		{
-
-			Pair<LocalDate, LocalDate> span = weekSpans.get(weekNr);
-			LocalDate wStart = span.getKey();
-			WeekData wd = new WeekData(wStart, weekNr);
-
-			for(JSONObject pJSON: prjctSet)
-			{
-				if(isActiveGivenWeek(pJSON, wd))wd.addProjectActive(pJSON);
-				if(isWrittenGivenWeek(pJSON, wd))wd.addProjectWrittenDown(pJSON);
-				if(isTerminatedGivenWeek(pJSON, wd))wd.addProjectTerminated(pJSON);
-			}
-			outputList.add(wd);
-		}
-
-		return outputList;
 	}
 
 	public static boolean isWrittenGivenWeek(JSONObject pJSON, WeekData wd) throws IOException, URISyntaxException

@@ -2,6 +2,7 @@ package jborg.gtdForBash;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.ADTKey;
 import static jborg.gtdForBash.ProjectJSONKeyz.DLDTKey;
+import static jborg.gtdForBash.ProjectJSONKeyz.NDTKey;
 import static jborg.gtdForBash.ProjectJSONKeyz.TDTKey;
 import static jborg.gtdForBash.ProjectJSONKeyz.nameKey;
 import static jborg.gtdForBash.ProjectJSONToolbox.extractLDT;
@@ -11,9 +12,12 @@ import static jborg.gtdForBash.ProjectJSONToolbox.projectIsTerminated;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +26,7 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
+import allgemein.ExactPeriode;
 import javafx.util.Pair;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 
@@ -38,33 +43,130 @@ public class TimeSpanCreator
 
 	Set<JSONObject> prjctSet = new HashSet<>();
 	
-	Map<ChronoUnit, List<ChronoUnit>> chronoUnitTimeSpanMap = new HashMap<>();
+	Map<ChronoUnit, List<TimeSpanData>> chronoUnitTimeSpanMap = new HashMap<>();
 	
-	public TimeSpanCreator(LocalDateTime beginAnker, LocalDateTime endAnker, Set<JSONObject> prjctSet)
+	
+	List<Pair<LocalDateTime, LocalDateTime>> yearFrames = new ArrayList<>();
+	List<Pair<LocalDateTime, LocalDateTime>> monthFrames = new ArrayList<>();
+	List<Pair<LocalDateTime, LocalDateTime>> weekFrames = new ArrayList<>();
+	List<Pair<LocalDateTime, LocalDateTime>> dayFrames = new ArrayList<>();
+	List<Pair<LocalDateTime, LocalDateTime>> hourFrames = new ArrayList<>();
+	
+	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException
 	{
+		//TODO: end must be after begin and both need to be not null!! Throw Exception!!!!
+		if(prjctSet.isEmpty()) throw new TimeSpanException("No Projects to evaluate.");
+		
+	    Pair<String, LocalDateTime> oldPair = oldestLDTOverall();
+	    Pair<String, LocalDateTime> youngPair = youngestLDTOverall();
 
-		this.beginAnker = beginAnker;
-		this.endAnker = endAnker;
+	    LocalDateTime old = oldPair.getValue();
+		LocalDateTime young = youngPair.getValue();
+	    if(young.isBefore(old))throw new TimeSpanException("Evaluation went wrong this should not happen!");
+	    
+	    this.beginAnker = old;
+		this.endAnker = young;
 	}
 	
-	
-	private List<ChronoUnit> createListOfChronoUnitTimeSpan(ChronoUnit cu)
+	public List<Pair<LocalDateTime, LocalDateTime>> createTimeSpansFrame(ChronoUnit cu) throws IOException, URISyntaxException
 	{
-		List<ChronoUnit> list = new ArrayList<>();
+
+		List<Pair<LocalDateTime, LocalDateTime>> outputSpans = new ArrayList<>();
 		
+		LocalDateTime start = null;
+		LocalDateTime end = null;
+
+		if(cu.equals(ChronoUnit.YEARS))
+		{
+			start = LocalDateTime.of(beginAnker.getYear(), Month.JANUARY, 1, 0, 0);
+			end = LocalDateTime.of(endAnker.getYear()+1, Month.JANUARY, 1, 0, 0).minusNanos(1);
+
+			for(int year=start.getYear();year<=end.getYear();year++)
+			{
+				LocalDateTime a = LocalDateTime.of(year, Month.JANUARY, 1, 0, 0);
+				LocalDateTime b = LocalDateTime.of(year+1, Month.JANUARY, 1, 0, 0).minusNanos(1);
+	    	
+				Pair<LocalDateTime, LocalDateTime> pair = new Pair<>(a, b);
+				outputSpans.add(pair);
+			}
+		}
+		
+		if(cu.equals(ChronoUnit.MONTHS))
+		{
+			start = LocalDateTime.of(beginAnker.getYear(), beginAnker.getMonth(), 1, 0, 0);
+			end = LocalDateTime.of(endAnker.getYear(), endAnker.getMonth(), 1, 0, 0).minusNanos(1);
+
+			int k = end.getMonthValue()-start.getMonthValue();
+			int y = end.getYear()-start.getYear();
+			int d = y*12+k;
+	
+			for(int diffMonat=0;diffMonat<=d;diffMonat++)
+			{
+				LocalDateTime a = start.plusMonths(diffMonat);
+				LocalDateTime b = a.plusMonths(1).minusNanos(1);
+	    	
+				Pair<LocalDateTime, LocalDateTime> pair = new Pair<>(a, b);
+				outputSpans.add(pair);
+			}
+
+		}
+
+		if(cu.equals(ChronoUnit.WEEKS))
+		{
+			
+		}
+		
+		if(cu.equals(ChronoUnit.DAYS))
+		{
+			
+		}
+
+		if(cu.equals(ChronoUnit.HOURS))
+		{
+			
+		}
+
+    	return outputSpans;
+	}
+
+	private List<TimeSpanData> createListOfChronoUnitTimeSpan(ChronoUnit cu)
+	{
+
+		List<TimeSpanData> outputList = new ArrayList<>();
+
+		int weekSpansSize = 100; //TODO://Remember:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
+		for(int weekNr=0;weekNr<weekSpansSize;weekNr++)
+		{
+
+			Pair<LocalDate, LocalDate> span = weekSpans.get(weekNr);
+			LocalDate wStart = span.getKey();
+			WeekData wd = new WeekData(wStart, weekNr);
+
+			for(JSONObject pJSON: prjctSet)
+			{
+				if(isActiveGivenWeek(pJSON, wd))wd.addProjectActive(pJSON);
+				if(isWrittenGivenWeek(pJSON, wd))wd.addProjectWrittenDown(pJSON);
+				if(isTerminatedGivenWeek(pJSON, wd))wd.addProjectTerminated(pJSON);
+			}
+			outputList.add(wd);
+		}
+
+		return outputList;
+
 		return list;
 	}
 	
 	public void createListsOfAllChronoUnitTimeSpans()
 	{
 		
-		Map<ChronoUnit, List<ChronoUnit>> outputMap = new HashMap<>();
+		Map<ChronoUnit, List<TimeSpanData>> outputMap = new HashMap<>();
 		
-		List<ChronoUnit> yearList = createListOfChronoUnitTimeSpan(ChronoUnit.YEARS);
-		List<ChronoUnit> monthList = createListOfChronoUnitTimeSpan(ChronoUnit.MONTHS);
-		List<ChronoUnit> weekList = createListOfChronoUnitTimeSpan(ChronoUnit.WEEKS);
-		List<ChronoUnit> dayList = createListOfChronoUnitTimeSpan(ChronoUnit.DAYS);
-		List<ChronoUnit> hourList = createListOfChronoUnitTimeSpan(ChronoUnit.HOURS);
+		List<TimeSpanData> yearList = createListOfChronoUnitTimeSpan(ChronoUnit.YEARS);
+		List<TimeSpanData> monthList = createListOfChronoUnitTimeSpan(ChronoUnit.MONTHS);
+		List<TimeSpanData> weekList = createListOfChronoUnitTimeSpan(ChronoUnit.WEEKS);
+		List<TimeSpanData> dayList = createListOfChronoUnitTimeSpan(ChronoUnit.DAYS);
+		List<TimeSpanData> hourList = createListOfChronoUnitTimeSpan(ChronoUnit.HOURS);
 		
 		outputMap.put(ChronoUnit.YEARS, yearList);
 		outputMap.put(ChronoUnit.MONTHS, monthList);
@@ -74,51 +176,21 @@ public class TimeSpanCreator
 
 		chronoUnitTimeSpanMap = outputMap;
 	}
-	
-	public boolean oldestLDTIsStep(String jsonKey) throws IOException, URISyntaxException
+
+	public Pair<String, LocalDateTime> oldestLDTOverall() throws IOException, URISyntaxException, TimeSpanException
 	{
-		Pair<String, LocalDateTime> oldestProjectLDTpair = oldestProjectLDT(jsonKey); 
-		Pair<String, LocalDateTime> oldestStepLDTpair = oldestStepLDT(jsonKey); 
-		
-		String oldProjectName = oldestProjectLDTpair.getKey();
-		String oldStepProjectName = oldestStepLDTpair.getKey();
-		
-		
-		if(oldStepProjectName.trim().equals(""))
-			return false;
-		
-		if(oldProjectName.trim().equals(""))
-			return true;
+	    Pair<String, LocalDateTime> oldPair = oldestProjectLDT(NDTKey);//Which is the eldest LDT!!!
+	    
+	    if(oldPair.getKey().trim().equals(""))
+	    {
+	    	oldPair = oldestProjectLDT(ADTKey);
+	    	
+		    if(oldPair.getKey().trim().equals(""))throw new TimeSpanException("No Project with DateTimes????");
+	    	
+	    }
 
-		LocalDateTime oldPrjctLDT = oldestProjectLDTpair.getValue();
-		LocalDateTime oldStepLDT = oldestStepLDTpair.getValue();
-		
-		if(oldStepLDT.isBefore(oldPrjctLDT))return true;
-		
-		return false;
+	    return oldPair;
 	}
-
-
-	public Pair<String, LocalDateTime> oldestProjectAndStepLDT(String jsonKey) throws IOException, URISyntaxException, TimeSpanException
-	{
-		Pair<String, LocalDateTime> oldestProjectLDTPair = oldestProjectLDT(jsonKey); 
-		Pair<String, LocalDateTime> oldestStepLDTPair = oldestStepLDT(jsonKey); 
-		
-		String oldProjectName = oldestProjectLDTPair.getKey();
-		String oldStepProjectName = oldestStepLDTPair.getKey();
-		
-		if(oldProjectName.trim().equals("")&&oldStepProjectName.trim().equals(""))
-			return new Pair<>("", LocalDateTime.now());
-
-		if(oldProjectName.trim().equals(""))
-			return new Pair<>(oldStepProjectName, oldestStepLDTPair.getValue());
-		
-		if(oldStepProjectName.trim().equals(""))
-			return new Pair<>(oldProjectName, oldestProjectLDTPair.getValue());
-
-		throw new TimeSpanException("This should not happen.");
-	}
-
 	public Pair<String, LocalDateTime> oldestStepLDT(String jsonKey) throws IOException, URISyntaxException
 	{
 
@@ -173,49 +245,6 @@ public class TimeSpanCreator
     	return output;
     }
 	
-    public boolean youngestLDTIsStep(String jsonKey) throws IOException, URISyntaxException
-    {
-		Pair<String, LocalDateTime> youngestProjectLDTpair = youngestProjectLDT(jsonKey); 
-		Pair<String, LocalDateTime> youngestStepLDTpair = youngestStepLDT(jsonKey); 
-		
-		String youngProjectName = youngestProjectLDTpair.getKey();
-		String youngStepProjectName = youngestStepLDTpair.getKey();
-		
-		
-		if(youngStepProjectName.trim().equals(""))
-			return false;
-		
-		if(youngProjectName.trim().equals(""))
-			return true;
-
-		LocalDateTime youngPrjctLDT = youngestProjectLDTpair.getValue();
-		LocalDateTime youngStepLDT = youngestStepLDTpair.getValue();
-		
-		if(youngStepLDT.isAfter(youngPrjctLDT))return true;
-		
-		return false;
-    }
-
-    public Pair<String, LocalDateTime> youngestProjectAndStepLDT(String jsonKey) throws IOException, URISyntaxException, TimeSpanException
-    {
-    	
-    	Pair<String, LocalDateTime> projectLDTPair = youngestProjectLDT(jsonKey);
-    	Pair<String, LocalDateTime> stepLDTPair = youngestStepLDT(jsonKey);
-    	
-		String youngProjectName = projectLDTPair.getKey();
-		String youngStepProjectName = stepLDTPair.getKey();
-		
-		if(youngProjectName.trim().equals("")&&youngStepProjectName.trim().equals(""))
-			return new Pair<>("", LocalDateTime.now());
-
-		if(youngProjectName.trim().equals(""))
-			return new Pair<>(youngStepProjectName, stepLDTPair.getValue());
-		
-		if(youngStepProjectName.trim().equals(""))
-			return new Pair<>(youngProjectName, projectLDTPair.getValue());
-
-		throw new TimeSpanException("This should not happen.");
-    }
 
     public Pair<String, LocalDateTime> youngestStepLDT(String jsonKey) throws IOException, URISyntaxException
     {
@@ -267,5 +296,40 @@ public class TimeSpanCreator
     	Pair<String, LocalDateTime> output = new Pair<>(name, youngest);
     	
     	return output;
+    }
+    
+    public Pair<String, LocalDateTime> youngestLDTOverall() throws IOException, URISyntaxException, TimeSpanException
+    {
+	    Pair<String, LocalDateTime> youngProjectDLDTPair = youngestProjectLDT(DLDTKey);
+	    Pair<String, LocalDateTime> youngStepDLDTPair = youngestStepLDT(StepJSONKeyz.DLDTKey);
+	    Pair<String, LocalDateTime> youngProjectTDTPair = youngestProjectLDT(TDTKey);
+	    Pair<String, LocalDateTime> youngStepTDTPair = youngestStepLDT(StepJSONKeyz.TDTKey);
+	    Pair<String, LocalDateTime> youngProjectNDTPair = youngestProjectLDT(NDTKey);
+	    Pair<String, LocalDateTime> youngStepADTPair = youngestStepLDT(StepJSONKeyz.ADTKey);
+
+	    Set<Pair<String, LocalDateTime>> set = new HashSet<>(Arrays.asList(youngProjectDLDTPair,
+	    		youngStepDLDTPair, youngProjectTDTPair, youngStepTDTPair, youngProjectNDTPair,
+	    		youngStepADTPair));
+	    
+	    Set<Pair<String, LocalDateTime>> set2 = new HashSet<>();
+	    
+	    for(Pair<String, LocalDateTime> pair: set)
+	    {
+	    	if(!pair.getKey().trim().equals(""))set2.add(pair);
+	    }
+	    
+	    LocalDateTime youngest = oldestLDTOverall().getValue();
+	    String name = "";
+	    
+	    for(Pair<String, LocalDateTime> pair: set2)
+	    {
+	    	if(pair.getValue().isAfter(youngest))
+	    		youngest = pair.getValue();
+	    		name = pair.getKey();
+	    }
+	    
+	    if(name.trim().equals(""))throw new TimeSpanException("No Projects with Datetimes???");
+
+	    return new Pair<>(name, youngest);
     }
 }
