@@ -6,16 +6,18 @@ import java.awt.Point;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.URISyntaxException;
+
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+
 import java.util.HashSet;
 import java.util.List;
-
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,29 +26,29 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 
-
-
-
 import javafx.util.Pair;
 
 
 import someMath.NaturalNumberException;
 
+
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import static jborg.gtdForBash.WeekData.mapJSONToName;
-
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
+import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
+
+
 
 public class TestingStats
 {
 
     static GTDCLI gtdCli;
     static Set<JSONObject> prjctSet;
-    
+
 
 	@BeforeAll
 	public static void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
@@ -56,17 +58,19 @@ public class TestingStats
 
     	for(File file: listOfFiles)
     	{
-    		
+	
     		if(file.isFile())file.delete();
     	}
 
     	prjctSet = ProjectSetForTesting.get();
+    	assert(!prjctSet.isEmpty());
 	}
 
 	@Test
-	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException
+	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException
 	{
 
+		assert(!prjctSet.isEmpty());
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
@@ -82,9 +86,10 @@ public class TestingStats
 	}
 
 	@Test
-	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException
+	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException, ToolBoxException
 	{
-
+		
+		assert(!prjctSet.isEmpty());
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
@@ -191,9 +196,10 @@ public class TestingStats
 	}
 
 	@Test
-	public void statsTest() throws IOException, URISyntaxException, WeekDataException, StatisticalToolsException, TimeSpanException
+	public void statsTest() throws IOException, URISyntaxException, WeekDataException, StatisticalToolsException, TimeSpanException, ToolBoxException
 	{
-
+		
+		assert(!prjctSet.isEmpty());
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
  

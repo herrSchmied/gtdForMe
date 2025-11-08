@@ -1,13 +1,16 @@
 package jborg.gtdForBash;
 
 
+
 import java.awt.Point;
+
 import java.io.IOException;
+
 import java.net.URISyntaxException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,17 +21,17 @@ import java.util.Set;
 import org.json.JSONObject;
 
 
-import javafx.util.Pair;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
+import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
+import static jborg.gtdForBash.ProjectJSONToolbox.*;
+import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 
 import someMath.NaturalNumberException;
 
 
-import static jborg.gtdForBash.ProjectJSONToolbox.*;
-import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 public class StatisticalTools
 {
@@ -36,9 +39,9 @@ public class StatisticalTools
 	final Set<JSONObject> prjctSet;
 	final TimeSpanCreator tsc;
 
-	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException
+	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException
 	{
-
+		assert(!prjctSet.isEmpty());
 		this.prjctSet = prjctSet;
 		tsc = new TimeSpanCreator(prjctSet);
 	}

@@ -25,7 +25,7 @@ public class TestingWeekData
 		LocalDate ld = LocalDate.now();
 		DayOfWeek dow = ld.getDayOfWeek();
 		LocalDate ldMonday = ld.minusDays(dow.getValue()-1);
-		
+
 		WeekData wd = new WeekData(ldMonday, 0);
 		
 		LocalDate ldSunday = ldMonday.plusDays(6);

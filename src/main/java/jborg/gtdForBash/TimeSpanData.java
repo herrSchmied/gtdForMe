@@ -1,22 +1,14 @@
 package jborg.gtdForBash;
 
-import static jborg.gtdForBash.ProjectJSONToolbox.extractLDT;
-import static jborg.gtdForBash.ProjectJSONToolbox.getLastStepOfProject;
-import static jborg.gtdForBash.ProjectJSONToolbox.isMODProject;
-import static jborg.gtdForBash.ProjectJSONToolbox.iterateOverSteps;
-import static jborg.gtdForBash.ProjectJSONToolbox.lastStepIsTerminated;
-import static jborg.gtdForBash.ProjectJSONToolbox.prjctDeadlineNone;
-import static jborg.gtdForBash.ProjectJSONToolbox.stepDeadlineNone;
-import static jborg.gtdForBash.ProjectJSONToolbox.stepIsTerminated;
-import static jborg.gtdForBash.ProjectJSONToolbox.tdtNotePrjctDLDTAbuse;
-import static jborg.gtdForBash.ProjectJSONToolbox.tdtNoteStpDLDTAbuse;
+
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,14 +16,24 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
+
 import allgemein.ExactPeriode;
 import allgemein.LittleTimeTools;
+
+
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.WeekDataException;
+import static jborg.gtdForBash.ProjectJSONToolbox.*;
+
+
 import someMath.NaturalNumberException;
+
+
 
 public class TimeSpanData
 {
@@ -125,6 +127,11 @@ public class TimeSpanData
 	public int getTimeNr()
 	{
 		return timeNr;
+	}
+
+	public ChronoUnit getChronoUnit()
+	{
+		return cu;
 	}
 
 	/**

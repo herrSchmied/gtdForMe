@@ -193,11 +193,12 @@ public class GTDDataSpawnSession
 	 * @param iss InputStreamSession which is a wrapped up InputStream
 	 * from System.in.
 	 */
+
 	public GTDDataSpawnSession(InputStreamSession iss)
 	{
 		this.iss = iss;
 	}
-	
+
 	/**
 	 * This Method asks for Information for a Maybe-one-day(MOD) Project. It forces valid Data.
 	 * It receives Data via InputStreamSession It returns than a JSONObject with that Data. 
@@ -298,7 +299,7 @@ public class GTDDataSpawnSession
 		}
 		else pJson.put(DLDTKey, prjctDeadlineNone);
 
-		if(ProjectJSONToolbox.timeAndGoalOfActiveProjectIsValide(pJson))
+		if(timeAndGoalOfActiveProjectIsValide(pJson))
 		{
 			
 			spawnStep(pJson);//Here status will be overwritten. Here step status will be equal project status.
@@ -324,12 +325,11 @@ public class GTDDataSpawnSession
 	public void spawnStep(JSONObject pJson) throws IOException
 	{
 
-
 		JSONObject newStep = new JSONObject();
-		int index = ProjectJSONToolbox.getIndexOfLastStepInPrjct(pJson);
+		int index = getIndexOfLastStepInPrjct(pJson);
 		JSONObject oldStep;
 		boolean isFirstStep = (index==ProjectJSONToolbox.firstStepIndex-1);
-		
+
 		JSONArray steps;
 		if(isFirstStep)
 		{
@@ -474,7 +474,6 @@ public class GTDDataSpawnSession
 		String adtStr = LittleTimeTools.timeString(LocalDateTime.now());
 		pJson.put(ADTKey, adtStr);
 
-		String goal = pJson.getString(goalKey);
 		if(timeAndGoalOfActiveProjectIsValide(pJson))
 		{
 			

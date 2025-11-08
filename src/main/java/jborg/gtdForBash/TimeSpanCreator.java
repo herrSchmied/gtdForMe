@@ -1,14 +1,6 @@
 package jborg.gtdForBash;
 
-import static jborg.gtdForBash.ProjectJSONKeyz.ADTKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.DLDTKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.NDTKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.TDTKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.nameKey;
-import static jborg.gtdForBash.ProjectJSONToolbox.extractLDT;
-import static jborg.gtdForBash.ProjectJSONToolbox.isMODProject;
-import static jborg.gtdForBash.ProjectJSONToolbox.projectHasNoDLDT;
-import static jborg.gtdForBash.ProjectJSONToolbox.projectIsTerminated;
+import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -28,10 +20,11 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
-
+import consoleTools.TerminalXDisplay;
 import javafx.util.Pair;
 
 import jborg.gtdForBash.exceptions.TimeSpanException;
+import jborg.gtdForBash.exceptions.ToolBoxException;
 
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
@@ -55,10 +48,11 @@ public class TimeSpanCreator
 	private static final LocalTime earlyInTheDay = LocalTime.of(0, 0);
 
 	
-	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException
+	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException
 	{
 		//TODO: end must be after begin and both need to be not null!! Throw Exception!!!!
 		if(prjctSet.isEmpty()) throw new TimeSpanException("No Projects to evaluate.");
+		this.prjctSet = prjctSet;
 		
 	    Pair<String, LocalDateTime> oldPair = oldestLDTOverall();
 	    Pair<String, LocalDateTime> youngPair = youngestLDTOverall();
@@ -246,32 +240,44 @@ public class TimeSpanCreator
 
 	public Pair<String, LocalDateTime> oldestLDTOverall() throws IOException, URISyntaxException, TimeSpanException
 	{
+
 	    Pair<String, LocalDateTime> oldPair = oldestProjectLDT(NDTKey);//Which is the eldest LDT!!!
 	    
 	    if(oldPair.getKey().trim().equals(""))
 	    {
+
 	    	oldPair = oldestProjectLDT(ADTKey);
-	    	
+	
 		    if(oldPair.getKey().trim().equals(""))throw new TimeSpanException("No Project with DateTimes????");
 	    	
 	    }
 
 	    return oldPair;
 	}
-	public Pair<String, LocalDateTime> oldestStepLDT(String jsonKey) throws IOException, URISyntaxException
+	public Pair<String, LocalDateTime> oldestStepLDT(String jsonKey) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException
 	{
-
+		
 		LocalDateTime oldestLDT = LocalDateTime.now();
 		
 		String name = "";
 		
+		if(prjctSet.isEmpty())throw new TimeSpanException("No Projects to get an oldest LDT");
+
 		for(JSONObject pJSON: prjctSet)
 		{
 
 			if((isMODProject.test(pJSON)))continue;
+						
 			JSONObject step = getStepOfIndexN(0, pJSON);
 			
+			if(!step.has(jsonKey))continue;
+
+			if((jsonKey.equals(StepJSONKeyz.DLDTKey))&&!(stepHasDLDT(step)))continue;
+			
+			if((jsonKey.equals(StepJSONKeyz.TDTKey))&&!(stepIsTerminated(step)))continue;
+
 			LocalDateTime ldt = extractLDT(step, jsonKey);
+
 			if(ldt.isBefore(oldestLDT))
 			{
 				oldestLDT = ldt;
@@ -289,31 +295,48 @@ public class TimeSpanCreator
     {
 
 		LocalDateTime oldestLDT = LocalDateTime.now();
-		
+
 		String name = "";
-		
+		if(prjctSet.isEmpty())
+		{
+			System.out.println(TerminalXDisplay.formatBashStringBoldAndRed("No Projects!"));
+			new Pair<>(name, oldestLDT);
+		}
+
 		for(JSONObject pJSON: prjctSet)
 		{
 
-			if((projectHasNoDLDT.test(pJSON))&&(jsonKey.equals(DLDTKey)))continue;
-			if((!projectIsTerminated.test(pJSON))&&(jsonKey.equals(TDTKey)))continue;
-			if((isMODProject.test(pJSON))&&(jsonKey.equals(ADTKey)))continue;
+			name = pJSON.getString(nameKey);
+			if((projectHasNoDLDT.test(pJSON))&&(jsonKey.equals(DLDTKey)))
+			{
+		    	System.out.println(TerminalXDisplay.formatBashStringBoldAndRed("Project " + name + " has No DLDT's"));
+				continue;
+			}
+
+			if((!projectIsTerminated.test(pJSON))&&(jsonKey.equals(TDTKey)))
+			{
+		    	System.out.println(TerminalXDisplay.formatBashStringBoldAndRed("Project " + name + " has No TDT's"));
+				continue;
+			}
+
+			if((isMODProject.test(pJSON))&&(jsonKey.equals(ADTKey)))
+			{
+		    	System.out.println(TerminalXDisplay.formatBashStringBoldAndRed("Project " + name + " has No ADT's"));
+				continue;
+			}
 			
 			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
-			if(ldt.isBefore(oldestLDT))
-			{
-				oldestLDT = ldt;
-				name = pJSON.getString(nameKey);
-			}
+			if(ldt.isBefore(oldestLDT))oldestLDT = ldt;
+
 		}
-		
+
     	Pair<String, LocalDateTime> output = new Pair<>(name, oldestLDT);
-    	
+
     	return output;
     }
 	
 
-    public Pair<String, LocalDateTime> youngestStepLDT(String jsonKey) throws IOException, URISyntaxException
+    public Pair<String, LocalDateTime> youngestStepLDT(String jsonKey) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException
     {
 
 		LocalDateTime youngestLDT = oldestStepLDT(jsonKey).getValue();
@@ -325,8 +348,14 @@ public class TimeSpanCreator
 
 			if((isMODProject.test(pJSON)))continue;
 			JSONObject step = getStepOfIndexN(0, pJSON);
+
 			
+			if((jsonKey.equals(StepJSONKeyz.DLDTKey))&&!(stepHasDLDT(step)))continue;
+	
+			if((jsonKey.equals(StepJSONKeyz.TDTKey))&&!(stepIsTerminated(step)))continue;
+
 			LocalDateTime ldt = extractLDT(step, jsonKey);
+			
 			if(ldt.isAfter(youngestLDT))
 			{
 				youngestLDT = ldt;
@@ -365,8 +394,9 @@ public class TimeSpanCreator
     	return output;
     }
     
-    public Pair<String, LocalDateTime> youngestLDTOverall() throws IOException, URISyntaxException, TimeSpanException
+    public Pair<String, LocalDateTime> youngestLDTOverall() throws IOException, URISyntaxException, TimeSpanException, ToolBoxException
     {
+
 	    Pair<String, LocalDateTime> youngProjectDLDTPair = youngestProjectLDT(DLDTKey);
 	    Pair<String, LocalDateTime> youngStepDLDTPair = youngestStepLDT(StepJSONKeyz.DLDTKey);
 	    Pair<String, LocalDateTime> youngProjectTDTPair = youngestProjectLDT(TDTKey);

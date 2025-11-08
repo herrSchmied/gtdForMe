@@ -19,7 +19,7 @@ import org.json.JSONObject;
 
 
 import allgemein.LittleTimeTools;
-
+import jborg.gtdForBash.exceptions.ToolBoxException;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
@@ -65,13 +65,28 @@ public class ProjectJSONToolbox
 	/** Possible Project Deadline Status.*/
 	public static final String prjctDeadlineNone = "No_got_no_Deadline!";
 	/** Possible Status for Step Deadline*/
-	public final static String stepDeadlineNone = "No Step Deadline!";	
+	public final static String stepDeadlineNone = "No_Step_Deadline!";	
 	public static final String deadLineUnknownStr = "UNKNOWN";//If MOD-Project
 
 	public static final String stepIsOkToItSelfMsg = "Step is Ok to it Self.";
 
 	public static final String stepTimeDataIsValide = "Step Time Data is valide.";
 
+	
+	public static boolean stepIsTerminated(JSONObject sJSON)
+	{
+		return sJSON.has(StepJSONKeyz.TDTKey);
+	}
+
+	public static boolean stepHasDLDT(JSONObject sJSON)
+	{
+		if(!sJSON.has(StepJSONKeyz.DLDTKey))return false;
+
+		String dldtStr = sJSON.getString(StepJSONKeyz.DLDTKey);
+		if(dldtStr.equals(stepDeadlineNone))return false;
+		
+		return true;
+	}
 	/**
 	 * Returns the Index of last(youngest) Step JSON Object in
 	 * Project JSON Object. If there is no StepArray or no Steps
@@ -112,11 +127,13 @@ public class ProjectJSONToolbox
 		return stepArray.getJSONObject(indexOfLastStep);
 	}
 
-	public static JSONObject getStepOfIndexN(int n, JSONObject pJson)
+	public static JSONObject getStepOfIndexN(int n, JSONObject pJson) throws ToolBoxException
 	{
 		int indexOfLastStep = getIndexOfLastStepInPrjct(pJson);
-		if(n>indexOfLastStep)return null;
+		if(n>indexOfLastStep)throw new ToolBoxException("Index of Step request to big.");
+		if(n<0)throw new ToolBoxException("Index of Step smaller than Zero.");
 		
+
 		JSONArray stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 	
 		return stepArray.getJSONObject(n);

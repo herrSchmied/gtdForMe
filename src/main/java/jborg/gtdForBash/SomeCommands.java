@@ -1126,14 +1126,14 @@ public class SomeCommands
 			}
     		catch(JSONException e)
 			{
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			}
     		catch(ConsoleToolsException e)
 			{
 				throw new RuntimeException("TerminalTableDisplay did it!");
 			}
-   
+
     		if(map.isEmpty())sLog.logNow("No fails.");
     		else sLog.logNow("Displayed fails.");
  
