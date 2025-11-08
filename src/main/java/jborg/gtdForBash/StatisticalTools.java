@@ -39,9 +39,10 @@ public class StatisticalTools
 	final Set<JSONObject> prjctSet;
 	final TimeSpanCreator tsc;
 
-	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException
+	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException
 	{
-		assert(!prjctSet.isEmpty());
+
+		if(prjctSet==null||prjctSet.isEmpty())throw new StatisticalToolsException("No Projects.");
 		this.prjctSet = prjctSet;
 		tsc = new TimeSpanCreator(prjctSet);
 	}

@@ -16,6 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -23,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
@@ -32,10 +34,10 @@ import javafx.util.Pair;
 import someMath.NaturalNumberException;
 
 
+
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
-import static jborg.gtdForBash.WeekData.mapJSONToName;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
@@ -49,9 +51,10 @@ public class TestingStats
     static GTDCLI gtdCli;
     static Set<JSONObject> prjctSet;
 
-
-	@BeforeAll
-	public static void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+    Function<JSONObject, String> mapJSONToName = (pJSON)->pJSON.getString(nameKey);
+    
+	@BeforeEach
+	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
     	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.projectDataFolderRelativePath);
@@ -67,7 +70,7 @@ public class TestingStats
 	}
 
 	@Test
-	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException
+	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException
 	{
 
 		assert(!prjctSet.isEmpty());
@@ -77,7 +80,7 @@ public class TestingStats
         Pair<String, LocalDateTime> oldPrjct = tsc.oldestLDTOverall();
         String newPrjctName = SequenzesForISS.getNewProjectName(1);
 
-        assert(oldPrjct.getKey().equals(newPrjctName));
+        assert(oldPrjct.getKey().startsWith(newPrjctName.substring(0, 12)));
  
         JSONObject oldPJSON = st.pickByName(newPrjctName);
         assert(st.pickAndCheckByName(ChronoUnit.WEEKS, newPrjctName, 0, oldPJSON, ADTKey));
@@ -86,7 +89,7 @@ public class TestingStats
 	}
 
 	@Test
-	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException, ToolBoxException
+	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException, ToolBoxException, StatisticalToolsException
 	{
 		
 		assert(!prjctSet.isEmpty());

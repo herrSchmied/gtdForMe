@@ -544,8 +544,8 @@ public class TimeSpanData
 	public boolean isInThisTimeSpan(LocalDateTime ldt)
 	{
 
-		LocalDateTime beginBevorBegin = ldt.minusNanos(1);
-		LocalDateTime endAfterEnd = ldt.plusNanos(1);
+		LocalDateTime beginBevorBegin = begin.minusNanos(1);
+		LocalDateTime endAfterEnd = end.plusNanos(1);
 		
 		return ldt.isAfter(beginBevorBegin)&&ldt.isBefore(endAfterEnd);
 	}

@@ -188,8 +188,6 @@ public class SequenzesForISS
 		//starts and ends not like usually.
 		for(int m=1;m<s+1;m++)
 		{
-			
-			LocalDateTime bdt = getBDT(m);
 			String name = getNewProjectName(m);
 			data = data + sequenzNewProject(name);
 		}

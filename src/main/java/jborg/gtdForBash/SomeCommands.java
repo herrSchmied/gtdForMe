@@ -1,10 +1,12 @@
 package jborg.gtdForBash;
 
 
-import java.net.URISyntaxException;
+
 import java.sql.SQLException;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,24 +18,37 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 import allgemein.ExactPeriode;
+
 import allgemein.LittleTimeTools;
+
 import allgemein.SimpleLogger;
+
+
 import consoleTools.BashSigns;
+
 import consoleTools.InputStreamSession;
+
 import consoleTools.TerminalTableDisplay;
+
 
 import jborg.gtdForBash.DBIssues.DBSink;
 import jborg.gtdForBash.exceptions.CLICMDException;
-import jborg.gtdForBash.exceptions.WeekDataException;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
+
+
 import someMath.NaturalNumberException;
+
 import someMath.exceptions.ConsoleToolsException;
+
+
 
 public class SomeCommands
 {

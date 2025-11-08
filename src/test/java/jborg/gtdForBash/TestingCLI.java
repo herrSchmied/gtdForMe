@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import allgemein.LittleTimeTools;
@@ -38,8 +39,8 @@ public class TestingCLI
 	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
 
-	@BeforeAll
-	public static void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	@BeforeEach
+	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
     	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.projectDataFolderRelativePath);

@@ -307,23 +307,10 @@ public class TimeSpanCreator
 		{
 
 			name = pJSON.getString(nameKey);
-			if((projectHasNoDLDT.test(pJSON))&&(jsonKey.equals(DLDTKey)))
-			{
-		    	System.out.println(TerminalXDisplay.formatBashStringBoldAndRed("Project " + name + " has No DLDT's"));
-				continue;
-			}
-
-			if((!projectIsTerminated.test(pJSON))&&(jsonKey.equals(TDTKey)))
-			{
-		    	System.out.println(TerminalXDisplay.formatBashStringBoldAndRed("Project " + name + " has No TDT's"));
-				continue;
-			}
-
-			if((isMODProject.test(pJSON))&&(jsonKey.equals(ADTKey)))
-			{
-		    	System.out.println(TerminalXDisplay.formatBashStringBoldAndRed("Project " + name + " has No ADT's"));
-				continue;
-			}
+			
+			if((projectHasNoDLDT.test(pJSON))&&(jsonKey.equals(DLDTKey)))continue;
+			if((!projectIsTerminated.test(pJSON))&&(jsonKey.equals(TDTKey)))continue;
+			if((isMODProject.test(pJSON))&&(jsonKey.equals(ADTKey)))continue;
 			
 			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
 			if(ldt.isBefore(oldestLDT))oldestLDT = ldt;
