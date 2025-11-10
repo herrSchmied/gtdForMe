@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.junit.jupiter.api.BeforeAll;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +34,7 @@ import javafx.util.Pair;
 import someMath.NaturalNumberException;
 
 
+import static consoleTools.TerminalXDisplay.*;
 
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
@@ -79,9 +80,17 @@ public class TestingStats
         
         Pair<String, LocalDateTime> oldPrjct = tsc.oldestLDTOverall();
         String newPrjctName = SequenzesForISS.getNewProjectName(1);
+        String oldPrjctName = oldPrjct.getKey();
+        
+        System.out.println(formatBashStringBoldAndRed("oldPrjct: " + oldPrjctName + ". oldPrjct length: " + oldPrjctName.length()));
+        System.out.println(formatBashStringBoldAndRed("newPrjct: " + newPrjctName + ". newPrjct length: " + newPrjctName.length()));
 
+        /* TODO: Is not working in Bash
+        */
+        assert(oldPrjctName.substring(0, 12).equals(newPrjctName.substring(0,12)));
         assert(oldPrjct.getKey().startsWith(newPrjctName.substring(0, 12)));
- 
+
+
         JSONObject oldPJSON = st.pickByName(newPrjctName);
         assert(st.pickAndCheckByName(ChronoUnit.WEEKS, newPrjctName, 0, oldPJSON, ADTKey));
 
