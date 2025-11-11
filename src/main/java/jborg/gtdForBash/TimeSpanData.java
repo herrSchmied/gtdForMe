@@ -116,12 +116,14 @@ public class TimeSpanData
 
 	public LocalDateTime getBegin()
 	{
-		return begin;//Remember: can give a copy back?
+		//Giving a Copy back? No because LocalDateTime is immutable!
+		return begin;
 	}
 
 	public LocalDateTime getEnd()
 	{
-		return end;//Remember: can give a copy back?
+		//Giving a Copy back? No because LocalDateTime is immutable!
+		return end;
 	}
 
 	public int getTimeNr()
@@ -342,8 +344,7 @@ public class TimeSpanData
 
 		return outputMap;
 	}
-	
-	//TODO: Maybe a list in case it is more than one?
+
 	public Map<String, LocalDateTime> mostPressingStepDeadline() throws IOException, URISyntaxException, NaturalNumberException
 	{
 
@@ -479,8 +480,7 @@ public class TimeSpanData
 
 		return names;
 	}
-	
-	//TODO: Maybe a list in case it is more than one?
+
 	public Set<String> mostPressingProjectDeadline() throws IOException, URISyntaxException, NaturalNumberException
 	{
 

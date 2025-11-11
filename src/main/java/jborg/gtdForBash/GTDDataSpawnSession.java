@@ -3,6 +3,7 @@ package jborg.gtdForBash;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -256,8 +258,10 @@ public class GTDDataSpawnSession
 	 * @param statusMGMT allowed Statuses for the Project.
 	 * @return JSONObject Project-Data.
 	 * @throws IOException only if something with the InputStreamSession goes wrong.
+	 * @throws URISyntaxException 
+	 * @throws JSONException 
 	 */
-	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException
+	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException, JSONException, URISyntaxException
 	{
 		
 		System.out.println("");
@@ -321,8 +325,10 @@ public class GTDDataSpawnSession
 	 * @param pJson Project-Data. The Step belongs to that Project.
 	 * @throws IOException only if something with the InputStreamSession 
 	 * goes wrong.
+	 * @throws URISyntaxException 
+	 * @throws JSONException 
 	 */
-	public void spawnStep(JSONObject pJson) throws IOException
+	public void spawnStep(JSONObject pJson) throws IOException, JSONException, URISyntaxException
 	{
 
 		JSONObject newStep = new JSONObject();
@@ -453,8 +459,10 @@ public class GTDDataSpawnSession
 	 * @param pJson MOD-Project Data.
 	 
 	 * @throws IOException only when something goes wrong with InputStreamSession.
+	 * @throws URISyntaxException 
+	 * @throws JSONException 
 	 */
-	public void wakeMODProject(JSONObject pJson) throws IOException
+	public void wakeMODProject(JSONObject pJson) throws IOException, JSONException, URISyntaxException
 	{
 		
 		LocalDateTime dldt = null;
@@ -549,10 +557,10 @@ public class GTDDataSpawnSession
 		if(wantToChangeTDTOfStep)
 		{
 			System.out.println(stpTDTHintPrefix + adtStr + stpTDTHintMid + jetztStr);
+			//InputStreamSession makes sure that tdt is between ADT and jetzt.
 			tdt = iss.forcedDateTimeInOneLine(stepWhenTDTR, adt, jetzt);
-			//TODO:Maybe i need to check (above) if tdt is before ndt.
 		}
-			
+
 		sJson.put(StepJSONKeyz.statusKey, stepStatus);
 		pJson.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
 		String when = LittleTimeTools.timeString(tdt);

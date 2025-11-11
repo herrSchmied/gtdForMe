@@ -431,13 +431,13 @@ public class ProjectJSONToolbox
 	 * 
 	 * @return if everything is alright: stepIsOkToItSelfMsg.
 	 * else some: stepIsNotOkayToItSelfMsgList.get(x).
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public static String stepIsOkToItsSelf(JSONObject step)
+	public static String stepIsOkToItsSelf(JSONObject step) throws IOException, URISyntaxException
 	{
-	
-		//stepIsNotOkayToitSelfMsgSet
-		String adtStr = step.getString(StepJSONKeyz.ADTKey);
-		LocalDateTime adt = LittleTimeTools.LDTfromTimeString(adtStr);
+
+		LocalDateTime adt = extractLDT(step, StepJSONKeyz.ADTKey);
 		
 		if(LocalDateTime.now().isBefore(adt))return stepIsNotOkayToItSelfMsgList.get(indexOfStpIsBornAfterNow);
 	
@@ -464,8 +464,10 @@ public class ProjectJSONToolbox
 	 * that is Okay.
 	 * 
 	 * @return true if adding the new Step to Project doesn't create a Time Paradox.
+	 * @throws URISyntaxException
+	 * @throws IOException 
 	 */
-	public static boolean stepDataIsValide(JSONObject pJson, JSONObject newStep)
+	public static boolean stepDataIsValide(JSONObject pJson, JSONObject newStep) throws IOException, URISyntaxException
 	{
 	
 		int index = getIndexOfLastStepInPrjct(pJson);

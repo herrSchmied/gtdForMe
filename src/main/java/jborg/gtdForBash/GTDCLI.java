@@ -237,7 +237,7 @@ public class GTDCLI implements Beholder<String>
     }
    
     
-	public void nxtStp(JSONObject pJSON) throws InputArgumentException, IOException
+	public void nxtStp(JSONObject pJSON) throws InputArgumentException, IOException, JSONException, URISyntaxException
     {
     	ds.spawnStep(pJSON);
     }

@@ -85,8 +85,7 @@ public class TestingStats
         System.out.println(formatBashStringBoldAndRed("oldPrjct: " + oldPrjctName + ". oldPrjct length: " + oldPrjctName.length()));
         System.out.println(formatBashStringBoldAndRed("newPrjct: " + newPrjctName + ". newPrjct length: " + newPrjctName.length()));
 
-        /* TODO: Is not working in Bash
-        */
+
         assert(oldPrjctName.substring(0, 12).equals(newPrjctName.substring(0,12)));
         assert(oldPrjct.getKey().startsWith(newPrjctName.substring(0, 12)));
 
@@ -220,34 +219,25 @@ public class TestingStats
         List<Pair<LocalDateTime, LocalDateTime>> wochen = tsc.createTimeSpanFrames(ChronoUnit.WEEKS);
 
         int weeksSize = wochen.size();
-        //int lastWeekIndex = weeksSize-1;
 
         System.out.println("Number of weeks: " + weeksSize);
 
 		Point wknrAndN = st.weekWithMostLDTs(NDTKey);
 		System.out.println("Week with the most NDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written.");
-		//assert((wknrAndN.x)==(lastWeekIndex));
-		//assert((wknrAndN.y)==(prjctSet.size()));
 
 		wknrAndN = st.weekWithMostLDTs(ADTKey);
 		System.out.println("Week with the most ADTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written.");
-		//assert((wknrAndN.x)==(lastWeekIndex));
-		//assert((wknrAndN.y)==(prjctSet.size()));
 
 		wknrAndN = st.weekWithMostLDTs(DLDTKey);
 		if(wknrAndN!=null)
 		{
 			System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
-			//assert((wknrAndN.x)==(lastWeekIndex));
-			//assert((wknrAndN.y)==(6));
 		}
 
 		wknrAndN = st.weekWithMostLDTs(TDTKey);
 		if(wknrAndN!=null)
 		{
 			System.out.println("Week with the most TDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Terminated.");
-			//assert((wknrAndN.x)==(lastWeekIndex));
-			//assert((wknrAndN.y)==(2));//TODO:Why Six?
 		}
 	}
 }

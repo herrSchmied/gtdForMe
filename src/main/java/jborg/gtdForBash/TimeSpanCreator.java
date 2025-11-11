@@ -50,7 +50,7 @@ public class TimeSpanCreator
 	
 	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException
 	{
-		//TODO: end must be after begin and both need to be not null!! Throw Exception!!!!
+
 		if(prjctSet.isEmpty()) throw new TimeSpanException("No Projects to evaluate.");
 		this.prjctSet = prjctSet;
 		

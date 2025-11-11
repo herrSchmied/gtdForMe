@@ -2,6 +2,7 @@ package jborg.gtdForBash;
 
 
 
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 
 import java.time.LocalDateTime;
@@ -290,7 +291,15 @@ public class SomeCommands
 		{
 
 			sLog.logNow("Creating new Project.");
-			JSONObject pJSON = ds.spawnNewProject(knownProjects.keySet(), states);
+			JSONObject pJSON = null;
+			try
+			{
+				pJSON = ds.spawnNewProject(knownProjects.keySet(), states);
+			}
+			catch(JSONException | URISyntaxException e)
+			{
+				e.printStackTrace();
+			}
 
 			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
 			knownProjects.put(name, pJSON);
@@ -358,12 +367,19 @@ public class SomeCommands
 				if(status.equals(StatusMGMT.mod))continue;
 				
     			String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
+
+    			//JSONObject lastStep = getLastStep(pJSON);
     				
-    			JSONObject lastStep = getLastStep(pJSON);
-    				
-    			String stepDLDTStr = lastStep.getString(StepJSONKeyz.DLDTKey);
-    			if(stepDLDTStr.equals(stepDeadlineNone))continue;
-    			LocalDateTime stepDLDT = LittleTimeTools.LDTfromTimeString(stepDLDTStr);
+    			LocalDateTime stepDLDT = null;
+				try
+				{
+	    			if(projectHasNoDLDT.test(pJSON))continue;
+					stepDLDT = extractLDT(pJSON, DLDTKey);
+				}
+				catch(URISyntaxException e)
+				{
+					e.printStackTrace();
+				}
     				
     			String dauer = new ExactPeriode(jetzt, stepDLDT).toString();
     				
@@ -550,7 +566,6 @@ public class SomeCommands
 			}
     		catch (JSONException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     		catch(ConsoleToolsException e)
@@ -593,7 +608,6 @@ public class SomeCommands
 			}
 			catch(JSONException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			catch(ConsoleToolsException e)
@@ -857,7 +871,6 @@ public class SomeCommands
 			}
     		catch(JSONException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     		catch(ConsoleToolsException e)
@@ -899,7 +912,15 @@ public class SomeCommands
 				
 			JSONObject pJSON = knownProjects.get(prjctName);
 			knownProjects.remove(prjctName);
-			ds.wakeMODProject(pJSON);
+			
+			try
+			{
+				ds.wakeMODProject(pJSON);
+			}
+			catch(JSONException | URISyntaxException e)
+			{
+				e.printStackTrace();
+			}
 			knownProjects.put(prjctName, pJSON);
 			
 			return "";
@@ -947,7 +968,14 @@ public class SomeCommands
 				throw new CLICMDException(sorryDeadlineAbuse);
     		}
  
-    		ds.spawnStep(pJSON);
+    		try
+			{
+				ds.spawnStep(pJSON);
+			}
+    		catch(JSONException | URISyntaxException e)
+			{
+				e.printStackTrace();
+			}
     		sLog.logNow("Step created.");
 
     		return pJSON;
@@ -1054,15 +1082,8 @@ public class SomeCommands
 		
 		registerCmd(terminate_Step, pmcSetName, ioArray, killStep);
 		
-		MeatOfCLICmd<String> hilfe = (s)->
-		{
-			sLog.logNow("Help display.");
-			String output = "Not yet Installed.";//TODO:;
-			System.out.println(output);
-			
-			return output;
-		};
-		
+		MeatOfCLICmd<String> hilfe = listCmds; //Remember: For Now.
+
     	ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, true, true, false));
 	
@@ -1095,7 +1116,6 @@ public class SomeCommands
 			}
     		catch(JSONException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     		catch(ConsoleToolsException e)
