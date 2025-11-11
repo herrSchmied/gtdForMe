@@ -22,12 +22,13 @@ import java.util.stream.Collectors;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
+import allgemein.LittleTimeTools;
 import javafx.util.Pair;
 
 
@@ -67,7 +68,39 @@ public class TestingStats
     	}
 
     	prjctSet = ProjectSetForTesting.get();
+    	
     	assert(!prjctSet.isEmpty());
+	}
+
+	public void makeUpProjectWithLaterNDTAndADT()
+	{
+		
+		JSONObject pJSON = new JSONObject();
+		
+		pJSON.put(nameKey, "One_Week_Later");
+		pJSON.put(statusKey, StatusMGMT.atbd);
+		pJSON.put(goalKey, "Testing.");
+		
+		LocalDateTime ldt = LocalDateTime.now().plusDays(7);
+		String ldtStr =  LittleTimeTools.timeString(ldt);
+		pJSON.put(NDTKey, ldtStr);
+		pJSON.put(ADTKey, ldtStr);
+
+
+		JSONObject sJSON = new JSONObject();
+		sJSON.put(StepJSONKeyz.descKey, "Step by Step .. ooh baby!");
+		sJSON.put(StepJSONKeyz.statusKey, StatusMGMT.atbd);
+		
+		ldt = ldt.plusSeconds(70);
+		ldtStr = LittleTimeTools.timeString(ldt);
+		sJSON.put(StepJSONKeyz.ADTKey, ldtStr);
+		
+		JSONArray steps = new JSONArray();
+		steps.put(0, sJSON);
+		pJSON.put(stepArrayKey, steps);
+
+		prjctSet.add(pJSON);
+		
 	}
 
 	@Test
@@ -99,7 +132,8 @@ public class TestingStats
 	@Test
 	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException, ToolBoxException, StatisticalToolsException
 	{
-		
+		makeUpProjectWithLaterNDTAndADT();
+
 		assert(!prjctSet.isEmpty());
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
@@ -193,8 +227,8 @@ public class TestingStats
 
 			if(n==1)
 			{
-				assert(projectsWritten==0);
-				assert(projectsActive==5);
+				assert(projectsWritten==1);
+				assert(projectsActive==6);
 				assert(projectsSucceeded==0);
 				assert(projectsFailed==0);
 			}
