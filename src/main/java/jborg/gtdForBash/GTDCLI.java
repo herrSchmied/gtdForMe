@@ -41,8 +41,8 @@ import allgemein.SimpleLogger;
 
 public class GTDCLI implements Beholder<String>
 {
-	
-	
+
+
 	private final String statesFileName = "statusMGMT.states";
 	private final StatusMGMT states = loadStates();
 	
@@ -178,7 +178,7 @@ public class GTDCLI implements Beholder<String>
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
-    
+
     public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException
     {
     	

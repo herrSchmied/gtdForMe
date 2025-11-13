@@ -115,8 +115,8 @@ public class TestingStats
         String newPrjctName = SequenzesForISS.getNewProjectName(1);
         String oldPrjctName = oldPrjct.getKey();
         
-        System.out.println(formatBashStringBoldAndRed("oldPrjct: " + oldPrjctName + ". oldPrjct length: " + oldPrjctName.length()));
-        System.out.println(formatBashStringBoldAndRed("newPrjct: " + newPrjctName + ". newPrjct length: " + newPrjctName.length()));
+        System.out.println(formatBashStringBoldAndRed("oldPrjct: " + oldPrjctName + ". oldPrjct(0,12): " + oldPrjctName.substring(0,12)));
+        System.out.println(formatBashStringBoldAndRed("newPrjct: " + newPrjctName + ". newPrjct(0,12): " + newPrjctName.substring(0,12)));
 
 
         assert(oldPrjctName.substring(0, 12).equals(newPrjctName.substring(0,12)));
