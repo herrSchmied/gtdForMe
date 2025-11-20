@@ -1,12 +1,14 @@
 package jborg.gtdForBash;
 
 
+import static consoleTools.TerminalXDisplay.formatBashStringBoldAndGreen;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -28,7 +30,14 @@ public class ValidationTests
 	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.projectDataFolderRelativePath);
+	    // Create a guaranteed-empty temp directory for all project data
+        Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
+
+        // IMPORTANT: Override the CLI project data directory for this test
+        GTDCLI.setDataFolder(tempProjectDir);
+        System.out.println(formatBashStringBoldAndGreen(GTDCLI.getDataFolder().toString()));
+
+    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.getDataFolder());
     	
     	for(File file: listOfFiles)
     	{
@@ -37,6 +46,8 @@ public class ValidationTests
     	}
   	
 		projects = ProjectSetForTesting.get();
+		
+		assert(!projects.isEmpty());
 	}
 
 	@Test

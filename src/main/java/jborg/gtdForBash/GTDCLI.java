@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import java.util.Map;
@@ -48,7 +48,7 @@ public class GTDCLI implements Beholder<String>
 	
 	//private final List<String> history = new ArrayList<>();
 	
-	public static final String projectDataFolderRelativePath = "projectDATA/";
+	private static Path projectDataFolderRelativePath = Paths.get("projectDATA/");
 	private static final String actionLog = "activityLog";
 	private final SimpleLogger sLog = new SimpleLogger(projectDataFolderRelativePath+actionLog, "Log of GTD ");
 	
@@ -102,7 +102,7 @@ public class GTDCLI implements Beholder<String>
     	System.out.println(sLog.getSessionString());
     	
     	ds = new GTDDataSpawnSession(this.iss);
-    	Path p = Path.of(getPathToDataFolder());
+    	Path p = getDataFolder();
     	
 		boolean isThereDataFolder = Files.exists(p)&&Files.isDirectory(p);
 
@@ -127,9 +127,9 @@ public class GTDCLI implements Beholder<String>
 		else 
 		{
 			System.out.println(thereIsNoDataFolder);
-			String directoryPath = getPathToDataFolder();
+			Path directoryPath = getDataFolder();
 
-	        File directory = new File(directoryPath);
+	        File directory = directoryPath.toFile();
 
 	        // Create the directory
 	        if (directory.mkdir())
@@ -241,16 +241,11 @@ public class GTDCLI implements Beholder<String>
     {
     	ds.spawnStep(pJSON);
     }
-  
-    public static String getPathToDataFolder()
-    {
-    	return projectDataFolderRelativePath;
-    }
 
     public StatusMGMT loadStates()
     {
     	
-    	Path p = Path.of(getPathToDataFolder()+statesFileName);
+    	Path p = Path.of(getDataFolder()+statesFileName);
     	
     	boolean thereAreStates = (Files.exists(p));
     	StatusMGMT tmpStates;
@@ -297,12 +292,12 @@ public class GTDCLI implements Beholder<String>
     public Set<JSONObject> loadProjects() throws IOException, URISyntaxException
     {
     	
-    	String path = getPathToDataFolder();
+    	Path path = getDataFolder();
     	
     	return loadProjects(path);
     }
 
-    public static Set<JSONObject> loadProjects(String path) throws IOException, URISyntaxException
+    public static Set<JSONObject> loadProjects(Path path) throws IOException, URISyntaxException
     {
 
     	Set<JSONObject> prjctSet = new HashSet<>();
@@ -328,10 +323,10 @@ public class GTDCLI implements Beholder<String>
     	return prjctSet;
     }
 
-    public static File[] getListOfFilesFromDataFolder(String path)
+    public static File[] getListOfFilesFromDataFolder(Path path)
     {
     	
-    	File folder = new File(path);
+    	File folder = path.toFile();
 
     	File[] listOfFiles = folder.listFiles();
     	
@@ -343,14 +338,14 @@ public class GTDCLI implements Beholder<String>
     {
     	for(JSONObject jo: knownProjects.values())
     	{
-    		String path = getPathToDataFolder();
+    		Path path = getDataFolder();
     		saveText(path + jo.getString(ProjectJSONKeyz.nameKey)+fileMarker, jo.toString(jsonPrintStyle));
     	}
     }
      
     private void saveStatusMGMT() throws IOException
     {
-    	saveObject(getPathToDataFolder()+statesFileName, StatusMGMT.getInstance());
+    	saveObject(getDataFolder()+statesFileName, StatusMGMT.getInstance());
     }
 
     public void saveAll() throws JSONException, IOException
@@ -384,6 +379,17 @@ public class GTDCLI implements Beholder<String>
     {
     	return iss;
     }
+    
+    public static void setDataFolder(Path newDataFolder)
+    {
+    	projectDataFolderRelativePath = newDataFolder;
+    }
+    
+    public static Path getDataFolder()
+    {
+    	return projectDataFolderRelativePath;
+    }
+
 }
 
 

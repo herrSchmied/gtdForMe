@@ -537,7 +537,7 @@ public class ProjectJSONToolbox
 	public LocalDateTime extractLDT(String name, String key) throws IOException, URISyntaxException
 	{
 		
-        Set<JSONObject> jsonSet = GTDCLI.loadProjects(GTDCLI.getPathToDataFolder());
+        Set<JSONObject> jsonSet = GTDCLI.loadProjects(GTDCLI.getDataFolder());
 
 	    JSONObject pJSON = pickProjectByName(name, jsonSet);
 

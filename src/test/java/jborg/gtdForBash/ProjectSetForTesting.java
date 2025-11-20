@@ -1,11 +1,13 @@
 package jborg.gtdForBash;
 
-import static jborg.gtdForBash.SequenzesForISS.sequenzManyProjects;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
 import java.net.URISyntaxException;
+
 import java.time.LocalDateTime;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,12 +15,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 import allgemein.LittleTimeTools;
+
+
 import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
+import static consoleTools.TerminalXDisplay.*;
+
+
 import someMath.NaturalNumberException;
+
+
 import static jborg.gtdForBash.ProjectJSONToolbox.extractLDT;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
+import static jborg.gtdForBash.SequenzesForISS.sequenzManyProjects;
+
 
 public class ProjectSetForTesting
 {
@@ -28,16 +40,23 @@ public class ProjectSetForTesting
 	public static Set<JSONObject> get() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 		
+    
 		String data = sequenzManyProjects();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 
         GTDCLI cli = new GTDCLI(iss);
+        System.out.println(formatBashStringBoldAndBlue(GTDCLI.getDataFolder().toString()));
+        
         cli.saveAll();
         
+        prjctSet = GTDCLI.loadProjects(GTDCLI.getDataFolder());
+        System.out.println(prjctSet);
         
-        return cli.loadProjects();
+        assert(!prjctSet.isEmpty());
+
+        return prjctSet;
 	}
 	
 	public static void alterFirstProjectsDLDT() throws IOException, URISyntaxException

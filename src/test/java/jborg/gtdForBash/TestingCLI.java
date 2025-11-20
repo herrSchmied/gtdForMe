@@ -5,7 +5,8 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,6 +28,7 @@ import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
+import static consoleTools.TerminalXDisplay.formatBashStringBoldAndGreen;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 public class TestingCLI
@@ -43,13 +45,12 @@ public class TestingCLI
 	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.projectDataFolderRelativePath);
-    	
-    	for(File file: listOfFiles)
-    	{
-    		
-    		if(file.isFile())file.delete();
-    	}
+	    // Create a guaranteed-empty temp directory for all project data
+        Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
+
+        // IMPORTANT: Override the CLI project data directory for this test
+        GTDCLI.setDataFolder(tempProjectDir);
+        System.out.println(formatBashStringBoldAndGreen(GTDCLI.getDataFolder().toString()));
     	
 		projects = ProjectSetForTesting.get();
 	}

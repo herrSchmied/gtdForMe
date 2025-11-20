@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -23,12 +25,14 @@ import java.util.stream.Collectors;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
-
-
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+
 import allgemein.LittleTimeTools;
+
+
 import javafx.util.Pair;
 
 
@@ -36,6 +40,7 @@ import someMath.NaturalNumberException;
 
 
 import static consoleTools.TerminalXDisplay.*;
+
 
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
@@ -56,16 +61,17 @@ public class TestingStats
     Function<JSONObject, String> mapJSONToName = (pJSON)->pJSON.getString(nameKey);
     
 	@BeforeEach
-	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.projectDataFolderRelativePath);
+	    // Create a guaranteed-empty temp directory for all project data
+        Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
 
-    	for(File file: listOfFiles)
-    	{
-	
-    		if(file.isFile())file.delete();
-    	}
+        // IMPORTANT: Override the CLI project data directory for this test
+        GTDCLI.setDataFolder(tempProjectDir);
+        System.out.println(formatBashStringBoldAndGreen(GTDCLI.getDataFolder().toString()));
+
+    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.getDataFolder());
 
     	prjctSet = ProjectSetForTesting.get();
     	
@@ -117,7 +123,7 @@ public class TestingStats
         
         System.out.println(formatBashStringBoldAndRed("oldPrjct: " + oldPrjctName + ". oldPrjct(0,12): " + oldPrjctName.substring(0,12)));
         System.out.println(formatBashStringBoldAndRed("newPrjct: " + newPrjctName + ". newPrjct(0,12): " + newPrjctName.substring(0,12)));
-
+        System.out.println("Working Folder:" + Paths.get("").toAbsolutePath());
 
         assert(oldPrjctName.substring(0, 12).equals(newPrjctName.substring(0,12)));
         assert(oldPrjct.getKey().startsWith(newPrjctName.substring(0, 12)));
@@ -148,7 +154,7 @@ public class TestingStats
         }
         
         int weeksSize = wochen.size();
-        int lastWeekIndex = weeksSize-1;
+        //int lastWeekIndex = weeksSize-1;
         int firstWeekIndex = 0;
         
         JSONObject pJSON = st.pickByName(wakeProjectName);
