@@ -37,7 +37,7 @@ public class ValidationTests
         GTDCLI.setDataFolder(tempProjectDir);
         System.out.println(formatBashStringBoldAndGreen(GTDCLI.getDataFolder().toString()));
 
-    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder(GTDCLI.getDataFolder());
+    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder();
     	
     	for(File file: listOfFiles)
     	{

@@ -1,27 +1,30 @@
 package jborg.gtdForBash;
 
 
-import java.io.File;
-import java.io.IOException;
-
-
-import java.net.URISyntaxException;
-
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import java.io.File;
+import java.io.IOException;
+
+import java.net.URISyntaxException;
+
 import java.time.LocalDateTime;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
-
 import java.util.HashMap;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+
+import someMath.NaturalNumberException;
+
+
+import allgemein.SimpleLogger;
 
 import allgemein.Beholder;
 
@@ -29,14 +32,18 @@ import allgemein.LittleTimeTools;
 
 
 import consoleTools.BashSigns;
+
 import consoleTools.InputArgumentException;
+
 import consoleTools.InputStreamSession;
+
+
 import jborg.gtdForBash.exceptions.CLICMDException;
-import someMath.NaturalNumberException;
+import static jborg.gtdForBash.ProjectJSONKeyz.*;
+
 
 import static fileShortCuts.TextAndObjSaveAndLoad.*;
 
-import allgemein.SimpleLogger;
 
 
 public class GTDCLI implements Beholder<String>
@@ -302,7 +309,7 @@ public class GTDCLI implements Beholder<String>
 
     	Set<JSONObject> prjctSet = new HashSet<>();
 
-    	File[] listOfFiles = getListOfFilesFromDataFolder(path);
+    	File[] listOfFiles = getListOfFilesFromDataFolder();
 
     	if(listOfFiles==null)return prjctSet;
     	
@@ -312,7 +319,7 @@ public class GTDCLI implements Beholder<String>
     		if(file.isFile()&&name.endsWith(fileMarker))
     		{
     			
-    			String joText = loadText(path + name);
+    			String joText = loadText(path +"/" + name);
     			
     			JSONObject jo = new JSONObject(joText);
     			
@@ -323,10 +330,13 @@ public class GTDCLI implements Beholder<String>
     	return prjctSet;
     }
 
-    public static File[] getListOfFilesFromDataFolder(Path path)
+    public static File[] getListOfFilesFromDataFolder()
     {
+
+    	System.out.println("Listing Files in Path: " + projectDataFolderRelativePath.toString());
+    	File folder = projectDataFolderRelativePath.toFile();
     	
-    	File folder = path.toFile();
+    	System.out.println(Files.isDirectory(projectDataFolderRelativePath));
 
     	File[] listOfFiles = folder.listFiles();
     	
@@ -336,10 +346,13 @@ public class GTDCLI implements Beholder<String>
     
     public void saveProjects() throws JSONException, IOException
     {
+    	
+    	
     	for(JSONObject jo: knownProjects.values())
     	{
-    		Path path = getDataFolder();
-    		saveText(path + jo.getString(ProjectJSONKeyz.nameKey)+fileMarker, jo.toString(jsonPrintStyle));
+
+    		System.out.println("Saving Project: " + jo.getString(nameKey) + ". In Folder: " + getDataFolder());
+    		saveText(getDataFolder().toString() + "/" + jo.getString(nameKey)+fileMarker, jo.toString(jsonPrintStyle));
     	}
     }
      
@@ -379,7 +392,7 @@ public class GTDCLI implements Beholder<String>
     {
     	return iss;
     }
-    
+
     public static void setDataFolder(Path newDataFolder)
     {
     	projectDataFolderRelativePath = newDataFolder;
@@ -389,7 +402,4 @@ public class GTDCLI implements Beholder<String>
     {
     	return projectDataFolderRelativePath;
     }
-
-}
-
-
+ }

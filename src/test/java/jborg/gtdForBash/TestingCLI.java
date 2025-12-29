@@ -1,7 +1,6 @@
 package jborg.gtdForBash;
 
 
-import java.io.File;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
@@ -11,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,14 +40,14 @@ public class TestingCLI
 	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
 	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
-
 	@BeforeEach
 	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
 	    // Create a guaranteed-empty temp directory for all project data
         Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
-
+        FileUtils.cleanDirectory(tempProjectDir.toFile());
+        
         // IMPORTANT: Override the CLI project data directory for this test
         GTDCLI.setDataFolder(tempProjectDir);
         System.out.println(formatBashStringBoldAndGreen(GTDCLI.getDataFolder().toString()));
