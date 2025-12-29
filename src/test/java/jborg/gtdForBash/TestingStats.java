@@ -67,9 +67,10 @@ public class TestingStats
 	void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
+		Path base = Paths.get(System.getProperty("java.io.tmpdir"));
 	    // Create a guaranteed-empty temp directory for all project data
-        Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
-        FileUtils.cleanDirectory(tempProjectDir.toFile());
+        Path tempProjectDir = base.resolve("gtdTestProjectData");
+		Path p = Files.createDirectories(tempProjectDir);
         
         // IMPORTANT: Override the CLI project data directory for this test
         GTDCLI.setDataFolder(tempProjectDir);

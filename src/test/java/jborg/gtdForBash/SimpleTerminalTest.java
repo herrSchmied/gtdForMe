@@ -44,8 +44,6 @@ public class SimpleTerminalTest
 
 		Path base = Paths.get(System.getProperty("java.io.tmpdir"));
 		Path tempProjectDir = base.resolve("gtdTestProjectData");
-	    FileUtils.cleanDirectory(tempProjectDir.toFile());
-	       
 		Path p = Files.createDirectories(tempProjectDir);
 	    // Create a guaranteed-empty temp directory for all project data
       

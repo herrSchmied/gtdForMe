@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,9 +45,10 @@ public class TestingCLI
 	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
+		Path base = Paths.get(System.getProperty("java.io.tmpdir"));
 	    // Create a guaranteed-empty temp directory for all project data
-        Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
-        FileUtils.cleanDirectory(tempProjectDir.toFile());
+        Path tempProjectDir = base.resolve("gtdTestProjectData");
+		Path p = Files.createDirectories(tempProjectDir);
         
         // IMPORTANT: Override the CLI project data directory for this test
         GTDCLI.setDataFolder(tempProjectDir);
