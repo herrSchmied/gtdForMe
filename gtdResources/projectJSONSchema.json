@@ -35,7 +35,10 @@
 		"Steps":
 		{
 			"description": "Steps to further the Project.",
-			"type": "array"
+			"type": "array",
+			"itemes": { "type": "string"},
+			"minItems": 1,
+			"required": ["Description_of_Step", "Status_of_Step", "ADT_of_Step"]
 		},
 		"DLDT_of_Project":
 		{

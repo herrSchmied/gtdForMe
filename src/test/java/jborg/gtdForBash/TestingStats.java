@@ -64,22 +64,11 @@ public class TestingStats
     Function<JSONObject, String> mapJSONToName = (pJSON)->pJSON.getString(nameKey);
     
 	@BeforeEach
-	void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException
 	{
 
-		Path base = Paths.get(System.getProperty("java.io.tmpdir"));
-	    // Create a guaranteed-empty temp directory for all project data
-        Path tempProjectDir = base.resolve("gtdTestProjectData");
-		Path p = Files.createDirectories(tempProjectDir);
-        
-        // IMPORTANT: Override the CLI project data directory for this test
-        GTDCLI.setDataFolder(tempProjectDir);
-        System.out.println(formatBashStringBoldAndGreen(GTDCLI.getDataFolder().toString()));
+		prjctSet = ProjectSetForTesting.get();
 
-    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder();
-    	
-    	prjctSet = ProjectSetForTesting.get();
-    	
     	assert(!prjctSet.isEmpty());
 	}
 
@@ -141,11 +130,15 @@ public class TestingStats
 	}
 
 	@Test
-	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException, ToolBoxException, StatisticalToolsException
+	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException
 	{
 		makeUpProjectWithLaterNDTAndADT();
 
 		assert(!prjctSet.isEmpty());
+		System.out.println(prjctSet);
+		Thread.sleep(3000);
+		
+		
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         

@@ -180,16 +180,17 @@ public class SequenzesForISS
 
 	public static String sequenzOfFourNewProjects()
 	{
+
 		int s = 4;
 		String data = "";
-		
+
 		//starts and ends not like usually.
 		for(int m=1;m<s+1;m++)
 		{
 			String name = getNewProjectName(m);
 			data = data + sequenzNewProject(name);
 		}
-		
+
 		return data;
 	}
 	
@@ -203,7 +204,6 @@ public class SequenzesForISS
 	public static String sequenzManyProjects()
 	{
 
-		
 		String data = sequenzOfFourNewProjects()
 				+ sequenzAddNote(getNewProjectName(2))
 				+ sequenzKillStep(getNewProjectName(3))
@@ -221,7 +221,7 @@ public class SequenzesForISS
 
 		return data;
 	}
-	
+
 	public static String getNewProjectName(int n)
 	{
 		return "New_Project_"+n;

@@ -333,17 +333,10 @@ public class GTDCLI implements Beholder<String>
     public static File[] getListOfFilesFromDataFolder()
     {
 
-    	System.out.println("Listing Files in Path: " + projectDataFolderRelativePath.toString());
     	File folder = projectDataFolderRelativePath.toFile();
-    	
-    	System.out.println(Files.isDirectory(projectDataFolderRelativePath));
-
-    	File[] listOfFiles = folder.listFiles();
-    	
-    	return listOfFiles;
+    	return folder.listFiles();
     }
-    
-    
+
     public void saveProjects() throws JSONException, IOException
     {
     	
