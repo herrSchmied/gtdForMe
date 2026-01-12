@@ -339,12 +339,8 @@ public class GTDCLI implements Beholder<String>
 
     public void saveProjects() throws JSONException, IOException
     {
-    	
-    	
     	for(JSONObject jo: knownProjects.values())
     	{
-
-    		System.out.println("Saving Project: " + jo.getString(nameKey) + ". In Folder: " + getDataFolder());
     		saveText(getDataFolder().toString() + "/" + jo.getString(nameKey)+fileMarker, jo.toString(jsonPrintStyle));
     	}
     }

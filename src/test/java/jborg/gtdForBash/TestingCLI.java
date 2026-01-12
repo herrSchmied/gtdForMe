@@ -1,22 +1,16 @@
 package jborg.gtdForBash;
 
 
-import java.io.File;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,13 +24,11 @@ import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
-import static consoleTools.TerminalXDisplay.formatBashStringBoldAndGreen;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 public class TestingCLI
 {
 
-	static GTDCLI gtdCli;
 	static Set<JSONObject> projects = new HashSet<>();
 
 	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
