@@ -2,11 +2,6 @@ package jborg.gtdForBash;
 
 
 
-import java.sql.SQLException;
-
-import org.junit.jupiter.api.Test;
-
-import jborg.gtdForBash.DBIssues.DBSink;
 
 public class DBTestGetQuery
 {
