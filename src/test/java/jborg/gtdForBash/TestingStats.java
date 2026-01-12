@@ -275,12 +275,12 @@ public class TestingStats
 		}
 	}
 	
-		public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
-		{
+	public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
+	{
 
-	        LocalDateTime ldt = extractLDT(pJSON, jsonKey);
-	        TimeSpanData tsd = st.tsc.getTimeSpanList(cu).get(unitNr);
-	        
-			return tsd.isInThisTimeSpan(ldt);
-		}
+		LocalDateTime ldt = extractLDT(pJSON, jsonKey);
+		TimeSpanData tsd = st.tsc.getTimeSpanList(cu).get(unitNr);
+
+		return tsd.isInThisTimeSpan(ldt);
+	}
 }
