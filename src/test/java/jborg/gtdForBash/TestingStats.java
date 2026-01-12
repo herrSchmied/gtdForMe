@@ -104,7 +104,7 @@ public class TestingStats
 	}
 
 	@Test
-	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException
+	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException
 	{
 
 		assert(!prjctSet.isEmpty());
@@ -115,10 +115,14 @@ public class TestingStats
         String newPrjctName = SequenzesForISS.getNewProjectName(1);
         String oldPrjctName = oldPrjct.getKey();
         
-        //assert(oldPrjctName.equals(newPrjctName));
+        System.out.println(formatBashStringBoldAndYellow("OldProject: " + oldPrjctName));
+        System.out.println(formatBashStringBoldAndGreen("NewProject: " + newPrjctName));
+        Thread.sleep(2000);
 
         JSONObject oldPJSON = st.pickByName(newPrjctName);
-        assert(st.pickAndCheckByName(ChronoUnit.WEEKS, newPrjctName, 0, oldPJSON, ADTKey));
+        
+        int weekNr = 0;
+        assert(pickAndCheckByName(ChronoUnit.WEEKS, newPrjctName, weekNr, oldPJSON, ADTKey, st));
 
         System.out.println("Youngest: " + tsc.youngestLDTOverall());
 	}
@@ -148,33 +152,33 @@ public class TestingStats
         int firstWeekIndex = 0;
         
         JSONObject pJSON = st.pickByName(wakeProjectName);
-		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, ADTKey));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, ADTKey, st));
 		
 		pJSON = st.pickByName(modPrjctName);
-		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, modPrjctName, firstWeekIndex, pJSON, NDTKey));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, modPrjctName, firstWeekIndex, pJSON, NDTKey, st));
 		
 		String addNotePrjctName = SequenzesForISS.getNewProjectName(2);
 		pJSON = st.pickByName(addNotePrjctName);
-		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, addNotePrjctName, firstWeekIndex, pJSON, ADTKey));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, addNotePrjctName, firstWeekIndex, pJSON, ADTKey, st));
 
 		pJSON = st.pickByName(killPrjctNameNoDLDT);
-		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, killPrjctNameNoDLDT, firstWeekIndex, pJSON, ADTKey));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, killPrjctNameNoDLDT, firstWeekIndex, pJSON, ADTKey, st));
 		
 		String killPrjctName = SequenzesForISS.getNewProjectName(3);
 		pJSON = st.pickByName(killPrjctName);
-		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, killPrjctName, firstWeekIndex, pJSON, ADTKey));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, killPrjctName, firstWeekIndex, pJSON, ADTKey, st));
 		assert(projectIsTerminated.test(pJSON));
 		
 		String killStepPrjctName = SequenzesForISS.getNewProjectName(3);
 		pJSON = st.pickByName(killStepPrjctName);
-		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, killStepPrjctName, firstWeekIndex, pJSON, ADTKey));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, killStepPrjctName, firstWeekIndex, pJSON, ADTKey, st));
 
 		String appendStpPrjctName = SequenzesForISS.getNewProjectName(4);
 		pJSON = st.pickByName(appendStpPrjctName);
-		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, appendStpPrjctName, firstWeekIndex, pJSON, ADTKey));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, appendStpPrjctName, firstWeekIndex, pJSON, ADTKey, st));
 	
 		pJSON = st.pickByName(newPrjctNoDLDT);
-		assert(st.pickAndCheckByName(ChronoUnit.WEEKS, newPrjctNoDLDT, firstWeekIndex, pJSON, ADTKey));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, newPrjctNoDLDT, firstWeekIndex, pJSON, ADTKey, st));
 
 		for(int n=0;n<weeksSize;n++)
 		{
@@ -270,4 +274,13 @@ public class TestingStats
 			System.out.println("Week with the most TDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Terminated.");
 		}
 	}
+	
+		public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
+		{
+
+	        LocalDateTime ldt = extractLDT(pJSON, jsonKey);
+	        TimeSpanData tsd = st.tsc.getTimeSpanList(cu).get(unitNr);
+	        
+			return tsd.isInThisTimeSpan(ldt);
+		}
 }

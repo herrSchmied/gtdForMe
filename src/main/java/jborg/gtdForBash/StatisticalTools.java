@@ -47,16 +47,7 @@ public class StatisticalTools
 		tsc = new TimeSpanCreator(prjctSet);
 	}
 
-    //Remember: should this Method be here?
-	public boolean pickAndCheckByName(ChronoUnit cu, String name, int n, JSONObject pJSON, String jsonKey) throws IOException, URISyntaxException, TimeSpanException
-	{
-
-        LocalDateTime ldt = extractLDT(pJSON, jsonKey);
-        TimeSpanData tsd = tsc.getTimeSpanList(cu).get(n);
-        
-		return tsd.isInThisTimeSpan(ldt);
-	}
-
+ 
 	public Map<Integer, Map<String, LocalDateTime>> weeksLDTs(String jsonKey) throws IOException, URISyntaxException, StatisticalToolsException, TimeSpanException
 	{
 		
