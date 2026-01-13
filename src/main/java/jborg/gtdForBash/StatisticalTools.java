@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
+import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
@@ -39,7 +40,7 @@ public class StatisticalTools
 	final Set<JSONObject> prjctSet;
 	final TimeSpanCreator tsc;
 
-	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException
+	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{
 
 		if(prjctSet==null||prjctSet.isEmpty())throw new StatisticalToolsException("No Projects.");

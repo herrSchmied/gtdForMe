@@ -284,6 +284,7 @@ public class GTDDataSpawnSession
 		
 		pJson.put(nameKey, name);
 		pJson.put(goalKey, goal);
+		//Status will be overwritten. Step status will be equal project status.
 		pJson.put(statusKey, status);
 			
 		String adtStr = LittleTimeTools.timeString(adt);
@@ -332,6 +333,9 @@ public class GTDDataSpawnSession
 	{
 
 		JSONObject newStep = new JSONObject();
+		String projectName = pJson.getString(nameKey);
+		newStep.put(StepJSONKeyz.Project, projectName);
+
 		int index = getIndexOfLastStepInPrjct(pJson);
 		JSONObject oldStep;
 		boolean isFirstStep = (index==ProjectJSONToolbox.firstStepIndex-1);
@@ -369,35 +373,25 @@ public class GTDDataSpawnSession
 
 		String descriptionOfStep = iss.getString(phrase);
 		
-		String prjctADT = pJson.getString(ADTKey);
-		LocalDateTime adtPrjct = LittleTimeTools.LDTfromTimeString(prjctADT);
-		
 		String prjctDeadLine = pJson.getString(DLDTKey);
-		String deadLineStr = "";
+		String deadLineStr = "";	
 		
-		LocalDateTime prjctDLDTYear;
-		if(!prjctDeadLine.equals(prjctDeadlineNone))prjctDLDTYear = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
-		else prjctDLDTYear = farInFuture;
-		
-		boolean gotDeadline = iss.forcedYesOrNo(stepDeadlineQ);
-		
-		if(gotDeadline)
+		if(iss.forcedYesOrNo(stepDeadlineQ))
 		{
-			if(isFirstStep)
-			{
-				System.out.println(stpDLDTHintPrefix + prjctADT + stpDLDTHintMid  + prjctDeadLine);
-				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stepDeadlineR, adtPrjct, prjctDLDTYear);
-				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
-			}
-			else //iss got other parameters
-			{
-				System.out.println("");
-				LocalDateTime minLDT = LocalDateTime.now();
-				String minStr = LittleTimeTools.timeString(minLDT);
-				System.out.println(nowPrefix + minStr + extrStpDLDTHintMid + prjctDeadLine);
-				LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stepDeadlineR, minLDT, prjctDLDTYear);
-				deadLineStr = LittleTimeTools.timeString(deadLineLDT);
-			}
+			
+			System.out.println("");
+
+			LocalDateTime minLDT = LocalDateTime.now();
+			LocalDateTime maxLDT;
+			if(!prjctDeadLine.equals(prjctDeadlineNone))maxLDT = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
+			else maxLDT = farInFuture;
+			
+			String minStr = LittleTimeTools.timeString(minLDT);
+			String maxStr = LittleTimeTools.timeString(maxLDT);
+			System.out.println(nowPrefix + minStr + extrStpDLDTHintMid + maxStr);
+			
+			LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stepDeadlineR, minLDT, maxLDT);
+			deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 		}
 		else 
 		{	

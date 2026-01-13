@@ -50,7 +50,6 @@ public class TestingCLI
 		String status = newProject.getString(ProjectJSONKeyz.statusKey);
 		assert(status.equals(StatusMGMT.atbd));
 		
-		
 		String adtStr = newProject.getString(ADTKey);
 		LocalDateTime adt = LittleTimeTools.LDTfromTimeString(adtStr);
 		assert(jetzt.isAfter(adt));

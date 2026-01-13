@@ -98,8 +98,9 @@ public class ProjectJSONToolbox
 	 */
 	public static int getIndexOfLastStepInPrjct(JSONObject pJson)
 	{
+
 		JSONArray stepArray;
-		
+
 		if(pJson.has(ProjectJSONKeyz.stepArrayKey))
 		{
 			stepArray = pJson.getJSONArray(ProjectJSONKeyz.stepArrayKey);

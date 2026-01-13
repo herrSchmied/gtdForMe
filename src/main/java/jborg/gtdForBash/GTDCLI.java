@@ -7,7 +7,8 @@ import java.nio.file.Paths;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
 
 import java.time.LocalDateTime;
@@ -390,5 +391,17 @@ public class GTDCLI implements Beholder<String>
     public static Path getDataFolder()
     {
     	return projectDataFolderRelativePath;
+    }
+    
+    public void redirectinStndrtOut(PrintStream os)
+    {
+    	
+    	System.setOut(os);
+    	
+    	/*
+    	 * TODO:
+    	 * I don't wan't to see all the output!!!!!!!!!!
+    	 * Is this a Solution????????????
+    	 */
     }
  }

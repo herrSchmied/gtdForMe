@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import java.net.URISyntaxException;
 
-
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -30,12 +29,11 @@ import org.junit.jupiter.api.Test;
 
 import allgemein.LittleTimeTools;
 
-
 import javafx.util.Pair;
 
 
 import someMath.NaturalNumberException;
-
+import someMath.exceptions.ConsoleToolsException;
 
 import static consoleTools.TerminalXDisplay.*;
 
@@ -44,6 +42,7 @@ import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
+import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
@@ -57,6 +56,7 @@ public class TestingStats
     static Set<JSONObject> prjctSet;
 
     Function<JSONObject, String> mapJSONToName = (pJSON)->pJSON.getString(nameKey);
+    
     
 	@BeforeEach
 	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException
@@ -99,31 +99,27 @@ public class TestingStats
 	}
 
 	@Test
-	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException
+	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
 	{
 
 		assert(!prjctSet.isEmpty());
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
-        
-        Pair<String, LocalDateTime> oldPrjct = tsc.oldestLDTOverall();
-        String newPrjctName = SequenzesForISS.getNewProjectName(1);
-        String oldPrjctName = oldPrjct.getKey();
-        
-        System.out.println(formatBashStringBoldAndYellow("OldProject: " + oldPrjctName));
-        System.out.println(formatBashStringBoldAndGreen("NewProject: " + newPrjctName));
-        Thread.sleep(2000);
 
-        JSONObject oldPJSON = st.pickByName(newPrjctName);
-        
-        int weekNr = 0;
-        assert(pickAndCheckByName(ChronoUnit.WEEKS, newPrjctName, weekNr, oldPJSON, ADTKey, st));
+        Pair<String, LocalDateTime> oldPair = tsc.oldestLDTOverall();
+        Pair<String, LocalDateTime> youngPair = tsc.youngestLDTOverall();
 
-        System.out.println("Youngest: " + tsc.youngestLDTOverall());
+        System.out.println(formatBashStringBoldAndGreen("young: " + youngPair.getKey() + " time: " + youngPair.getValue()));
+        System.out.println(formatBashStringBoldAndGreen("old: " + oldPair.getKey() + " time: " + oldPair.getValue()));
+        assert(oldPair.getKey().equals(SequenzesForISS.getNewProjectName(1)));
+        assert(youngPair.getKey().equals(wakeProjectName));
+        
+        
+
 	}
 
 	@Test
-	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException
+	public void areWeeksWherePlacedRightTest() throws WeekDataException, IOException, URISyntaxException, NaturalNumberException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, TimeSpanCreatorException
 	{
 		makeUpProjectWithLaterNDTAndADT();
 
@@ -236,7 +232,7 @@ public class TestingStats
 	}
 
 	@Test
-	public void statsTest() throws IOException, URISyntaxException, WeekDataException, StatisticalToolsException, TimeSpanException, ToolBoxException
+	public void statsTest() throws IOException, URISyntaxException, WeekDataException, StatisticalToolsException, TimeSpanException, ToolBoxException, InterruptedException, TimeSpanCreatorException
 	{
 		
 		assert(!prjctSet.isEmpty());
@@ -255,13 +251,14 @@ public class TestingStats
 		System.out.println("Week with the most NDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written.");
 
 		wknrAndN = st.weekWithMostLDTs(ADTKey);
-		System.out.println("Week with the most ADTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written.");
+		System.out.println("Week with the most ADTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects active.");
+		Thread.sleep(4000);
 
-		wknrAndN = st.weekWithMostLDTs(DLDTKey);
-		if(wknrAndN!=null)
-		{
-			System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
-		}
+//		wknrAndN = st.weekWithMostLDTs(DLDTKey);
+//		if(wknrAndN!=null)
+//		{
+//			System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
+//		}
 
 		wknrAndN = st.weekWithMostLDTs(TDTKey);
 		if(wknrAndN!=null)
