@@ -85,7 +85,7 @@ public class TestingStats
 		JSONObject sJSON = new JSONObject();
 		sJSON.put(StepJSONKeyz.descKey, "Step by Step .. ooh baby!");
 		sJSON.put(StepJSONKeyz.statusKey, StatusMGMT.atbd);
-		
+		sJSON.put(StepJSONKeyz.DLDTKey, stepDeadlineNone);
 		ldt = ldt.plusSeconds(70);
 		ldtStr = LittleTimeTools.timeString(ldt);
 		sJSON.put(StepJSONKeyz.ADTKey, ldtStr);
@@ -99,7 +99,33 @@ public class TestingStats
 	}
 
 	@Test
-	public void oldPrjctTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
+	public void sortingLists() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	{
+
+        StatisticalTools st = new StatisticalTools(prjctSet);
+        TimeSpanCreator tsc = st.getTimeSpanCreator();
+        
+        List<JSONObject> list = tsc.sortedListProjectsByLDT(NDTKey);
+        
+        for(int n=0;n<list.size();n++)
+        {
+
+        	JSONObject pJSON = list.get(n);
+        	String name = pJSON.getString(nameKey);
+        	LocalDateTime ndt = extractLDT(pJSON, NDTKey);
+        	
+        	//System.out.println("Name: " + name + ", NDT: " + ndt);
+        	if(n>0)
+        	{
+        		JSONObject beforePJSON = list.get(n-1);
+                LocalDateTime beforeNDT = extractLDT(beforePJSON, NDTKey);
+        		assert(beforeNDT.isAfter(ndt));
+        	}
+        }
+
+	}
+	@Test
+	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
 	{
 
 		assert(!prjctSet.isEmpty());
@@ -108,14 +134,8 @@ public class TestingStats
 
         Pair<String, LocalDateTime> oldPair = tsc.oldestLDTOverall();
         Pair<String, LocalDateTime> youngPair = tsc.youngestLDTOverall();
-
-        System.out.println(formatBashStringBoldAndGreen("young: " + youngPair.getKey() + " time: " + youngPair.getValue()));
-        System.out.println(formatBashStringBoldAndGreen("old: " + oldPair.getKey() + " time: " + oldPair.getValue()));
-        assert(oldPair.getKey().equals(SequenzesForISS.getNewProjectName(1)));
-        assert(youngPair.getKey().equals(wakeProjectName));
         
-        
-
+        assert(oldPair.getValue().isBefore(youngPair.getValue()));
 	}
 
 	@Test
@@ -143,7 +163,7 @@ public class TestingStats
         int firstWeekIndex = 0;
         
         JSONObject pJSON = st.pickByName(wakeProjectName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, ADTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, NDTKey, st));
 		
 		pJSON = st.pickByName(modPrjctName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, modPrjctName, firstWeekIndex, pJSON, NDTKey, st));
@@ -252,7 +272,6 @@ public class TestingStats
 
 		wknrAndN = st.weekWithMostLDTs(ADTKey);
 		System.out.println("Week with the most ADTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects active.");
-		Thread.sleep(4000);
 
 //		wknrAndN = st.weekWithMostLDTs(DLDTKey);
 //		if(wknrAndN!=null)

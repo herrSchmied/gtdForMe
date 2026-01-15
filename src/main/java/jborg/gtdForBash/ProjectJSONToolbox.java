@@ -535,6 +535,14 @@ public class ProjectJSONToolbox
 	   	return terminalSet.contains(status);
 	};
 	
+	public static final Predicate<JSONObject> stepHasNoDLDT = (step) ->
+	{
+		String dldtString = step.getString(StepJSONKeyz.DLDTKey);
+		if(dldtString.equals(stepDeadlineNone))return true;
+		
+		return false;
+	};
+	
 	public LocalDateTime extractLDT(String name, String key) throws IOException, URISyntaxException
 	{
 		

@@ -173,7 +173,7 @@ public class GTDDataSpawnSession
 	public static final String cantTerminateNullDataProjectJSONObject = "Can't Terminate Null. Project JSON-Object is Null.";
 
 	public static final String prjctJSONIsNull = "Project JSON is Null.";
-	public static final String stepJSONIsNull = "Project JSON is Null.";
+	public static final String stepJSONIsNull = "Step JSON is Null.";
 	public static final String prjctAlreadyTerminated = "Project Already Terminated.";
 	public static final String stepAlreadyTerminated = "Step Already Terminated.";
 	
@@ -395,7 +395,7 @@ public class GTDDataSpawnSession
 		}
 		else 
 		{	
-			if(!prjctDeadLine.equals(prjctDeadlineNone))deadLineStr = prjctDeadLine;
+			if(!projectHasNoDLDT.test(pJson))deadLineStr = prjctDeadLine;
 			else deadLineStr = stepDeadlineNone;
 		}
 		

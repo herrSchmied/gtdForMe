@@ -464,21 +464,21 @@ public class TimeSpanCreator
     public Pair<String, LocalDateTime> youngestLDTInThisStep(JSONObject sJSON) throws IOException, URISyntaxException, TimeSpanCreatorException
     {
 
-    	if(sJSON.has(DLDTKey))
+    	if(!stepHasNoDLDT.test(sJSON))
     	{
-    		LocalDateTime dldt = extractLDT(sJSON, DLDTKey);
-    		return new Pair<>(DLDTKey, dldt);
+    		LocalDateTime dldt = extractLDT(sJSON, StepJSONKeyz.DLDTKey);
+    		return new Pair<>(StepJSONKeyz.DLDTKey, dldt);
     	}
 
-    	if(sJSON.has(TDTKey))
+    	if(sJSON.has(StepJSONKeyz.TDTKey))
     	{
-    		LocalDateTime tdt = extractLDT(sJSON, TDTKey);
-    		return new Pair<>(TDTKey, tdt);
+    		LocalDateTime tdt = extractLDT(sJSON, StepJSONKeyz.TDTKey);
+    		return new Pair<>(StepJSONKeyz.TDTKey, tdt);
     	}
 
-    	LocalDateTime ndt = extractLDT(sJSON, NDTKey);
+    	LocalDateTime ndt = extractLDT(sJSON, StepJSONKeyz.ADTKey);
     	
-    	return new Pair<>(NDTKey, ndt);
+    	return new Pair<>(StepJSONKeyz.ADTKey, ndt);
     }
 
     public Pair<String, LocalDateTime> youngestLDTInThisProject(JSONObject pJSON) throws IOException, URISyntaxException, TimeSpanCreatorException
@@ -487,7 +487,7 @@ public class TimeSpanCreator
     	String jsonKey = "";
     	LocalDateTime ldt = oldestLDTOverall().getValue();
 
-    	if(pJSON.has(DLDTKey))
+    	if(!projectHasNoDLDT.test(pJSON))
     	{
     		LocalDateTime dldt = extractLDT(pJSON, DLDTKey);
     		return new Pair<>(DLDTKey, dldt);
@@ -499,22 +499,33 @@ public class TimeSpanCreator
     		jsonKey = TDTKey;
     	}
    	
-    	JSONObject sJSON = getLastStep(pJSON);
-    	Pair<String, LocalDateTime> candidate = youngestLDTInThisStep(sJSON);
-    	if(candidate.getValue().isAfter(ldt))
-    	{
-    		ldt = candidate.getValue();
-    		jsonKey = candidate.getKey();
-    	}
+   		LocalDateTime ndt = extractLDT(pJSON, NDTKey);
+   		if(ndt.isAfter(ldt))
+   		{
+   			ldt = ndt;
+   			jsonKey = NDTKey;
+  		}
     	
+   		if(!isMODProject.test(pJSON))
+   		{
+   			JSONObject sJSON = getLastStep(pJSON);
+   			Pair<String, LocalDateTime> candidate = youngestLDTInThisStep(sJSON);
+   			if(candidate.getValue().isAfter(ldt))
+   			{
+   				ldt = candidate.getValue();
+   				jsonKey = candidate.getKey();
+   			}
+   		}
+ 
     	return new Pair<>(jsonKey, ldt);
     }
 
     public Pair<String, LocalDateTime> youngestLDTOverall() throws IOException, URISyntaxException, TimeSpanCreatorException
     {
 
-    	String name = "";
-    	LocalDateTime ldt = oldestLDTOverall().getValue();
+    	Pair<String, LocalDateTime> old = oldestLDTOverall();
+    	String name = old.getKey();
+    	LocalDateTime ldt = old.getValue();
     	
     	for(JSONObject pJSON: prjctSet)
     	{
@@ -535,7 +546,7 @@ public class TimeSpanCreator
    	
     	List<JSONObject> list = sortedListProjectsByLDT(NDTKey);//Which is thee oldest LDT!
     	
-    	JSONObject pJSON = list.getFirst();
+    	JSONObject pJSON = list.getLast();
     	String name = pJSON.getString(nameKey);
     	LocalDateTime ldt = extractLDT(pJSON, NDTKey);
     	
