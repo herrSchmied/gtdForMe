@@ -29,13 +29,14 @@ import org.junit.jupiter.api.Test;
 
 import allgemein.LittleTimeTools;
 
+
 import javafx.util.Pair;
 
 
 import someMath.NaturalNumberException;
+
 import someMath.exceptions.ConsoleToolsException;
 
-import static consoleTools.TerminalXDisplay.*;
 
 
 import static jborg.gtdForBash.SequenzesForISS.*;
@@ -111,10 +112,8 @@ public class TestingStats
         {
 
         	JSONObject pJSON = list.get(n);
-        	String name = pJSON.getString(nameKey);
         	LocalDateTime ndt = extractLDT(pJSON, NDTKey);
         	
-        	//System.out.println("Name: " + name + ", NDT: " + ndt);
         	if(n>0)
         	{
         		JSONObject beforePJSON = list.get(n-1);
@@ -124,6 +123,27 @@ public class TestingStats
         }
 
 	}
+	
+	@Test
+	public void timeSpanTests() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	{
+
+        StatisticalTools st = new StatisticalTools(prjctSet);
+        TimeSpanCreator tsc = st.getTimeSpanCreator();
+
+        List<TimeSpanData> tspdListHours = tsc.getTimeSpanList(ChronoUnit.HOURS);
+        List<TimeSpanData> tspdListDays = tsc.getTimeSpanList(ChronoUnit.DAYS);
+        List<TimeSpanData> tspdListWeeks = tsc.getTimeSpanList(ChronoUnit.WEEKS);
+        List<TimeSpanData> tspdListMonth = tsc.getTimeSpanList(ChronoUnit.MONTHS);
+        List<TimeSpanData> tspdListYears = tsc.getTimeSpanList(ChronoUnit.YEARS);
+ 
+        assert(tspdListHours.size()>=337&&tspdListHours.size()<=338);
+        assert(tspdListDays.size()>=15&&tspdListDays.size()<=16);
+        assert(tspdListWeeks.size()>=3&&tspdListWeeks.size()<=4);
+        assert(tspdListMonth.size()>=1&&tspdListMonth.size()<=2);
+        assert(tspdListYears.size()>=1&&tspdListYears.size()<=2);     
+	}
+
 	@Test
 	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
 	{
@@ -132,11 +152,9 @@ public class TestingStats
         TimeSpanCreator tsc = st.getTimeSpanCreator();
 
         Pair<String, LocalDateTime> oldPair = tsc.oldestLDTOverall();
-        String oldPrjctName = oldPair.getKey();
         LocalDateTime oldLDT = oldPair.getValue();
         
         Pair<String, LocalDateTime> youngPair = tsc.youngestLDTOverall();
-        String youngPrjctName = youngPair.getKey();
         LocalDateTime youngLDT = youngPair.getValue();
 
         assert(oldLDT.isBefore(youngLDT));
@@ -146,7 +164,6 @@ public class TestingStats
 
         	Pair<String, LocalDateTime> pair = tsc.youngestLDTInThisProject(pJSON);
         	LocalDateTime pLDT = pair.getValue();
-        	String prjctName = pJSON.getString(nameKey);
 
    			assert(pLDT.isAfter(oldLDT)||pLDT.equals(oldLDT));     		
  
