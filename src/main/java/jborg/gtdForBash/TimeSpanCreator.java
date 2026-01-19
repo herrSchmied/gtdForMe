@@ -508,6 +508,14 @@ public class TimeSpanCreator
     	
    		if(!isMODProject.test(pJSON))
    		{
+   			
+   			LocalDateTime adt = extractLDT(pJSON, ADTKey);
+   			if(adt.isAfter(ldt))
+   			{
+   				ldt = adt;
+   				jsonKey = ADTKey;
+   			}
+   	
    			JSONObject sJSON = getLastStep(pJSON);
    			Pair<String, LocalDateTime> candidate = youngestLDTInThisStep(sJSON);
    			if(candidate.getValue().isAfter(ldt))
@@ -540,7 +548,7 @@ public class TimeSpanCreator
     	
     	return new Pair<>(name, ldt);
     }
-    
+
     public Pair<String, LocalDateTime> oldestLDTOverall() throws IOException, URISyntaxException, TimeSpanCreatorException
     {
    	

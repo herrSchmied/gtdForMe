@@ -128,14 +128,30 @@ public class TestingStats
 	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
 	{
 
-		assert(!prjctSet.isEmpty());
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
 
         Pair<String, LocalDateTime> oldPair = tsc.oldestLDTOverall();
-        Pair<String, LocalDateTime> youngPair = tsc.youngestLDTOverall();
+        String oldPrjctName = oldPair.getKey();
+        LocalDateTime oldLDT = oldPair.getValue();
         
-        assert(oldPair.getValue().isBefore(youngPair.getValue()));
+        Pair<String, LocalDateTime> youngPair = tsc.youngestLDTOverall();
+        String youngPrjctName = youngPair.getKey();
+        LocalDateTime youngLDT = youngPair.getValue();
+
+        assert(oldLDT.isBefore(youngLDT));
+
+        for(JSONObject pJSON: prjctSet)
+        {
+
+        	Pair<String, LocalDateTime> pair = tsc.youngestLDTInThisProject(pJSON);
+        	LocalDateTime pLDT = pair.getValue();
+        	String prjctName = pJSON.getString(nameKey);
+
+   			assert(pLDT.isAfter(oldLDT)||pLDT.equals(oldLDT));     		
+ 
+   			assert(pLDT.isBefore(youngLDT)||pLDT.equals(youngLDT));     		
+        }
 	}
 
 	@Test
