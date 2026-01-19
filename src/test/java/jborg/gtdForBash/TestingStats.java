@@ -176,9 +176,6 @@ public class TestingStats
 	{
 		makeUpProjectWithLaterNDTAndADT();
 
-		assert(!prjctSet.isEmpty());
-		System.out.println(prjctSet);
-
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
@@ -306,11 +303,11 @@ public class TestingStats
 		wknrAndN = st.weekWithMostLDTs(ADTKey);
 		System.out.println("Week with the most ADTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects active.");
 
-//		wknrAndN = st.weekWithMostLDTs(DLDTKey);
-//		if(wknrAndN!=null)
-//		{
-//			System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
-//		}
+		wknrAndN = st.weekWithMostLDTs(DLDTKey);
+		if(wknrAndN!=null)
+		{
+			System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
+		}
 
 		wknrAndN = st.weekWithMostLDTs(TDTKey);
 		if(wknrAndN!=null)
