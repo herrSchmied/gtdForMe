@@ -45,9 +45,7 @@ public class TimeSpanData
 	private final Set<JSONObject> newProjectsWrittenDown;
 	
 	private final Set<JSONObject> projectsTerminated;
-	
-	private int howManyStepsDoneInThisWeek;
-	
+
 	public static final String weekBeginExceptionMsg = "Week must begin Monday.";
 
 	public static final Function<JSONObject, String> mapJSONToName = obj->obj.getString(ProjectJSONKeyz.nameKey);
@@ -109,11 +107,6 @@ public class TimeSpanData
 		projectsTerminated.addAll(projectNames);
 	}
 
-	public void setHowManyStepsDone(int n)
-	{
-		howManyStepsDoneInThisWeek = n;
-	}
-
 	public LocalDateTime getBegin()
 	{
 		//Giving a Copy back? No because LocalDateTime is immutable!
@@ -168,14 +161,14 @@ public class TimeSpanData
 
 		Map<String, Integer> terminated = new HashMap<>();
 
-		for(JSONObject pJSON: allTheJSON())
+		for(JSONObject pJSON: allTheProjectJSON())
 		{
 			if(isMODProject.test(pJSON))continue;
 			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 			terminated.put(pName, 0);
 		}
 
-		for(JSONObject pJSON: allTheJSON())
+		for(JSONObject pJSON: allTheProjectJSON())
 		{
 			if(isMODProject.test(pJSON))continue;
 			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
@@ -239,6 +232,16 @@ public class TimeSpanData
 		return successes;
 	}
 	
+	public int howManyStepsSucceededInThisTSD()
+	{
+
+		int n = 0;
+
+		for(Integer i: getStepsSucceededThisTimeSpan().values())n += i;
+
+		return n;
+	}
+
 	public Map<String, Integer> getStepsFailedThisTimeSpan()
 	{
 
@@ -268,6 +271,30 @@ public class TimeSpanData
 		}
 
 		return fails;
+	}
+	
+	public int howManyStepsFailedInThisTSD()
+	{
+
+		int n = 0;
+
+		for(Integer i: getStepsFailedThisTimeSpan().values())n += i;
+
+		return n;
+	}
+
+	public int howManyNewStepsInThisTSD() throws IOException, URISyntaxException
+	{
+		int n = 0;
+		
+		for(JSONObject sJSON: allTheStepsOfAllActiveProjects())
+		{
+			LocalDateTime adt = extractLDT(sJSON, StepJSONKeyz.ADTKey);
+			
+			if(isInThisTimeSpan(adt))n++;
+		}
+
+		return n;
 	}
 	
 	public Map<String, Integer> stepsViolatedDLThisTimeSpan()
@@ -302,13 +329,25 @@ public class TimeSpanData
 		
 		return violations;
 	}
+	
+	public int howManyStepsViolatedDLInThisTSD()
+	{
+		int n=0;
+		
+		for(Integer i: stepsViolatedDLThisTimeSpan().values())
+		{
+			n+=i;
+		}
+
+		return n;
+	}
 
 	public Map<String, JSONObject> getAllActiveStepDLs() throws IOException, URISyntaxException
 	{
 
 		Map<String, JSONObject> output = new HashMap<>();
 
-		for(JSONObject pJSON: allTheJSON())
+		for(JSONObject pJSON: allTheProjectJSON())
 		{
 
 			if(isMODProject.test(pJSON))continue;
@@ -516,12 +555,12 @@ public class TimeSpanData
 	{
 
 		JSONObject pJSON;
-		pJSON = ProjectJSONToolbox.pickProjectByName(name, allTheJSON());
+		pJSON = ProjectJSONToolbox.pickProjectByName(name, allTheProjectJSON());
 
 		return pJSON;
 	}
 
-	public Set<JSONObject> allTheJSON()
+	public Set<JSONObject> allTheProjectJSON()
 	{
 		Set<JSONObject> all = new HashSet<>();
 		all.addAll(newProjectsWrittenDown);
@@ -535,10 +574,28 @@ public class TimeSpanData
 	{
 		
 		Set<String> names = new HashSet<>();
-	    names.addAll(allTheJSON().stream().map(mapJSONToName)
+	    names.addAll(allTheProjectJSON().stream().map(mapJSONToName)
 	    		.collect(Collectors.toSet()));
 
 		return names;
+	}
+	
+	public Set<JSONObject> allTheStepsOfAllActiveProjects()
+	{
+		Set<JSONObject> output = new HashSet<>();
+		
+		for(JSONObject pJSON: getActiveProjects())
+		{
+			JSONArray stepJSONArray = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+			
+			for(Object obj: stepJSONArray)
+			{
+				JSONObject sJSON = (JSONObject) obj;
+				output.add(sJSON);
+			}
+		}
+		
+		return output;
 	}
 
 	public boolean isInThisTimeSpan(LocalDateTime ldt)
@@ -558,11 +615,6 @@ public class TimeSpanData
 	public boolean isBeforeThisTimeSpan(LocalDateTime ldt)
 	{
 		return ldt.isBefore(begin);
-	}
-
-	public int getHowManyStepsDone()
-	{
-		return howManyStepsDoneInThisWeek;
 	}
 
 }

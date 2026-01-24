@@ -13,14 +13,15 @@ import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-
+import allgemein.ExactPeriode;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
@@ -49,14 +50,16 @@ public class StatisticalTools
 	}
 
  
-	public Map<Integer, Map<String, LocalDateTime>> weeksLDTs(String jsonKey) throws IOException, URISyntaxException, StatisticalToolsException, TimeSpanException
+	// <#1 how Many, < #2 project Name, LDT>
+	public Map<Integer, Map<String, LocalDateTime>> timeSpansLDTs(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, StatisticalToolsException, TimeSpanException
 	{
+
 		
 		Map<Integer, Map<String, LocalDateTime>> map = new HashMap<>();
 		List<Map<String, LocalDateTime>> listOfMaps = new ArrayList<>();
-		List<TimeSpanData> weekSpans = tsc.getTimeSpanList(ChronoUnit.WEEKS);
-		
-		for(int n=0;n<weekSpans.size();n++)
+		List<TimeSpanData> timeSpans = tsc.getTimeSpanList(cu);
+
+		for(int n=0;n<timeSpans.size();n++)
 		{
 			listOfMaps.add(new HashMap<>());
 		}
@@ -70,13 +73,13 @@ public class StatisticalTools
 			if((jsonKey.equals(ADTKey))&&(isMODProject.test(pJSON)))continue;
 			
 			LocalDateTime ldt = extractLDT(pJSON, jsonKey);
-			Map<String, LocalDateTime> innerMap = listOfMaps.get(tsc.isInWhichTimeSpan(ChronoUnit.WEEKS, ldt));
+			Map<String, LocalDateTime> innerMap = listOfMaps.get(tsc.isInWhichTimeSpan(cu, ldt));
 			//DLDT might be in no week but to far in the future.
 
 			innerMap.put(pName, ldt);
 		}
 
-		for(int n=0;n<weekSpans.size();n++)
+		for(int n=0;n<timeSpans.size();n++)
 		{
 			map.put(n, listOfMaps.get(n));
 		}
@@ -103,10 +106,10 @@ public class StatisticalTools
 		}
 	}
 
-	public Point weekWithMostLDTs(String jsonKey) throws IOException, URISyntaxException, StatisticalToolsException, TimeSpanException
+	public Point timeSpanWithMostLDTs(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, StatisticalToolsException, TimeSpanException
 	{
 
-		Map<Integer, Map<String, LocalDateTime>> map = weeksLDTs(jsonKey);
+		Map<Integer, Map<String, LocalDateTime>> map = timeSpansLDTs(cu, jsonKey);
 		if(map.isEmpty())return null;
 		
 		int whichOne = 0;
@@ -146,69 +149,51 @@ public class StatisticalTools
 		return null;
 	}
 	
-	public String periodeResume(ChronoUnit cu, int unitNr) throws IOException, URISyntaxException, NaturalNumberException
+	// #new Step					:	 6 Points.
+	// #new Project					:	12 Points.
+	// #Step success				:	18 Points.
+	// #Project success				:	36 Points.
+	// #Step failed					:	-1 Points.
+	// #Step failed by DLDT abuse	:	-2 Points.
+	// #Project failed				:	-1 Point per active Day. **Fail fast!!!
+	// #Project failed by DLDT abuse:	-4 Point per active Day.
+	public int positivityIndexTimeSpan(TimeSpanData tsd) throws IOException, URISyntaxException, NaturalNumberException
 	{
+		int sum = 0;
+		
+		sum += tsd.howManyNewStepsInThisTSD()*6;
+		sum += tsd.getProjectsWrittenDown().size()*12;
+		sum += tsd.howManyStepsSucceededInThisTSD()*18;
+		sum += tsd.projectsSucceededThisTimeSpan().size()*36;
+		sum += tsd.howManyStepsFailedInThisTSD()*(-1);
+		sum += tsd.howManyStepsViolatedDLInThisTSD()*(-2);
+		
+		// #Project failed				:	-1 Point per active Day.
+		for(String pName: tsd.projectsFailedThisTimeSpan())
+		{
+			JSONObject pJSON = tsd.pickProjectByName(pName);
+			
+			LocalDateTime adt = extractLDT(pJSON, ADTKey);
+			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
+			
+			ExactPeriode ep = new ExactPeriode(adt, tdt);
+			
+			sum += ep.getAbsoluteDays()*(-1);
+		}
+		
+		// #Project failed by DLDT abuse:	-4 Point per active Day.
+		for(String pName: tsd.projectsViolatedDLThisTimeSpan())
+		{
+			JSONObject pJSON = tsd.pickProjectByName(pName);
+			
+			LocalDateTime adt = extractLDT(pJSON, ADTKey);
+			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
+			
+			ExactPeriode ep = new ExactPeriode(adt, tdt);
+			
+			sum += ep.getAbsoluteDays()*(-4);
+		}
 
-		/*
-		 * WeekData wd = weekDatas.get(unitNr);
-		 * 
-		 * int prjctNDTs = wd.getProjectsWrittenDown().size(); int prjctsSucceded =
-		 * wd.projectsSucceededThisWeek().size(); int prjctsFailed =
-		 * wd.projectsFailedThisWeek().size(); int prjctDeadlineViolations =
-		 * wd.projectsViolatedDLThisWeek().size(); int openPrjctDeadlines =
-		 * wd.allActiveProjectsWithDLs().size(); int prjctDeadlinesHere =
-		 * wd.projectDLsThisWeek().size(); Set<String> prjctMostPressingDeadline =
-		 * wd.mostPressingProjectDeadline();
-		 * 
-		 * int stepADTs = 0; int stepsSucceded = 0; int stepsFailed = 0; int
-		 * stepDeadlineViolation = 0; int openStepDeadlines = 0; int stepDeadlinesHere =
-		 * 0; String stepMostPressingDeadline = "";
-		 * 
-		 * int l = cu.toString().length()-1; String unit = cu.toString().substring(l);
-		 * 
-		 * if(cu.equals(ChronoUnit.WEEKS)) {
-		 * 
-		 * 
-		 * 
-		 * Set<JSONObject> allTheNames = wd.allTheJSON();
-		 * 
-		 * for(JSONObject pJSON: allTheNames) {
-		 * 
-		 * if(!pJSON.has(ProjectJSONKeyz.stepArrayKey))break; JSONObject lastStep =
-		 * getLastStepOfProject(pJSON);
-		 * 
-		 * LocalDateTime adt = extractLDT(lastStep, StepJSONKeyz.ADTKey);
-		 * if(wd.isInThisWeek(adt))stepADTs++;
-		 * 
-		 * 
-		 * LocalDateTime dldt = null; if(lastStep.has(StepJSONKeyz.DLDTKey))dldt =
-		 * extractLDT(lastStep, StepJSONKeyz.DLDTKey);
-		 * if(stepIsAlreadyTerminated(lastStep)) {
-		 * 
-		 * String status = lastStep.getString(StepJSONKeyz.statusKey);
-		 * 
-		 * 
-		 * if(wd.isInThisWeek(dldt)) {
-		 * if(StatusMGMT.success.equals(status))stepsSucceded++;
-		 * if(StatusMGMT.failed.equals(status)) { stepsFailed++;
-		 * if(lastStep.has(StepJSONKeyz.TDTNoteKey)) { String note =
-		 * lastStep.getString(StepJSONKeyz.TDTNoteKey);
-		 * if(note.equals(tdtNoteStpDLDTAbuse))stepDeadlineViolation++; } } } } else {
-		 * if(dldt!=null)openStepDeadlines++;
-		 * if(wd.isInThisWeek(dldt))stepDeadlinesHere++; } } }
-		 * 
-		 */
-			String s = "";//"\nProjects:" + "\nNew Projects written: " + prjctNDTs +
-		 /* "\nSuccesses: " + prjctsSucceded + "\nFailed: " + prjctsFailed +
-		 * "\nDeadlineViolations: " + prjctDeadlineViolations + "\nOpen Deadlines: " +
-		 * openPrjctDeadlines + "\nDeadlines this " + unit + ": " + prjctDeadlinesHere +
-		 * "\nMost pressing Deadline: " + prjctMostPressingDeadline + "\n" + "\nSteps:"
-		 * + "\nNew Steps written: " + stepADTs + "\nSuccesses: " + stepsSucceded +
-		 * "\nFailed: " + stepsFailed + "\nDeadlineViolations: " + stepDeadlineViolation
-		 * + "\nOpen Deadlines: " + openStepDeadlines + "\nDeadlines this " + unit +
-		 * ": " + stepDeadlinesHere + "\nMost pressing Deadline: " +
-		 * stepMostPressingDeadline;
-		 */
-		return s;
+		return sum;
 	}
 }

@@ -47,7 +47,7 @@ public class TimeSpanCreator
 	
 
 	Set<JSONObject> prjctSet = new HashSet<>();
-	
+
 	Map<ChronoUnit, List<TimeSpanData>> chronoUnitTimeSpanMap = new HashMap<>();
 		
 	private List<TimeSpanData> yearList;

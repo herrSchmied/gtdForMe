@@ -235,6 +235,20 @@ public class ProjectJSONToolbox
 		return status.equals(StatusMGMT.mod);
 	};
 
+	public static final Predicate<JSONObject> stepIsASuccess = (sJSON)->
+	{
+		String status = sJSON.getString(StepJSONKeyz.statusKey);
+		
+		return status.equals(StatusMGMT.success);
+	};
+
+	public static final Predicate<JSONObject> projectIsASuccess = (pJSON)->
+	{
+		String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+		
+		return status.equals(StatusMGMT.success);
+	};
+
 	public static final Predicate<JSONObject> projectIsTerminated = (jo)->
 	{
 	

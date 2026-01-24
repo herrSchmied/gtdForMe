@@ -297,23 +297,53 @@ public class TestingStats
 
         System.out.println("Number of weeks: " + weeksSize);
 
-		Point wknrAndN = st.weekWithMostLDTs(NDTKey);
-		System.out.println("Week with the most NDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written.");
+		Point wknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.WEEKS, NDTKey);
+		System.out.println("Week with the most NDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written..\n");
 
-		wknrAndN = st.weekWithMostLDTs(ADTKey);
-		System.out.println("Week with the most ADTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects active.");
+		wknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.WEEKS, ADTKey);
+		System.out.println("Week with the most ADTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects active..\n");
 
-		wknrAndN = st.weekWithMostLDTs(DLDTKey);
+		wknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.WEEKS, DLDTKey);
 		if(wknrAndN!=null)
 		{
-			System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines.");
+			System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines..\n");
 		}
 
-		wknrAndN = st.weekWithMostLDTs(TDTKey);
+		wknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.WEEKS, TDTKey);
 		if(wknrAndN!=null)
 		{
-			System.out.println("Week with the most TDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Terminated.");
+			System.out.println("Week with the most TDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Terminated..\n");
 		}
+
+        List<Pair<LocalDateTime, LocalDateTime>> hours 
+        			= tsc.createTimeSpanFrames(ChronoUnit.HOURS);
+
+        int hoursSize = hours.size();
+
+        System.out.println("Number of Hours: " + hoursSize);
+        Thread.sleep(3000);
+
+        Point hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, NDTKey);
+		System.out.println("Week with the most NDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Projects written..\n");
+		Thread.sleep(3000);
+
+		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, ADTKey);
+		System.out.println("Week with the most ADTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Projects active..\n");
+		Thread.sleep(3000);
+
+		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, DLDTKey);
+		if(hknrAndN!=null)
+		{
+			System.out.println("Week with the most DLDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Project Deadlines..\n");
+		}
+		Thread.sleep(3000);
+
+		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, TDTKey);
+		if(hknrAndN!=null)
+		{
+			System.out.println("Week with the most TDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Project Terminated..\n");
+		}
+		Thread.sleep(3000);
 	}
 	
 	public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
