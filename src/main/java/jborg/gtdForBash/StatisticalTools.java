@@ -13,15 +13,17 @@ import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.json.JSONArray;
+
 import org.json.JSONObject;
 
+
 import allgemein.ExactPeriode;
+
+
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;

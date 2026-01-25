@@ -52,21 +52,28 @@ public class TimeSpanData
 
 	private final ChronoUnit cu;
 	
+	Map<String, Double> dataMap;
+	
+	private static final String howManyProjectsSuceeded = "howManyProjectsSucceeded";
+	private static final String howManyProjectsFailed   = "howManyProjectsFailed";
+	
 	public TimeSpanData(ChronoUnit cu, LocalDateTime begin, LocalDateTime end, int timeNr) throws TimeSpanException
 	{
-		
-		if(end.isBefore(begin))throw new TimeSpanException("Time Span ends before it begins.");
-		
+
+		if(!begin.isBefore(end))throw new TimeSpanException("Time Span begin is not after end.");
+
 		this.cu = cu;
 		this.begin = begin;
 		this.end = end;
 		this.timeNr = timeNr;
-		
+
 		projectsActive = new HashSet<>();
 		newProjectsWrittenDown = new HashSet<>();
 		projectsTerminated = new HashSet<>();
+
+		dataMap = new HashMap<>();
 	}
-	
+
 	public boolean timeSpanIsInThePast()
 	{
 		return end.isBefore(LocalDateTime.now());
@@ -418,7 +425,7 @@ public class TimeSpanData
 
 	public Set<String> projectsSucceededThisTimeSpan()
 	{
-		
+
 		Set<String> successes = new HashSet<>();
 		
 		for(JSONObject pJSON: getProjectsTerminated())
@@ -431,7 +438,23 @@ public class TimeSpanData
 
 		return successes;
 	}
-	
+
+	public int howManyProjectsSuceeded()
+	{
+
+		int n=0;
+
+		if(dataMap.containsKey(howManyProjectsSuceeded))
+		{
+			return dataMap.get(howManyProjectsSuceeded).intValue();
+		}
+
+		n = projectsSucceededThisTimeSpan().size();
+		dataMap.put(howManyProjectsSuceeded, (double)n);
+
+		return n;
+	}
+
 	public Set<String> projectsFailedThisTimeSpan()
 	{
 
@@ -446,6 +469,22 @@ public class TimeSpanData
 		}
 
 		return fails;
+	}
+
+	public int howManyProjectsFailed()
+	{
+
+		int n=0;
+
+		if(dataMap.containsKey(howManyProjectsFailed))
+		{
+			return dataMap.get(howManyProjectsFailed).intValue();
+		}
+
+		n = projectsFailedThisTimeSpan().size();
+		dataMap.put(howManyProjectsFailed, (double)n);
+
+		return n;
 	}
 
 	public Set<String> projectsViolatedDLThisTimeSpan()
@@ -525,10 +564,10 @@ public class TimeSpanData
 
 		int secs = (int) Math.pow(10, 12);
 		LocalDateTime jetzt = LocalDateTime.now();
-		Set<String> currentName = new HashSet<>();
-	
+		Set<String> currentNames= new HashSet<>();
+
 		Map<String, LocalDateTime> map = getAllActiveProjectDLs();
-		
+
 		for(String pName: map.keySet())
 		{
 
@@ -539,16 +578,16 @@ public class TimeSpanData
 			if(Math.abs(secs)>Math.abs(ep.getAbsoluteSeconds()))
 			{
 				secs = ep.getAbsoluteSeconds();
-				currentName.clear();
-				currentName.add(pName);
+				currentNames.clear();
+				currentNames.add(pName);
 			}
 			if(Math.abs(secs)==Math.abs(ep.getAbsoluteSeconds()))
 			{
-				currentName.add(pName);
+				currentNames.add(pName);
 			}
 		}
 
-		return currentName;
+		return currentNames;
 	}
 
 	public JSONObject pickProjectByName(String name)
@@ -603,18 +642,17 @@ public class TimeSpanData
 
 		LocalDateTime beginBevorBegin = begin.minusNanos(1);
 		LocalDateTime endAfterEnd = end.plusNanos(1);
-		
+
 		return ldt.isAfter(beginBevorBegin)&&ldt.isBefore(endAfterEnd);
 	}
-	
+
 	public boolean isAfterThisTimeSpan(LocalDateTime ldt)
 	{
 		return ldt.isAfter(end);
 	}
-	
+
 	public boolean isBeforeThisTimeSpan(LocalDateTime ldt)
 	{
 		return ldt.isBefore(begin);
 	}
-
 }
