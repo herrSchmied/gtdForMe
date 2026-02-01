@@ -37,10 +37,15 @@ import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 
 import consoleTools.TerminalTableDisplay;
-
-
+import javafx.util.Pair;
 import jborg.gtdForBash.DBIssues.DBSink;
 import jborg.gtdForBash.exceptions.CLICMDException;
+import jborg.gtdForBash.exceptions.StatisticalToolsException;
+import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
+import jborg.gtdForBash.exceptions.TimeSpanException;
+import jborg.gtdForBash.exceptions.ToolBoxException;
+import jborg.gtdForBash.exceptions.WeekDataException;
+
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
@@ -211,29 +216,37 @@ public class SomeCommands
 		};
 
 		List<Boolean> ioArray;
+		
+		MeatOfCLICmd<String> oldestPrjct = (s)->
+		{
 
-		/*
-		 * MeatOfCLICmd<String> oldestPrjct = (s)-> {
-		 * 
-		 * StatisticalTools st; try { st = new
-		 * StatisticalTools(GTDCLI.loadProjects(GTDCLI.getPathToDataFolder()));
-		 * 
-		 * String name = st.oldestProjectLDT(ADTKey).getKey(); LocalDateTime oldestADT =
-		 * st.oldestProjectLDT(ADTKey).getValue();
-		 * 
-		 * String output = name + "\nNDT: " + LittleTimeTools.timeString(oldestADT);
-		 * System.out.println(output);
-		 * 
-		 * return name;
-		 * 
-		 * } catch (URISyntaxException | WeekDataException e) { e.printStackTrace(); }
-		 * 
-		 * throw new RuntimeException("This should not happen."); };
-		 * 
-		 * ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
-		 * 
-		 * registerCmd(oldest, sdcSetName, ioArray, oldestPrjct);
-		 */
+			StatisticalTools st;
+
+			try
+			{
+
+				st = new StatisticalTools(GTDCLI.loadProjects(GTDCLI.getDataFolder()));
+				TimeSpanCreator tsc = st.getTimeSpanCreator();
+				Pair<String, LocalDateTime> pair = tsc.oldestLDTOverall();
+				String name = pair.getKey();
+				LocalDateTime ldt = pair.getValue();
+
+				return "Project: " + name + ", NDT: " + ldt;
+			}
+			catch (URISyntaxException | WeekDataException | TimeSpanException | ToolBoxException
+					| StatisticalToolsException | TimeSpanCreatorException e)
+			{
+
+				e.printStackTrace();
+			}
+
+		  
+			throw new RuntimeException("This should not happen.");
+		};
+
+		ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
+
+		registerCmd(oldest, sdcSetName, ioArray, oldestPrjct);
 	
     	MeatOfCLICmd<String> transSteps = (s)->
 		{
@@ -282,7 +295,8 @@ public class SomeCommands
 			
 			return "Oki";
 		};
-		
+
+		ioArray.clear();
 		ioArray = new ArrayList<>(Arrays.asList(false, false, false, false));
 		
 		registerCmd(transferProjectHeads, ocSetName, ioArray, transPM);
@@ -307,6 +321,7 @@ public class SomeCommands
 			return pJSON;
 		};
 		
+		ioArray.clear();
 		ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
 		
 		registerCmd(new_Project, pmcSetName, ioArray, newProject);
