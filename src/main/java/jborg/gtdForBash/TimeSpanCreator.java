@@ -128,7 +128,7 @@ public class TimeSpanCreator
 			start = LocalDateTime.of(beginAnker.getYear(), beginAnker.getMonth(), 1, 0, 0);
 			end = LocalDateTime.of(endAnker.getYear(), endAnker.getMonth(), 1, 0, 0).minusNanos(1);
 
-			int k = end.getMonthValue()-start.getMonthValue();
+			int k = end.getMonthValue()-start.getMonthValue()+1;
 			int y = end.getYear()-start.getYear();
 			int d = y*12+k;
 	

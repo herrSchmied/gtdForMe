@@ -125,7 +125,7 @@ public class TestingStats
 	}
 	
 	@Test
-	public void timeSpanTests() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	public void timeSpanTests() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
 
         StatisticalTools st = new StatisticalTools(prjctSet);
@@ -141,6 +141,12 @@ public class TestingStats
         assert(tspdListDays.size()>=15&&tspdListDays.size()<=16);
         assert(tspdListWeeks.size()>=3&&tspdListWeeks.size()<=4);
         assert(tspdListMonth.size()>=1&&tspdListMonth.size()<=2);
+        for(int n=0;n<tspdListMonth.size();n++)
+        {
+        	TimeSpanData tsd = tspdListMonth.get(n);
+        	System.out.println(tsd);
+        	Thread.sleep(2000);
+        }
         assert(tspdListYears.size()>=1&&tspdListYears.size()<=2);     
 	}
 
@@ -321,29 +327,24 @@ public class TestingStats
         int hoursSize = hours.size();
 
         System.out.println("Number of Hours: " + hoursSize);
-        Thread.sleep(3000);
 
         Point hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, NDTKey);
 		System.out.println("Week with the most NDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Projects written..\n");
-		Thread.sleep(3000);
 
 		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, ADTKey);
 		System.out.println("Week with the most ADTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Projects active..\n");
-		Thread.sleep(3000);
 
 		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, DLDTKey);
 		if(hknrAndN!=null)
 		{
 			System.out.println("Week with the most DLDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Project Deadlines..\n");
 		}
-		Thread.sleep(3000);
 
 		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, TDTKey);
 		if(hknrAndN!=null)
 		{
 			System.out.println("Week with the most TDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Project Terminated..\n");
 		}
-		Thread.sleep(3000);
 	}
 	
 	public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
