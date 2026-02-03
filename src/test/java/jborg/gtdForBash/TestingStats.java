@@ -12,11 +12,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 import org.json.JSONException;
@@ -141,15 +139,20 @@ public class TestingStats
         assert(tspdListDays.size()>=15&&tspdListDays.size()<=16);
         assert(tspdListWeeks.size()>=3&&tspdListWeeks.size()<=4);
         assert(tspdListMonth.size()>=1&&tspdListMonth.size()<=2);
-        for(int n=0;n<tspdListMonth.size();n++)
-        {
-        	TimeSpanData tsd = tspdListMonth.get(n);
-        	System.out.println(tsd);
-        	Thread.sleep(2000);
-        }
+        //printTSPList(tspdListMonth);
         assert(tspdListYears.size()>=1&&tspdListYears.size()<=2);     
+        //printTSPList(tspdListYears);
 	}
 
+	public void printTSPList(List<TimeSpanData> list) throws InterruptedException
+	{
+        for(int n=0;n<list.size();n++)
+        {
+        	TimeSpanData tsd = list.get(n);
+        	System.out.println(tsd);
+        }
+	}
+	
 	@Test
 	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
 	{
@@ -236,33 +239,14 @@ public class TestingStats
 			int projectsFailed =  weekDatas.get(n).projectsFailedThisTimeSpan().size();
 			TimeSpanData tsd = weekDatas.get(n);
 			
-			System.out.println("\nWeekNr.: " + n);
-			Set<String> names = new HashSet<>();
-			System.out.println("Projects written: " + projectsWritten);
-			names.clear();
-			names.addAll(tsd.getProjectsWrittenDown().stream()
-					.map(mapJSONToName)
-					.collect(Collectors.toSet()));
-			System.out.println(names);
-			
-			System.out.println("Projects active: " + projectsActive);
-			names.clear();
-			names.addAll(tsd.getActiveProjects().stream()
-					.map(mapJSONToName)
-					.collect(Collectors.toSet()));
-			System.out.println(names);
-
-			System.out.println("Projects succeeded: " + projectsSucceeded);
-			names.clear();
-			names.addAll(tsd.projectsSucceededThisTimeSpan());
-			System.out.println(names);
-
-			System.out.println("Projects failed: " + projectsFailed);
-			names.clear();
-			names.addAll(tsd.projectsFailedThisTimeSpan());
-			System.out.println(names);
-			Set<String> pressing = tsd.mostPressingProjectDeadline();
-			System.out.println("Most Pressing Deadline: " + pressing);
+			System.out.println(tsd);
+			System.out.println("Projects succeeded: " 
+								+ tsd.projectsSucceededThisTimeSpan() + "\n");
+			System.out.println("Projects failed: " 
+								+ tsd.projectsFailedThisTimeSpan() + "\n");
+			System.out.println("Most Pressing Deadline: " 
+								+ tsd.mostPressingProjectDeadline() + "\n");
+			Thread.sleep(3500);
 			
 			if(n==0)
 			{	
@@ -275,15 +259,10 @@ public class TestingStats
 			if(n==1)
 			{
 				assert(projectsWritten==1);
-				assert(projectsActive==6);
+				assert(projectsActive==0);
 				assert(projectsSucceeded==0);
 				assert(projectsFailed==0);
 			}
-				  
-				/*
-				 * if(n==lastWeekIndex) { assert(projectsWritten==4); assert(projectsActive==7);
-				 * assert(projectsSucceeded==1); assert(projectsFailed==1); }
-				 */	 			  
 		}
 	}
 

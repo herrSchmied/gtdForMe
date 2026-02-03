@@ -658,14 +658,17 @@ public class TimeSpanData
 	
 	public String toString()
 	{
+		
+		
 		String beginStr = LittleTimeTools.timeString(begin);
 		String endStr = LittleTimeTools.timeString(end);
 		
 		return 		"Nr: " + timeNr + "\n"
+				+	"ChronoUnit: " + cu + "\n"
 				+	"Begin: " + beginStr + "\n"
 				+	"End: " + endStr + "\n"
 				+	"Projects active: " + projectsActive.size()+"\n"
 				+	"Projects created: " + newProjectsWrittenDown.size()+"\n"
-				+	"Projects terminated: " + projectsTerminated.size();
+				+	"Projects terminated: " + projectsTerminated.size() + "\n";
 	}
 }

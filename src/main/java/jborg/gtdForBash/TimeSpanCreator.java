@@ -103,8 +103,7 @@ public class TimeSpanCreator
 	{
 
 		List<Pair<LocalDateTime, LocalDateTime>> outputSpans = new ArrayList<>();
-		
-		
+
 		LocalDateTime start = null;
 		LocalDateTime end = null;
 
@@ -362,7 +361,7 @@ public class TimeSpanCreator
 		activatedLDT = extractLDT(pJSON, ADTKey);
 		
 		if(tsd.isAfterThisTimeSpan(activatedLDT))return false;
-		
+		if(tsd.timeSpanIsInTheFuture())return false;
 		if(tsd.isInThisTimeSpan(activatedLDT))return true;
 
 		if(tsd.isBeforeThisTimeSpan(activatedLDT)&&projectIsTerminated.test(pJSON))
