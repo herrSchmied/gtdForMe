@@ -46,7 +46,7 @@ public class StatisticalTools
 	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{
 
-		if(prjctSet==null||prjctSet.isEmpty())throw new StatisticalToolsException("No Projects.");
+		if(prjctSet==null)throw new NullPointerException("Argument is null.");
 		this.prjctSet = prjctSet;
 		tsc = new TimeSpanCreator(prjctSet);
 	}

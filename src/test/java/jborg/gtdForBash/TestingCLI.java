@@ -17,8 +17,11 @@ import org.junit.jupiter.api.Test;
 import allgemein.LittleTimeTools;
 
 import consoleTools.BashSigns;
-
-
+import jborg.gtdForBash.exceptions.StatisticalToolsException;
+import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
+import jborg.gtdForBash.exceptions.TimeSpanException;
+import jborg.gtdForBash.exceptions.ToolBoxException;
+import jborg.gtdForBash.exceptions.WeekDataException;
 import someMath.NaturalNumberException;
 
 
@@ -35,7 +38,7 @@ public class TestingCLI
 	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
 	@BeforeEach
-	public void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	public void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{    	
 		projects = ProjectSetForTesting.get();
 	}

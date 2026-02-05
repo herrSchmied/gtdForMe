@@ -83,18 +83,24 @@ public class TimeSpanCreator
 	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException
 	{
 
-		if(prjctSet.isEmpty()) throw new TimeSpanException("No Projects to evaluate.");
+		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
 		this.prjctSet = prjctSet;
 		
-	    Pair<String, LocalDateTime> oldPair = oldestLDTOverall();
-	    Pair<String, LocalDateTime> youngPair = youngestLDTOverall();
-
-	    LocalDateTime old = oldPair.getValue();
-		LocalDateTime young = youngPair.getValue();
-	    if(young.isBefore(old))throw new TimeSpanException("Evaluation went wrong this should not happen!");
+		if(prjctSet.isEmpty())
+		{
+			LocalDateTime now = LocalDateTime.now();
+			this.beginAnker = now;
+			this.endAnker = now;
+		}
+		else
+		{
+			
+			Pair<String, LocalDateTime> oldPair = oldestLDTOverall();
+			Pair<String, LocalDateTime> youngPair = youngestLDTOverall();
 	    
-	    this.beginAnker = old;
-		this.endAnker = young;
+			this.beginAnker = oldPair.getValue();
+			this.endAnker = youngPair.getValue();
+		}
 		
 		createListsOfAllChronoUnitTimeSpans();
 	}
@@ -103,6 +109,7 @@ public class TimeSpanCreator
 	{
 
 		List<Pair<LocalDateTime, LocalDateTime>> outputSpans = new ArrayList<>();
+		if(beginAnker.equals(endAnker))return outputSpans;
 
 		LocalDateTime start = null;
 		LocalDateTime end = null;
@@ -252,33 +259,26 @@ public class TimeSpanCreator
 	public void createListsOfAllChronoUnitTimeSpans() throws IOException, URISyntaxException, TimeSpanException
 	{
 		
-		Map<ChronoUnit, List<TimeSpanData>> outputMap = new HashMap<>();
-		
 		yearList = createListOfChronoUnitTimeSpan(ChronoUnit.YEARS);
 		monthList = createListOfChronoUnitTimeSpan(ChronoUnit.MONTHS);
 		weekList = createListOfChronoUnitTimeSpan(ChronoUnit.WEEKS);
 		dayList = createListOfChronoUnitTimeSpan(ChronoUnit.DAYS);
 		hourList = createListOfChronoUnitTimeSpan(ChronoUnit.HOURS);
 		
-		outputMap.put(ChronoUnit.YEARS, yearList);
-		outputMap.put(ChronoUnit.MONTHS, monthList);
-		outputMap.put(ChronoUnit.WEEKS, weekList);
-		outputMap.put(ChronoUnit.DAYS, dayList);
-		outputMap.put(ChronoUnit.HOURS, hourList);
-
-		chronoUnitTimeSpanMap = outputMap;
+		chronoUnitTimeSpanMap.put(ChronoUnit.YEARS, yearList);
+		chronoUnitTimeSpanMap.put(ChronoUnit.MONTHS, monthList);
+		chronoUnitTimeSpanMap.put(ChronoUnit.WEEKS, weekList);
+		chronoUnitTimeSpanMap.put(ChronoUnit.DAYS, dayList);
+		chronoUnitTimeSpanMap.put(ChronoUnit.HOURS, hourList);
 	}
 
 	public List<JSONObject> sortedListProjectsByLDT(String jsonKey) throws IOException, URISyntaxException, TimeSpanCreatorException
 	{
 		
-		LocalDateTime oldestLDT = LocalDateTime.now();
-
-		String name = "";
 		if(prjctSet.isEmpty())
 		{
 			System.out.println(TerminalXDisplay.formatBashStringBoldAndRed("No Projects!"));
-			new Pair<>(name, oldestLDT);
+			return new ArrayList<JSONObject>();
 		}
 
 		List<JSONObject> projectsThatHaveThatKey = new ArrayList<>();
@@ -293,16 +293,10 @@ public class TimeSpanCreator
 			projectsThatHaveThatKey.add(pJSON);
 		}
 
-		if(projectsThatHaveThatKey.isEmpty())
-			throw new TimeSpanCreatorException("No Project with the desired LDT");
+		if(projectsThatHaveThatKey.isEmpty())return projectsThatHaveThatKey;
 		
 		comparatorJSONKey = jsonKey;
 		projectsThatHaveThatKey.sort(ldtComparator);
-		
-		JSONObject pJSON = projectsThatHaveThatKey.getLast();
-		name = pJSON.getString(nameKey);
-		oldestLDT = extractLDT(pJSON, jsonKey);
-
 				
 		return projectsThatHaveThatKey;
 	}
@@ -390,6 +384,22 @@ public class TimeSpanCreator
 		}
 		
 		return false;
+	}
+
+	public TimeSpanData getCurrentTimeSpan(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
+	{
+
+		int nr = isInWhichTimeSpan(cu, LocalDateTime.now());
+
+    	List<TimeSpanData> list = null;
+
+    	if(cu.equals(ChronoUnit.YEARS))list = yearList;
+    	if(cu.equals(ChronoUnit.MONTHS))list = monthList;
+    	if(cu.equals(ChronoUnit.WEEKS))list = weekList;
+    	if(cu.equals(ChronoUnit.DAYS))list = dayList;
+    	if(cu.equals(ChronoUnit.HOURS))list = hourList;
+    	
+    	return list.get(nr);
 	}
 
     public int isInWhichTimeSpan(ChronoUnit cu, LocalDateTime ldt) throws IOException, URISyntaxException, TimeSpanException
@@ -531,6 +541,8 @@ public class TimeSpanCreator
     {
 
     	Pair<String, LocalDateTime> old = oldestLDTOverall();
+    	if(old==null)return null;
+
     	String name = old.getKey();
     	LocalDateTime ldt = old.getValue();
     	
@@ -552,7 +564,8 @@ public class TimeSpanCreator
     {
    	
     	List<JSONObject> list = sortedListProjectsByLDT(NDTKey);//Which is thee oldest LDT!
-    	
+    	if(list.isEmpty())return null;
+   
     	JSONObject pJSON = list.getLast();
     	String name = pJSON.getString(nameKey);
     	LocalDateTime ldt = extractLDT(pJSON, NDTKey);

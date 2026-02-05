@@ -2,6 +2,7 @@ package jborg.gtdForBash;
 
 
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 
@@ -109,9 +110,6 @@ public class SomeCommands
 																  sdcSetName, showDataCommands,
 																  ocSetName, otherCommands);
 
-	
-
-	
 	private final String unknownProject = "Unknown Project!";
 	private final String projectIsNotActive = "Project is not active.";
 	private final String sorryDeadlineAbuse = "Sorry Deadline Abuse.";
@@ -123,7 +121,7 @@ public class SomeCommands
 	public final String newPrjctStgClsd = "New Project Stage closed.";
 	
 	private final String projectStr = "Project";
-	private final String nearestDeadlineStr = "nearest Deadline of Last Steps.";
+	private final String nearestDeadlineStr = "nearest Deadline of Projects.";
 	private final String descStr = "Desc";
 	private final String statusStr = "Status";
 	private final String deadlineStr = "Deadline";
@@ -185,56 +183,60 @@ public class SomeCommands
     	return false;
     }    
 
+    private final boolean isActivePrjctName(String s)
+	{
+		if(!knownProjects.containsKey(s)) return false;
+		
+		JSONObject pJSON = knownProjects.get(s);
+		
+		return activeProject.test(pJSON);
+	}
+
+	private final boolean notActivePrjctName(String s)
+	{
+		if(!knownProjects.containsKey(s)) return false;//Is a must!!
+		
+		return !isActivePrjctName(s);
+	}
+
     private final InputStreamSession iss;
     private final Map<String, JSONObject> knownProjects;
-    
-    private final Predicate<String> activePrjctName;
 	
-	private final Predicate<String> notActivePrjctName;
+    private final LocalDateTime nowDef;
+	private final StatisticalTools st;
+	private final TimeSpanCreator tsc;
 
 	public SomeCommands(GTDCLI cli, Map<String, JSONObject> knownProjects, StatusMGMT states, 
-    		GTDDataSpawnSession ds, SimpleLogger sLog)
+    		GTDDataSpawnSession ds, SimpleLogger sLog) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
     {
 
     	this.iss = cli.getInputStreamSession();
     	this.knownProjects = knownProjects;
-
-		activePrjctName = (s)->
-		{
-			if(!knownProjects.containsKey(s)) return false;
-			
-			JSONObject pJSON = knownProjects.get(s);
-			
-			return activeProject.test(pJSON);
-		};
-		
-		notActivePrjctName = (s)->
-		{
-			if(!knownProjects.containsKey(s)) return false;//Is a must!!
-			
-			return !activePrjctName.test(s);
-		};
+    	this.nowDef = LocalDateTime.now();
+    	
+    	Set<JSONObject> pSet = new HashSet<>(knownProjects.values());
+    	st = new StatisticalTools(pSet);
+    	tsc = st.getTimeSpanCreator();
 
 		List<Boolean> ioArray;
 		
 		MeatOfCLICmd<String> oldestPrjct = (s)->
 		{
 
-			StatisticalTools st;
-
 			try
 			{
 
-				st = new StatisticalTools(GTDCLI.loadProjects(GTDCLI.getDataFolder()));
 				TimeSpanCreator tsc = st.getTimeSpanCreator();
 				Pair<String, LocalDateTime> pair = tsc.oldestLDTOverall();
 				String name = pair.getKey();
 				LocalDateTime ldt = pair.getValue();
-
-				return "Project: " + name + ", NDT: " + ldt;
+				
+				String output = "Project: " + name + ", NDT: " + ldt;
+				System.out.println(output + "\n");
+				
+				return output;
 			}
-			catch (URISyntaxException | WeekDataException | TimeSpanException | ToolBoxException
-					| StatisticalToolsException | TimeSpanCreatorException e)
+			catch (URISyntaxException | TimeSpanCreatorException e)
 			{
 
 				e.printStackTrace();
@@ -362,92 +364,40 @@ public class SomeCommands
     
 		MeatOfCLICmd<String> nearestDeadline = (s)->
 		{
-			
+
 			sLog.logNow("Nearest Deadline display.");
-			LocalDateTime jetzt = LocalDateTime.now();
-    		long newMinutes = 1000000;
-    		List<String> pList = new ArrayList<>();
-    		List<String> dauerList = new ArrayList<>();
-    			
-			if(knownProjects.isEmpty())
-			{
-				sLog.logNow("No Projects. No Display");
-				throw new CLICMDException(noPrjctFound);
-			}
 
-			for(JSONObject pJSON: knownProjects.values())
-    		{
-    			
-				String status = pJSON.getString(ProjectJSONKeyz.statusKey);
-				if(status.equals(StatusMGMT.mod))continue;
-				
-    			String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
-
-    			//JSONObject lastStep = getLastStep(pJSON);
-    				
-    			LocalDateTime stepDLDT = null;
-				try
-				{
-	    			if(projectHasNoDLDT.test(pJSON))continue;
-					stepDLDT = extractLDT(pJSON, DLDTKey);
-				}
-				catch(URISyntaxException e)
-				{
-					e.printStackTrace();
-				}
-    				
-    			String dauer = new ExactPeriode(jetzt, stepDLDT).toString();
-    				
-    			long minutes = jetzt.until(stepDLDT, ChronoUnit.MINUTES);
-    			boolean isNearer = (Math.abs(minutes)<Math.abs(newMinutes));
-    			boolean isEqual = Math.abs(minutes)==Math.abs(newMinutes);
-    				    				
-    			if(isEqual)
-    			{
-    				pList.add(prjctName);
-    				dauerList.add(dauer);
-    			}
-
-    				
-    			if(isNearer)
-    			{
-    				newMinutes=minutes;
-    					
-    				pList.clear();
-    				pList.add(prjctName);
-    				dauerList.clear();
-    				dauerList.add(dauer); 
-    			}
-    		}
-
-    		List<List<String>> rows = new ArrayList<>();
-    			
-    		int l = pList.size();
-    		for(int n=0;n<l;n++)
-    		{
-    			List<String> row = new ArrayList<>();
-
-    			row.add(pList.get(n));
-    			row.add(dauerList.get(n).toString());
-    				
-    			rows.add(row);
-    		}
-
-    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestDeadlineStr));
-    		
-    		TerminalTableDisplay ttd;
 			try
 			{
-				ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+
+				TimeSpanData tsd = tsc.getCurrentTimeSpan(ChronoUnit.HOURS);
+
+				Set<String> prjctNames = tsd.mostPressingProjectDeadline();
+				List<List<String>> rows = new ArrayList<>();
+
+				for(String pName: prjctNames)
+				{
+					List<String> singleRow = new ArrayList<>();
+					JSONObject pJSON = tsd.pickProjectByName(pName);
+					String timeStr = pJSON.getString(DLDTKey);
+					singleRow.add(pName);
+					singleRow.add(timeStr);
+					rows.add(singleRow);
+				}
+
+	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestDeadlineStr));
+
+	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+
+	    		System.out.println(ttd);
+				
+	    		return ttd.toString();
 			}
-			catch (ConsoleToolsException e)
+			catch (TimeSpanException | URISyntaxException | ConsoleToolsException e)
 			{
-				throw new RuntimeException("TerminalTableDisplay did it!");
+	
+				return "Error";
 			}
-			
-    		System.out.println(ttd);
-			
-    		return ttd.toString();
 		};
 		
 		ioArray.clear();
@@ -561,7 +511,7 @@ public class SomeCommands
 
 			sLog.logNow("Inactive Projects display.");
     		Map<String, JSONObject> map = new HashMap<>();
-    		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
+    		List<String> noAPrjcts = findProjectNamesByCondition(this::notActivePrjctName);
     		
     		if(noAPrjcts.isEmpty())
     		{
@@ -604,7 +554,7 @@ public class SomeCommands
 			
 			Map<String, JSONObject> map = new HashMap<>();
 			
-			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+			List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
 			if(aPrjcts.isEmpty())
 			{
 				sLog.logNow("No active Projects.");
@@ -645,7 +595,7 @@ public class SomeCommands
 			List<String> headers = new ArrayList<>(Arrays.asList(projectStr, descStr, statusStr, deadlineStr));
 			List<List<String>> rows = new ArrayList<>();
 
-			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+			List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
 			if(aPrjcts.isEmpty())
 			{
 				
@@ -765,7 +715,7 @@ public class SomeCommands
 			sLog.logNow("Trying to add a Note to a Project.");
 
    			System.out.println("");
-			List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+			List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
 			if(aPrjcts.isEmpty())
 			{
 				sLog.logNow("No Projects. No Note adding.");
@@ -952,7 +902,7 @@ public class SomeCommands
 			sLog.logNow("Trying to create next Step for Project");
 
 			System.out.println("");
-    		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+    		List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
     		if(aPrjcts.isEmpty())
     		{
     			sLog.logNow("No active Projects. No next Step.");
@@ -1007,7 +957,7 @@ public class SomeCommands
 
 			sLog.logNow("Trying to kill an active Project.");
 			System.out.println("");
-    		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+    		List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
     		if(aPrjcts.isEmpty())
     		{
     			sLog.logNow("No active Projects no Kill.");
@@ -1056,7 +1006,7 @@ public class SomeCommands
 
 			sLog.logNow("Terminating Step.");
     		System.out.println("");
-    		List<String> aPrjcts = findProjectNamesByCondition(activePrjctName);
+    		List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
 
     		String pName;
     		if(s.trim().equals(""))pName = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
@@ -1110,7 +1060,7 @@ public class SomeCommands
 			sLog.logNow("Displaying successes.");
 			
     		Map<String, JSONObject> map = new HashMap<>();
-    		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
+    		List<String> noAPrjcts = findProjectNamesByCondition(this::notActivePrjctName);
     		
     		if(noAPrjcts.isEmpty())
     		{
@@ -1155,7 +1105,7 @@ public class SomeCommands
 			sLog.logNow("Display fails.");
 
     		Map<String, JSONObject> map = new HashMap<>();
-    		List<String> noAPrjcts = findProjectNamesByCondition(notActivePrjctName);
+    		List<String> noAPrjcts = findProjectNamesByCondition(this::notActivePrjctName);
     		
     		if(noAPrjcts.isEmpty())
     		{
@@ -1245,13 +1195,7 @@ public class SomeCommands
     {
     	return commandMap;
     }
-    
- 
-    
-
         
-    
- 
     public String showProjectDetail(JSONObject pJSON)
     {
     	String gpx = BashSigns.boldGBCPX;
@@ -1364,9 +1308,8 @@ public class SomeCommands
     		String status = (String) jo.getString(statusKey);
     		String adtStr = (String) jo.getString(ADTKey);
 
-    		LocalDateTime jetzt = LocalDateTime.now();
     		LocalDateTime adt = LittleTimeTools.LDTfromTimeString(adtStr);
-    		String age = new ExactPeriode(adt, jetzt).toString();	
+    		String age = new ExactPeriode(adt, nowDef).toString();	
 
     		List<String> row = new ArrayList<>();
     		row.add(name);

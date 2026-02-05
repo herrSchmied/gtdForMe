@@ -655,7 +655,7 @@ public class TimeSpanData
 	{
 		return ldt.isBefore(begin);
 	}
-	
+		
 	public String toString()
 	{
 		

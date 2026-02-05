@@ -40,6 +40,12 @@ import consoleTools.InputStreamSession;
 
 
 import jborg.gtdForBash.exceptions.CLICMDException;
+import jborg.gtdForBash.exceptions.StatisticalToolsException;
+import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
+import jborg.gtdForBash.exceptions.TimeSpanException;
+import jborg.gtdForBash.exceptions.ToolBoxException;
+import jborg.gtdForBash.exceptions.WeekDataException;
+
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 
@@ -52,29 +58,23 @@ public class GTDCLI implements Beholder<String>
 
 
 	private final String statesFileName = "statusMGMT.states";
-	private final StatusMGMT states = loadStates();
+	private final StatusMGMT states = StatusMGMT.getInstance();
 	
 	//private final List<String> history = new ArrayList<>();
 	
 	private static Path projectDataFolderRelativePath = Paths.get("projectDATA/");
 	private static final String actionLog = "activityLog";
-	private final SimpleLogger sLog = new SimpleLogger(projectDataFolderRelativePath+actionLog, "Log of GTD ");
-	
-	private final String thereIsAStatesFileLoading = "There is a States File. Trying to Load it";
-	private final String somethinWrongStates = "Something is wrong. Using default States.";
-	private final String thereAreNoStates = "There is no States File using default States.";
+	private final SimpleLogger sLog;
 	
 	public static final String fileMarker = ".prjct";
-	
+
 	private Map<String, JSONObject> knownProjects = new HashMap<>();
 
 	public static final String isModProjectQ = "Maybe one Day-Project?(yes) or are we actually try "
 			+ "to do it soon enough?(no): ";	
-	
-	
+
 	private final Map<String, CLICommand<?>> commandMap;
-	
-	
+
 	boolean noMoreLoops = false;
 	
 	/*TODO: some only need Testing.
@@ -103,12 +103,13 @@ public class GTDCLI implements Beholder<String>
 	
 	public final int jsonPrintStyle = 4;
 	
-    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException
+    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{
 
     	this.iss = iss;
+    	this.sLog =  new SimpleLogger(projectDataFolderRelativePath.toAbsolutePath()+actionLog, "Log of GTD ");
     	System.out.println(sLog.getSessionString());
-    	
+
     	ds = new GTDDataSpawnSession(this.iss);
     	Path p = getDataFolder();
     	
@@ -129,7 +130,7 @@ public class GTDCLI implements Beholder<String>
 			
 			scds = new SomeCommands(this, knownProjects, states, ds, sLog);
 			commandMap = scds.getCommandMap();
-
+			
 			loopForCommands();
 		}
 		else 
@@ -152,7 +153,7 @@ public class GTDCLI implements Beholder<String>
 	    		}
 	    			
 	    		greetings();
-	    		
+
 				scds = new SomeCommands(this, knownProjects, states, ds, sLog);
 				commandMap = scds.getCommandMap();
 
@@ -181,24 +182,25 @@ public class GTDCLI implements Beholder<String>
     	System.out.println("Hello, it is " + day + " the " + day2 + " in the Year "+year);
     	System.out.println("Time: " + time + '\n');
     }
-    
-    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException
+
+    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
 
     public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException
     {
-    	
+
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
-    	
+
+    	System.out.println("\n");
     	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
-    	
+
     	checkAllForDLDTAbuse();
     	saveAll();
-    	
+
     	try
     	{
         	int numberOfCmds = commandMap.size();
@@ -236,48 +238,17 @@ public class GTDCLI implements Beholder<String>
 
     public String getArgumentOfCommand(String commandTyped, String commandKnown)
     {
-    	
+
     	String argument = "";
    		int l = commandKnown.length();
    		argument = commandTyped.substring(l);
 
    		return argument;
     }
-   
-    
+
 	public void nxtStp(JSONObject pJSON) throws InputArgumentException, IOException, JSONException, URISyntaxException
     {
     	ds.spawnStep(pJSON);
-    }
-
-    public StatusMGMT loadStates()
-    {
-    	
-    	Path p = Path.of(getDataFolder()+statesFileName);
-    	
-    	boolean thereAreStates = (Files.exists(p));
-    	StatusMGMT tmpStates;
-    	
-    	if(thereAreStates)
-    	{
-    		
-    		System.out.println(thereIsAStatesFileLoading);
-    		
-    		try
-    		{
-				tmpStates =(StatusMGMT) loadObject(p);
-				return tmpStates;
-			}
-    		catch (ClassNotFoundException | IOException e)
-    		{
-				e.printStackTrace();
-				System.out.println(somethinWrongStates);
-				return StatusMGMT.getInstance();
-			}
-    	}
-    	
-    	System.out.println(thereAreNoStates);
-    	return StatusMGMT.getInstance();
     }
 
     public void checkAllForDLDTAbuse()

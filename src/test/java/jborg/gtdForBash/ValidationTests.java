@@ -17,7 +17,11 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
+import jborg.gtdForBash.exceptions.StatisticalToolsException;
+import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
+import jborg.gtdForBash.exceptions.TimeSpanException;
+import jborg.gtdForBash.exceptions.ToolBoxException;
+import jborg.gtdForBash.exceptions.WeekDataException;
 import someMath.NaturalNumberException;
 
 public class ValidationTests
@@ -27,7 +31,7 @@ public class ValidationTests
 	static Set<JSONObject> projects;
 	
 	@BeforeEach
-	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException
+	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{
 
 	    // Create a guaranteed-empty temp directory for all project data

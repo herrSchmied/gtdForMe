@@ -55,10 +55,9 @@ public class TestingStats
     static Set<JSONObject> prjctSet;
 
     Function<JSONObject, String> mapJSONToName = (pJSON)->pJSON.getString(nameKey);
-    
-    
+
 	@BeforeEach
-	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException
+	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{
 
 		prjctSet = ProjectSetForTesting.get();
@@ -246,7 +245,6 @@ public class TestingStats
 								+ tsd.projectsFailedThisTimeSpan() + "\n");
 			System.out.println("Most Pressing Deadline: " 
 								+ tsd.mostPressingProjectDeadline() + "\n");
-			Thread.sleep(3500);
 			
 			if(n==0)
 			{	
