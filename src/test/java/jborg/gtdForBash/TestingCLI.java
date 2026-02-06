@@ -124,12 +124,10 @@ public class TestingCLI
 	 
 	
 		JSONObject step = getLastStep(project);
-		StatusMGMT statusMGMT =	StatusMGMT.getInstance();
-		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
 		String stepStatus = step.getString(StepJSONKeyz.statusKey);
 		System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
-		assert(terminalSet.contains(stepStatus));
-		assert(terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
+		assert(StatusMGMT.terminalSet.contains(stepStatus));
+		assert(StatusMGMT.terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
 
 	}
 	 
@@ -139,13 +137,11 @@ public class TestingCLI
 		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(3), projects);
 		assert(project!=null);
 		
-		JSONObject step = getLastStep(project); 
-		StatusMGMT statusMGMT =	StatusMGMT.getInstance(); 
-		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
+		JSONObject step = getLastStep(project);
 		String stepStatus = step.getString(StepJSONKeyz.statusKey);
-		//System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
-		assert(terminalSet.contains(stepStatus));
-		assert(terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
+	
+		assert(StatusMGMT.terminalSet.contains(stepStatus));
+		assert(StatusMGMT.terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
 	}
 
 	@Test 
@@ -156,9 +152,7 @@ public class TestingCLI
 		assert(project!=null);
 		
 		JSONObject step = getLastStep(project);
-		StatusMGMT statusMGMT = StatusMGMT.getInstance();
-		Set<String> terminalSet = statusMGMT.getStatesOfASet(StatusMGMT.terminalSetName);
-	 	assert(terminalSet.contains(step.getString(StepJSONKeyz.statusKey))); 
+	 	assert(StatusMGMT.terminalSet.contains(step.getString(StepJSONKeyz.statusKey))); 
 	}
 
 	@Test
@@ -169,17 +163,15 @@ public class TestingCLI
 		assert(project!=null);
 
 		JSONObject step2 = getLastStep(project);
-		StatusMGMT statusMGMT = StatusMGMT.getInstance();
-		Set<String> atStartSet = statusMGMT.getStatesOfASet(StatusMGMT.atStartSetName);
+
 		String stepStatus = step2.getString(StepJSONKeyz.statusKey);
-		assert(atStartSet.contains(stepStatus));
-	 
-		Set<String> onTheWaySet = statusMGMT.getStatesOfASet(StatusMGMT.onTheWaySetName);
-		assert(onTheWaySet.contains(stepStatus));
+		assert(StatusMGMT.stepStarterSet.contains(stepStatus));
+
+		assert(StatusMGMT.onTheWayStepSet.contains(stepStatus));
 
 		JSONArray steps = project.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 		assert(steps.length()==2);
-	 
+
 		String desc1 = step2.getString(StepJSONKeyz.descKey);
 		assert(desc1.equals(stepDesc2));
 
@@ -191,15 +183,14 @@ public class TestingCLI
 	@Test
 	public void testNewProjectWithoutDeadline() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
-		
+
 		JSONObject newProject = pickProjectByName(newPrjctNoDLDT, projects);
 		assert(newProject!=null);
 		assert(newProject.has(ProjectJSONKeyz.statusKey));
-		
+
 		String status = newProject.getString(statusKey);
 		assert(status.equals(StatusMGMT.atbd));
 		assert(newProject.has(ADTKey));
-
 
 		String adtStr = newProject.getString(ADTKey);
 		assert(newProject.has(DLDTKey));

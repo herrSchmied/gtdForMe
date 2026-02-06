@@ -253,12 +253,8 @@ public class ProjectJSONToolbox
 	{
 	
 	    String status = jo.getString(ProjectJSONKeyz.statusKey);
-	    
-	    StatusMGMT states = StatusMGMT.getInstance();
-	
-	    Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
-	    	
-	    return terminalSet.contains(status);
+		    	
+	    return StatusMGMT.terminalSet.contains(status);
 	};
 
 	public static final Predicate<JSONObject> lastStepIsTerminated = (jo)->
@@ -267,12 +263,8 @@ public class ProjectJSONToolbox
 		JSONObject sJSON = getLastStepOfProject(jo);
 		
 	    String status = sJSON.getString(StepJSONKeyz.statusKey);
-	    
-	    StatusMGMT states = StatusMGMT.getInstance();
-	
-	    Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
 	    	
-	    return terminalSet.contains(status);
+	    return StatusMGMT.terminalSet.contains(status);
 	};
 
 	public static final Predicate<JSONObject> projectHasNoDLDT = (jo)->
@@ -306,13 +298,8 @@ public class ProjectJSONToolbox
 	{
 		
 		String status = pJson.getString(ProjectJSONKeyz.statusKey);
-		StatusMGMT statusMGMT = StatusMGMT.getInstance();
-		String terminalSetName = StatusMGMT.terminalSetName;		
-		Set<String> terminalSet = statusMGMT.getStatesOfASet(terminalSetName);
 		
-		if(terminalSet.contains(status))return true;
-		
-		return false;
+		return StatusMGMT.terminalSet.contains(status);
 	}
 
 	/**
@@ -326,13 +313,8 @@ public class ProjectJSONToolbox
 	{
 		
 		String status = sJson.getString(StepJSONKeyz.statusKey);
-		StatusMGMT statusMGMT = StatusMGMT.getInstance();
-		String terminalSetName = StatusMGMT.terminalSetName;
-		
-		Set<String> terminalSet = statusMGMT.getStatesOfASet(terminalSetName);
-		if(terminalSet.contains(status))return true;
-		
-		return false;
+
+		return StatusMGMT.terminalSet.contains(status);
 	}
 
 	/**
@@ -539,21 +521,18 @@ public class ProjectJSONToolbox
 
 	public static final Predicate<JSONObject> stepIsTerminated = (step)->
 	{
-	
+
 	   	String status = step.getString(StepJSONKeyz.statusKey);
-	   	
-	   	StatusMGMT states = StatusMGMT.getInstance();
-	
-	   	Set<String> terminalSet = states.getStatesOfASet(StatusMGMT.terminalSetName);
-	    	
-	   	return terminalSet.contains(status);
+
+	   	return StatusMGMT.terminalSet.contains(status);
 	};
 	
 	public static final Predicate<JSONObject> stepHasNoDLDT = (step) ->
 	{
+
 		String dldtString = step.getString(StepJSONKeyz.DLDTKey);
 		if(dldtString.equals(stepDeadlineNone))return true;
-		
+
 		return false;
 	};
 	

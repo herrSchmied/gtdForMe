@@ -13,9 +13,11 @@ public class StatusMGMT implements Serializable
 	private static final long serialVersionUID = -7547462104106697126L;
 	//Because of Serializable.^
 	
-	public static final String terminalSetName = "terminalSet";
-	public static final String atStartSetName = "starterSet";
-	public static final String onTheWaySetName = "onTheWay";
+	public static final Set<String> terminalSet = new HashSet<>();
+	public static final Set<String> atStartSet = new HashSet<>();
+	public static final Set<String> stepStarterSet = new HashSet<>();
+	public static final Set<String> onTheWaySet = new HashSet<>();
+	public static final Set<String> onTheWayStepSet = new HashSet<>();
 	
 	public static final String asap = "As soon as possible";
 	public static final String atbd = "About_to_be_Done!";
@@ -44,59 +46,31 @@ public class StatusMGMT implements Serializable
 	//Singleton Design Pattern.
 	private StatusMGMT()
 	{		
-
-		Set<String> terminalSet = new HashSet<>();
-		addNewStateSet(terminalSetName, terminalSet);
 		
-		addState(terminalSetName, success, true, true);
-		addState(terminalSetName, failed, true, true);
+		terminalSet.add(success);
+		terminalSet.add(failed);
 
-		Set<String> startSet = new HashSet<>();
-		addNewStateSet(atStartSetName, startSet);
 
-		addState(atStartSetName, atbd, true, true);
-		addState(atStartSetName, mod, true, false);//is not a Step Status.
-		addState(atStartSetName, waiting, true, true);
-		addState(atStartSetName, asap, true, true);
+		atStartSet.add(atbd);
+		atStartSet.add(mod);//is not a Step Status.
+		atStartSet.add(waiting);
+		atStartSet.add(asap);
+
+		stepStarterSet.add(atbd);
+		stepStarterSet.add(waiting);
+		stepStarterSet.add(asap);
+
+		onTheWaySet.add(atbd);
+		onTheWaySet.add(mod);//is not a Step Status.
+		onTheWaySet.add(waiting);
+		onTheWaySet.add(needsNewStep);
+		onTheWaySet.add(asap);
 		
-		Set<String> onTheWaySet = new HashSet<>();
-		addNewStateSet(onTheWaySetName, onTheWaySet);
+		onTheWayStepSet.add(atbd);
+		onTheWayStepSet.add(waiting);
+		onTheWayStepSet.add(needsNewStep);
+		onTheWayStepSet.add(asap);
 
-		addState(onTheWaySetName, atbd, true, true);
-		addState(onTheWaySetName, mod, true, false);//is not a Step Status.
-		addState(onTheWaySetName, waiting, true, true);
-		addState(onTheWaySetName, needsNewStep, true, false);
-		addState(onTheWaySetName, asap, true, true);
-	}
-
-	/*
-	 * this is not allowed because every State should belong to at least 
-	 * one stateSet. So u have to first install a new stateSet or use the
-	 * other Method directly. allState Set is *not* included.
-	public void addNewState(String name)
-	{
-		allStates.add(name);
-	}
-	*/
-
-	public void addNewStateSet(String name, Set<String> stateSet)
-	{
-		stateSetMap.put(name, stateSet);
-	}
-
-	public void addState(String setName, String stateName, boolean isProjectStatus, boolean isStepStatus)
-	{
-		
-		if(!stateSetMap.containsKey(setName))throw new IllegalArgumentException("Unknown State Set.");
-		
-		Set<String> set = stateSetMap.get(setName);
-		set.add(stateName);
-		stateSetMap.put(setName, set);
-		
-		if(isProjectStatus)belongsToProjects.add(stateName);
-		if(isStepStatus)belongsToSteps.add(stateName);
-
-		allStates.add(stateName);
 	}
 
 	public Set<String> getSetOfAllStates()
@@ -107,16 +81,6 @@ public class StatusMGMT implements Serializable
 	public Set<String> getNameOfAllSets()
 	{
 		return stateSetMap.keySet();
-	}
-
-	public Set<String> getStatesOfASet(String setName)
-	{
-		return stateSetMap.get(setName);
-	}
-
-	public boolean isKnownAsState(String stateName)
-	{
-		return allStates.contains(stateName);
 	}
 
 	public boolean isStepStatus(String stateName)

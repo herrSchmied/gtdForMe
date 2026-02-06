@@ -129,8 +129,6 @@ public class GTDDataSpawnSession
 	public static final String noteAddPhrase = "Write Note:";
 	public static final boolean notTxtAQstn = true;
 	
-	private static StatusMGMT statusMGMT = StatusMGMT.getInstance();
-	private static Set<String> stepStartStatuses = statusMGMT.getStatesOfASet(StatusMGMT.atStartSetName);
 		
 	public static final String stepStatusPhrase = "Choose Status: ";
 	
@@ -361,11 +359,10 @@ public class GTDDataSpawnSession
 
 		String stepStatus = "";
 			
-			
-		List<String> sss = new ArrayList<>();
-		sss.addAll(stepStartStatuses);
+		
+		List<String> stepStarterStatuses = new ArrayList<>(StatusMGMT.stepStarterSet);
 		System.out.println("");
-		stepStatus = iss.forcedOutOfList(stepChooseStatusQstn, sss);
+		stepStatus = iss.forcedOutOfList(stepChooseStatusQstn, stepStarterStatuses);
 					
 		String phrase;
 		if(stepStatus.equals(StatusMGMT.waiting))phrase = waitingForPhrase;
