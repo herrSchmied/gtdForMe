@@ -121,8 +121,7 @@ public class TestingCLI
 
 		JSONObject project = pickProjectByName(killPrjctNameNoDLDT, projects);
 		assert(project!=null);
-	 
-	
+
 		JSONObject step = getLastStep(project);
 		String stepStatus = step.getString(StepJSONKeyz.statusKey);
 		System.out.println(BashSigns.boldRBCPX+stepStatus+BashSigns.boldRBCSX);
@@ -130,16 +129,16 @@ public class TestingCLI
 		assert(StatusMGMT.terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
 
 	}
-	 
+
 	public void testKillProject() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
-		
+
 		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(3), projects);
 		assert(project!=null);
-		
+
 		JSONObject step = getLastStep(project);
 		String stepStatus = step.getString(StepJSONKeyz.statusKey);
-	
+
 		assert(StatusMGMT.terminalSet.contains(stepStatus));
 		assert(StatusMGMT.terminalSet.contains(project.get(ProjectJSONKeyz.statusKey)));
 	}

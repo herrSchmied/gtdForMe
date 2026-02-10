@@ -2,7 +2,6 @@ package jborg.gtdForBash;
 
 
 
-import java.awt.Point;
 
 import java.io.IOException;
 
@@ -200,33 +199,33 @@ public class TestingStats
         //int lastWeekIndex = weeksSize-1;
         int firstWeekIndex = 0;
         
-        JSONObject pJSON = st.pickByName(wakeProjectName);
+        JSONObject pJSON = st.projectJSONObjByName(wakeProjectName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, NDTKey, st));
 		
-		pJSON = st.pickByName(modPrjctName);
+		pJSON = st.projectJSONObjByName(modPrjctName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, modPrjctName, firstWeekIndex, pJSON, NDTKey, st));
 		
 		String addNotePrjctName = SequenzesForISS.getNewProjectName(2);
-		pJSON = st.pickByName(addNotePrjctName);
+		pJSON = st.projectJSONObjByName(addNotePrjctName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, addNotePrjctName, firstWeekIndex, pJSON, ADTKey, st));
 
-		pJSON = st.pickByName(killPrjctNameNoDLDT);
+		pJSON = st.projectJSONObjByName(killPrjctNameNoDLDT);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, killPrjctNameNoDLDT, firstWeekIndex, pJSON, ADTKey, st));
 		
 		String killPrjctName = SequenzesForISS.getNewProjectName(3);
-		pJSON = st.pickByName(killPrjctName);
+		pJSON = st.projectJSONObjByName(killPrjctName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, killPrjctName, firstWeekIndex, pJSON, ADTKey, st));
 		assert(projectIsTerminated.test(pJSON));
 		
 		String killStepPrjctName = SequenzesForISS.getNewProjectName(3);
-		pJSON = st.pickByName(killStepPrjctName);
+		pJSON = st.projectJSONObjByName(killStepPrjctName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, killStepPrjctName, firstWeekIndex, pJSON, ADTKey, st));
 
 		String appendStpPrjctName = SequenzesForISS.getNewProjectName(4);
-		pJSON = st.pickByName(appendStpPrjctName);
+		pJSON = st.projectJSONObjByName(appendStpPrjctName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, appendStpPrjctName, firstWeekIndex, pJSON, ADTKey, st));
 	
-		pJSON = st.pickByName(newPrjctNoDLDT);
+		pJSON = st.projectJSONObjByName(newPrjctNoDLDT);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, newPrjctNoDLDT, firstWeekIndex, pJSON, ADTKey, st));
 
 		for(int n=0;n<weeksSize;n++)
@@ -280,23 +279,37 @@ public class TestingStats
 
         System.out.println("Number of weeks: " + weeksSize);
 
-		Point wknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.WEEKS, NDTKey);
-		System.out.println("Week with the most NDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects written..\n");
+		Pair<Integer, List<TimeSpanData>> pair = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, NDTKey);
+		List<TimeSpanData> tsdList = pair.getValue();
+		TimeSpanData tsd = tsdList.get(0);
+		int weekNr = tsd.getTimeNr();
+		int n = pair.getKey();
+		System.out.println("Week with the most NDTs: " + weekNr + ".\n" + n + " Projects written..\n");
+		Thread.sleep(750);
+		
+		pair = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, ADTKey);
+		tsdList = pair.getValue();
+		tsd = tsdList.get(0);
+		weekNr = tsd.getTimeNr();
+		n = pair.getKey();
+		System.out.println("Week with the most ADTs: " + weekNr + ".\n" + n + " Projects active..\n");
+		Thread.sleep(750);
 
-		wknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.WEEKS, ADTKey);
-		System.out.println("Week with the most ADTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Projects active..\n");
+		pair = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, DLDTKey);
+		tsdList = pair.getValue();
+		tsd = tsdList.get(0);
+		weekNr = tsd.getTimeNr();
+		n = pair.getKey();
+		System.out.println("Week with the most DLDTs: " + weekNr + ".\n" + n + " Project Deadlines..\n");
+		Thread.sleep(750);
 
-		wknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.WEEKS, DLDTKey);
-		if(wknrAndN!=null)
-		{
-			System.out.println("Week with the most DLDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Deadlines..\n");
-		}
-
-		wknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.WEEKS, TDTKey);
-		if(wknrAndN!=null)
-		{
-			System.out.println("Week with the most TDTs: " + wknrAndN.x + ".\n" + wknrAndN.y + " Project Terminated..\n");
-		}
+		pair = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, TDTKey);
+		tsdList = pair.getValue();
+		tsd = tsdList.get(0);
+		weekNr = tsd.getTimeNr();
+		n = pair.getKey();
+		System.out.println("Week with the most TDTs: " + weekNr + ".\n" + n + " Project Terminated..\n");
+		Thread.sleep(750);
 
         List<Pair<LocalDateTime, LocalDateTime>> hours 
         			= tsc.createTimeSpanFrames(ChronoUnit.HOURS);
@@ -305,23 +318,38 @@ public class TestingStats
 
         System.out.println("Number of Hours: " + hoursSize);
 
-        Point hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, NDTKey);
-		System.out.println("Week with the most NDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Projects written..\n");
+		pair = tsc.timeSpansWithMostLDTs(ChronoUnit.HOURS, NDTKey);
+		tsdList = pair.getValue();
+		tsd = tsdList.get(0);
+		int hourNr = tsd.getTimeNr();
+		n = pair.getKey();
+		System.out.println("Hour with the most NDTs: " + hourNr+ ".\n" + n + " Projects written..\n");
+		Thread.sleep(750);
 
-		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, ADTKey);
-		System.out.println("Week with the most ADTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Projects active..\n");
+		pair = tsc.timeSpansWithMostLDTs(ChronoUnit.HOURS, ADTKey);
+		tsdList = pair.getValue();
+		tsd = tsdList.get(0);
+		hourNr = tsd.getTimeNr();
+		n = pair.getKey();
+		System.out.println("Hour with the most ADTs: " + hourNr + ".\n" + n + " Projects active..\n");
+		Thread.sleep(750);
 
-		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, DLDTKey);
-		if(hknrAndN!=null)
-		{
-			System.out.println("Week with the most DLDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Project Deadlines..\n");
-		}
+		pair = tsc.timeSpansWithMostLDTs(ChronoUnit.HOURS, DLDTKey);
+		tsdList = pair.getValue();
+		tsd = tsdList.get(0);
+		hourNr = tsd.getTimeNr();
+		n = pair.getKey();
+		System.out.println("Hour with the most DLDTs: " + hourNr + ".\n" + n + " Projects active..\n");
+		Thread.sleep(750);
 
-		hknrAndN = st.timeSpanWithMostLDTs(ChronoUnit.HOURS, TDTKey);
-		if(hknrAndN!=null)
-		{
-			System.out.println("Week with the most TDTs: " + hknrAndN.x + ".\n" + hknrAndN.y + " Project Terminated..\n");
-		}
+		pair = tsc.timeSpansWithMostLDTs(ChronoUnit.HOURS, TDTKey);
+		tsdList = pair.getValue();
+		tsd = tsdList.get(0);
+		hourNr = tsd.getTimeNr();
+		n = pair.getKey();
+		System.out.println("Hour with the most TDTs: " + hourNr + ".\n" + n + " Projects active..\n");
+		Thread.sleep(750);
+
 	}
 	
 	public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException

@@ -378,7 +378,7 @@ public class SomeCommands
 				for(String pName: prjctNames)
 				{
 					List<String> singleRow = new ArrayList<>();
-					JSONObject pJSON = tsd.pickProjectByName(pName);
+					JSONObject pJSON = tsd.projectJSONObjByName(pName);
 					String timeStr = pJSON.getString(DLDTKey);
 					singleRow.add(pName);
 					singleRow.add(timeStr);

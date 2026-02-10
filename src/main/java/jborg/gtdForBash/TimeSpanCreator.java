@@ -33,9 +33,11 @@ import consoleTools.TerminalXDisplay;
 
 
 import javafx.util.Pair;
+import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
+import someMath.exceptions.NaturalNumberException;
 
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
@@ -588,4 +590,62 @@ public class TimeSpanCreator
     	
     	return new Pair<>(NDTKey, ldt);
     }
+
+	public List<TimeSpanData> timeSpansMostPositive(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, NaturalNumberException, TimeSpanException, someMath.NaturalNumberException
+	{
+	
+		List<TimeSpanData> list = getTimeSpanList(cu);
+		List<TimeSpanData> tsdList = new ArrayList<>();
+	
+		int n = 0;
+		for(TimeSpanData tsd: list)
+		{
+	
+			int m = tsd.positivityIndexTimeSpan();
+			if(n<m)
+			{
+				n=m;
+				tsdList.clear();
+				tsdList.add(tsd);
+			}
+	
+			if(n==m)tsdList.add(tsd);
+		}
+	
+		return tsdList;
+	}
+
+	public Pair<Integer, List<TimeSpanData>> timeSpansWithMostLDTs(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, TimeSpanException, StatisticalToolsException
+	{
+	
+		List<TimeSpanData> list = getTimeSpanList(cu);
+		List<TimeSpanData> tsdList = new ArrayList<>();
+	
+		int n = 0;
+		for(TimeSpanData tsd: list)
+		{
+	
+			int m = tsd.timeSpansLDTs(jsonKey);
+			if(n<m)
+			{
+				n=m;
+				tsdList.clear();
+				tsdList.add(tsd);
+			}
+	
+			if(n==m)tsdList.add(tsd);
+		}
+	
+		return new Pair<>(n, tsdList);
+	}
+	
+	public JSONObject projectJSONObjByName(String name)
+	{
+
+		JSONObject pJSON;
+		pJSON = ProjectJSONToolbox.pickProjectByName(name, prjctSet);
+
+		return pJSON;
+	}
+
 }

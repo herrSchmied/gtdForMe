@@ -24,10 +24,13 @@ import org.json.JSONObject;
 
 import allgemein.ExactPeriode;
 import allgemein.LittleTimeTools;
-
-
+import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.WeekDataException;
+
+import static jborg.gtdForBash.ProjectJSONKeyz.ADTKey;
+import static jborg.gtdForBash.ProjectJSONKeyz.DLDTKey;
+import static jborg.gtdForBash.ProjectJSONKeyz.TDTKey;
 import static jborg.gtdForBash.ProjectJSONToolbox.*;
 
 
@@ -223,7 +226,7 @@ public class TimeSpanData
 		{
 			int k = terminatedSteps.get(pName);
 			if(k==0)continue;
-			JSONObject pJSON = pickProjectByName(pName);
+			JSONObject pJSON = projectJSONObjByName(pName);
 			iterateOverSteps(pJSON, (jo)->
 			{
 				String stepStatus = jo.getString(StepJSONKeyz.statusKey);
@@ -264,7 +267,7 @@ public class TimeSpanData
 		{
 			int k = terminated.get(pName);
 			if(k==0)continue;
-			JSONObject pJSON = pickProjectByName(pName);
+			JSONObject pJSON = projectJSONObjByName(pName);
 			iterateOverSteps(pJSON, (jo)->
 			{
 				String stepStatus = jo.getString(StepJSONKeyz.statusKey);
@@ -320,7 +323,7 @@ public class TimeSpanData
 
 			int h = howManyInWichProjectMap.get(pName);
 			if(h==0)continue;
-			JSONObject pJSON = pickProjectByName(pName);
+			JSONObject pJSON = projectJSONObjByName(pName);
 			iterateOverSteps(pJSON, (sJSON)->
 			{
 				if(sJSON.has(StepJSONKeyz.TDTNoteKey)&&
@@ -339,14 +342,7 @@ public class TimeSpanData
 	
 	public int howManyStepsViolatedDLInThisTSD()
 	{
-		int n=0;
-		
-		for(Integer i: stepsViolatedDLThisTimeSpan().values())
-		{
-			n+=i;
-		}
-
-		return n;
+		return stepsViolatedDLThisTimeSpan().values().size();
 	}
 
 	public Map<String, JSONObject> getAllActiveStepDLs() throws IOException, URISyntaxException
@@ -571,7 +567,7 @@ public class TimeSpanData
 		for(String pName: map.keySet())
 		{
 
-			JSONObject pJSON = pickProjectByName(pName);
+			JSONObject pJSON = projectJSONObjByName(pName);
 			LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
 			if(dldt.isBefore(jetzt))continue;
 			ExactPeriode ep = new ExactPeriode(jetzt, dldt);
@@ -590,7 +586,7 @@ public class TimeSpanData
 		return currentNames;
 	}
 
-	public JSONObject pickProjectByName(String name)
+	public JSONObject projectJSONObjByName(String name)
 	{
 
 		JSONObject pJSON;
@@ -655,7 +651,73 @@ public class TimeSpanData
 	{
 		return ldt.isBefore(begin);
 	}
+	
+	// #new Step					:	 6 Points.
+	// #new Project					:	12 Points.
+	// #Step success				:	18 Points.
+	// #Project success				:	36 Points.
+	// #Step failed					:	-1 Points.
+	// #Step failed by DLDT abuse	:	-2 Points.
+	// #Project failed				:	-1 Point per active Day. **Fail fast!!!
+	// #Project failed by DLDT abuse:	-4 Point per active Day.
+	public int positivityIndexTimeSpan() throws IOException, URISyntaxException, NaturalNumberException
+	{
+		int sum = 0;
 		
+		sum += howManyNewStepsInThisTSD()*6;
+		sum += getProjectsWrittenDown().size()*12;
+		sum += howManyStepsSucceededInThisTSD()*18;
+		sum += projectsSucceededThisTimeSpan().size()*36;
+		sum += howManyStepsFailedInThisTSD()*(-1);
+		sum += howManyStepsViolatedDLInThisTSD()*(-2);
+		
+		// #Project failed				:	-1 Point per active Day.
+		for(String pName: projectsFailedThisTimeSpan())
+		{
+			JSONObject pJSON = projectJSONObjByName(pName);
+			
+			LocalDateTime adt = extractLDT(pJSON, ADTKey);
+			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
+			
+			ExactPeriode ep = new ExactPeriode(adt, tdt);
+			
+			sum += ep.getAbsoluteDays()*(-1);
+		}
+		
+		// #Project failed by DLDT abuse:	-4 Point per active Day.
+		for(String pName: projectsViolatedDLThisTimeSpan())
+		{
+			JSONObject pJSON = projectJSONObjByName(pName);
+			
+			LocalDateTime adt = extractLDT(pJSON, ADTKey);
+			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
+			
+			ExactPeriode ep = new ExactPeriode(adt, tdt);
+			
+			sum += ep.getAbsoluteDays()*(-4);
+		}
+
+		return sum;
+	}
+	
+	public int timeSpansLDTs(String jsonKey) throws IOException, URISyntaxException, StatisticalToolsException, TimeSpanException
+	{
+
+		int n = 0;
+		for(String pName: allTheNames())
+		{
+
+			JSONObject pJSON = projectJSONObjByName(pName);
+			if((jsonKey.equals(TDTKey))&&(!projectIsTerminated.test(pJSON)))continue;
+			if((jsonKey.equals(DLDTKey))&&(projectHasNoDLDT.test(pJSON)))continue;
+			if((jsonKey.equals(ADTKey))&&(isMODProject.test(pJSON)))continue;
+
+			n++;
+		}
+
+		return n;
+	}
+
 	public String toString()
 	{
 		
