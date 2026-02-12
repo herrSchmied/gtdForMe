@@ -17,14 +17,14 @@ import java.time.Month;
 import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
-
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.function.Function;
 
 import org.json.JSONObject;
 
@@ -48,9 +48,9 @@ public class TimeSpanCreator
 	private final LocalDateTime endAnker;
 	
 
-	Set<JSONObject> prjctSet = new HashSet<>();
+	private Set<JSONObject> prjctSet = new HashSet<>();
 
-	Map<ChronoUnit, List<TimeSpanData>> chronoUnitTimeSpanMap = new HashMap<>();
+	private Map<ChronoUnit, List<TimeSpanData>> chronoUnitTimeSpanMap = new HashMap<>();
 		
 	private List<TimeSpanData> yearList;
 	private List<TimeSpanData> monthList;
@@ -639,7 +639,7 @@ public class TimeSpanCreator
 		return new Pair<>(n, tsdList);
 	}
 	
-	public JSONObject projectJSONObjByName(String name)
+	private JSONObject projectJSONObjByName(String name)
 	{
 
 		JSONObject pJSON;
@@ -648,4 +648,14 @@ public class TimeSpanCreator
 		return pJSON;
 	}
 
+	public Double someAggregateOfProjects(Function<Collection<JSONObject>, Double> aggregator)
+	{
+		return aggregator.apply(prjctSet);
+	}
+
+	public Double someAggregateOfTSDs(ChronoUnit cu, Function<Collection<TimeSpanData>, Double> aggregator) throws TimeSpanException
+	{
+		List<TimeSpanData> tsdList = getTimeSpanList(cu);
+		return aggregator.apply(tsdList);
+	}
 }
