@@ -1,6 +1,6 @@
 package jborg.gtdForBash;
 
-import static jborg.gtdForBash.ProjectJSONToolbox.*;
+import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -336,7 +336,7 @@ public class GTDDataSpawnSession
 
 		int index = getIndexOfLastStepInPrjct(pJson);
 		JSONObject oldStep;
-		boolean isFirstStep = (index==ProjectJSONToolbox.firstStepIndex-1);
+		boolean isFirstStep = (index==ProjectJSONToolBox.firstStepIndex-1);
 
 		JSONArray steps;
 		if(isFirstStep)
@@ -401,7 +401,7 @@ public class GTDDataSpawnSession
 		newStep.put(StepJSONKeyz.descKey, descriptionOfStep);
 		newStep.put(StepJSONKeyz.ADTKey, LittleTimeTools.timeString(ndtOfStep));
 		
-		if(ProjectJSONToolbox.stepDataIsValide(pJson, newStep))
+		if(ProjectJSONToolBox.stepDataIsValide(pJson, newStep))
 		{
 			pJson.put(statusKey, stepStatus);//this overwrites old status!
 						

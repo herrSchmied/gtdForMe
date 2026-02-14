@@ -23,7 +23,7 @@ import jborg.gtdForBash.exceptions.ToolBoxException;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
-public class ProjectJSONToolbox
+public class ProjectJSONToolBox
 {
 
 	/** first Step Index.*/

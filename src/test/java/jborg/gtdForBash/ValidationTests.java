@@ -2,7 +2,7 @@ package jborg.gtdForBash;
 
 
 import static consoleTools.TerminalXDisplay.formatBashStringBoldAndGreen;
-import static jborg.gtdForBash.ProjectJSONToolbox.*;
+import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 import java.io.File;
 import java.io.IOException;

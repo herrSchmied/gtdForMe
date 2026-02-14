@@ -31,7 +31,7 @@ import jborg.gtdForBash.exceptions.WeekDataException;
 import static jborg.gtdForBash.ProjectJSONKeyz.ADTKey;
 import static jborg.gtdForBash.ProjectJSONKeyz.DLDTKey;
 import static jborg.gtdForBash.ProjectJSONKeyz.TDTKey;
-import static jborg.gtdForBash.ProjectJSONToolbox.*;
+import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 
 import someMath.NaturalNumberException;
@@ -590,7 +590,7 @@ public class TimeSpanData
 	{
 
 		JSONObject pJSON;
-		pJSON = ProjectJSONToolbox.pickProjectByName(name, allTheProjectJSON());
+		pJSON = ProjectJSONToolBox.pickProjectByName(name, allTheProjectJSON());
 
 		return pJSON;
 	}
@@ -650,54 +650,6 @@ public class TimeSpanData
 	public boolean isBeforeThisTimeSpan(LocalDateTime ldt)
 	{
 		return ldt.isBefore(begin);
-	}
-	
-	// #new Step					:	 6 Points.
-	// #new Project					:	12 Points.
-	// #Step success				:	18 Points.
-	// #Project success				:	36 Points.
-	// #Step failed					:	-1 Points.
-	// #Step failed by DLDT abuse	:	-2 Points.
-	// #Project failed				:	-1 Point per active Day. **Fail fast!!!
-	// #Project failed by DLDT abuse:	-4 Point per active Day.
-	public int positivityIndexTimeSpan() throws IOException, URISyntaxException, NaturalNumberException
-	{
-		int sum = 0;
-		
-		sum += howManyNewStepsInThisTSD()*6;
-		sum += getProjectsWrittenDown().size()*12;
-		sum += howManyStepsSucceededInThisTSD()*18;
-		sum += projectsSucceededThisTimeSpan().size()*36;
-		sum += howManyStepsFailedInThisTSD()*(-1);
-		sum += howManyStepsViolatedDLInThisTSD()*(-2);
-		
-		// #Project failed				:	-1 Point per active Day.
-		for(String pName: projectsFailedThisTimeSpan())
-		{
-			JSONObject pJSON = projectJSONObjByName(pName);
-			
-			LocalDateTime adt = extractLDT(pJSON, ADTKey);
-			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
-			
-			ExactPeriode ep = new ExactPeriode(adt, tdt);
-			
-			sum += ep.getAbsoluteDays()*(-1);
-		}
-		
-		// #Project failed by DLDT abuse:	-4 Point per active Day.
-		for(String pName: projectsViolatedDLThisTimeSpan())
-		{
-			JSONObject pJSON = projectJSONObjByName(pName);
-			
-			LocalDateTime adt = extractLDT(pJSON, ADTKey);
-			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
-			
-			ExactPeriode ep = new ExactPeriode(adt, tdt);
-			
-			sum += ep.getAbsoluteDays()*(-4);
-		}
-
-		return sum;
 	}
 	
 	public int timeSpansLDTs(String jsonKey) throws IOException, URISyntaxException, StatisticalToolsException, TimeSpanException

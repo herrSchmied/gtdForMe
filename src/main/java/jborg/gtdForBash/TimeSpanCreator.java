@@ -3,6 +3,7 @@ package jborg.gtdForBash;
 
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
+import static jborg.gtdForBash.PositivityOfATSD.*;
 
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import someMath.exceptions.NaturalNumberException;
 
-import static jborg.gtdForBash.ProjectJSONToolbox.*;
+import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 public class TimeSpanCreator
 {
@@ -591,17 +592,17 @@ public class TimeSpanCreator
     	return new Pair<>(NDTKey, ldt);
     }
 
-	public List<TimeSpanData> timeSpansMostPositive(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, NaturalNumberException, TimeSpanException, someMath.NaturalNumberException
+	public List<TimeSpanData> timeSpansMostPositive(ChronoUnit cu) throws IOException, URISyntaxException, NaturalNumberException, TimeSpanException, someMath.NaturalNumberException
 	{
 	
 		List<TimeSpanData> list = getTimeSpanList(cu);
 		List<TimeSpanData> tsdList = new ArrayList<>();
 	
-		int n = 0;
+		Double n = 0.0;
 		for(TimeSpanData tsd: list)
 		{
 	
-			int m = tsd.positivityIndexTimeSpan();
+			Double m = positivityIndexTimeSpan(tsd);
 			if(n<m)
 			{
 				n=m;
@@ -643,7 +644,7 @@ public class TimeSpanCreator
 	{
 
 		JSONObject pJSON;
-		pJSON = ProjectJSONToolbox.pickProjectByName(name, prjctSet);
+		pJSON = ProjectJSONToolBox.pickProjectByName(name, prjctSet);
 
 		return pJSON;
 	}

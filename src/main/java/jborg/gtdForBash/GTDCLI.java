@@ -258,12 +258,12 @@ public class GTDCLI implements Beholder<String>
     	for(JSONObject pJSON: knownProjects.values())
     	{
 
-    		if(ProjectJSONToolbox.activeProject.test(pJSON))
+    		if(ProjectJSONToolBox.activeProject.test(pJSON))
     		{
-    			boolean stepDidIt = ProjectJSONToolbox.checkStepForDeadlineAbuse(pJSON);
-    			boolean projectDidIt = ProjectJSONToolbox.checkProjectForDeadlineAbuse(pJSON);
+    			boolean stepDidIt = ProjectJSONToolBox.checkStepForDeadlineAbuse(pJSON);
+    			boolean projectDidIt = ProjectJSONToolBox.checkProjectForDeadlineAbuse(pJSON);
     		
-    			if(stepDidIt|| projectDidIt)ProjectJSONToolbox.alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+    			if(stepDidIt|| projectDidIt)ProjectJSONToolBox.alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
     		}
     	}
     }

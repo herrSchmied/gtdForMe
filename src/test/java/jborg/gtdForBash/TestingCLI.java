@@ -26,7 +26,7 @@ import someMath.NaturalNumberException;
 
 
 import static jborg.gtdForBash.SequenzesForISS.*;
-import static jborg.gtdForBash.ProjectJSONToolbox.*;
+import static jborg.gtdForBash.ProjectJSONToolBox.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 public class TestingCLI

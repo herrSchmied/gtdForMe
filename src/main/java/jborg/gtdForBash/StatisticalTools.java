@@ -78,7 +78,7 @@ public class StatisticalTools
 	{
 
 		JSONObject pJSON;
-		pJSON = ProjectJSONToolbox.pickProjectByName(name, prjctSet);
+		pJSON = ProjectJSONToolBox.pickProjectByName(name, prjctSet);
 
 		return pJSON;
 	}

@@ -38,7 +38,7 @@ import someMath.exceptions.ConsoleToolsException;
 
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
-import static jborg.gtdForBash.ProjectJSONToolbox.*;
+import static jborg.gtdForBash.ProjectJSONToolBox.*;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
@@ -196,9 +196,9 @@ public class TestingStats
         }
         
         int weeksSize = wochen.size();
-        //int lastWeekIndex = weeksSize-1;
         int firstWeekIndex = 0;
-        
+        assert((weeksSize==3)||(weeksSize==4));
+
         JSONObject pJSON = st.projectJSONObjByName(wakeProjectName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, NDTKey, st));
 		
@@ -244,7 +244,8 @@ public class TestingStats
 								+ tsd.projectsFailedThisTimeSpan() + "\n");
 			System.out.println("Most Pressing Deadline: " 
 								+ tsd.mostPressingProjectDeadline() + "\n");
-			
+			Thread.sleep(750);
+
 			if(n==0)
 			{	
 				assert(projectsWritten==8);
@@ -264,7 +265,7 @@ public class TestingStats
 	}
 
 	@Test
-	public void statsTest() throws IOException, URISyntaxException, WeekDataException, StatisticalToolsException, TimeSpanException, ToolBoxException, InterruptedException, TimeSpanCreatorException
+	public void statsTest() throws IOException, URISyntaxException, WeekDataException, StatisticalToolsException, TimeSpanException, ToolBoxException, InterruptedException, TimeSpanCreatorException, someMath.exceptions.NaturalNumberException, NaturalNumberException
 	{
 		
 		assert(!prjctSet.isEmpty());
@@ -350,6 +351,13 @@ public class TestingStats
 		System.out.println("Hour with the most TDTs: " + hourNr + ".\n" + n + " Projects active..\n");
 		Thread.sleep(750);
 
+		tsdList = tsc.timeSpansMostPositive(ChronoUnit.WEEKS);
+		List<Integer> listWeekNr = tsdList.stream()
+				.map(t-> t.getTimeNr())
+				.toList();
+		System.out.println("Weeks Most Positive: " + listWeekNr);
+		Thread.sleep(2000);
+		assert(listWeekNr.contains(0));
 	}
 	
 	public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
