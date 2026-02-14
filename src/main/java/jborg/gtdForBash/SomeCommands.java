@@ -12,6 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -64,6 +65,7 @@ public class SomeCommands
 	 * Write a Method to check that!!!!!!
 	 * */
 
+	public static final String bestDay = "best day";
 	public static final String oldest = "oldest project";
 	public static final String transferSteps = "transfer Steps";
 	public static final String transferProjectHeads = "transfer PH";
@@ -219,7 +221,54 @@ public class SomeCommands
     	tsc = st.getTimeSpanCreator();
 
 		List<Boolean> ioArray;
+
+		MeatOfCLICmd<String> bestTSDDay = (s)->
+		{
+
+			try
+			{
+
+				TimeSpanCreator tsc = st.getTimeSpanCreator();
+				List<TimeSpanData> tsdList = tsc.timeSpansMostPositive(ChronoUnit.WEEKS);
+				Set<TimeSpanData> tsdSet = new HashSet<>(tsdList);
+				tsdList = new ArrayList<>(tsdSet);
+				Collections.sort(tsdList, new Comparator<TimeSpanData>()
+				{
+					@Override
+					public int compare(TimeSpanData tsd1, TimeSpanData tsd2)
+					{
+
+						if(tsd1.getTimeNr()<tsd2.getTimeNr())return -1;
+						if(tsd1.getTimeNr()>tsd2.getTimeNr())return 1;
+
+						return 0;
+					}
+				});
+				
+				String output = "";
+				for(int n=0;n<tsdList.size();n++)
+				{
+					TimeSpanData tsd = tsdList.get(n);
+					output += tsd.toString();
+				}
+				
+				System.out.println(output);
+				return output;
+			}
+			catch (URISyntaxException | someMath.exceptions.NaturalNumberException | TimeSpanException e)
+			{
+
+				e.printStackTrace();
+			}
+
+		  
+			throw new RuntimeException("This should not happen.");
+		};
 		
+		ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
+
+		registerCmd(bestDay, sdcSetName, ioArray, bestTSDDay);
+	
 		MeatOfCLICmd<String> oldestPrjct = (s)->
 		{
 
