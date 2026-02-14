@@ -75,10 +75,10 @@ public class PositivityOfATSD
 		this.stepsSucceed = tsd.howManyStepsSucceededInThisTSD();
 		this.stepsSucceedTerm = stepsSucceed*stepsSucceedWeight;
 
-		this.stepsFailed =tsd.howManyProjectsFailed();
 		this.stepsWithDLDTAbuse = tsd.howManyStepsViolatedDLInThisTSD();
+		this.stepsFailed = tsd.howManyStepsFailedInThisTSD()-stepsWithDLDTAbuse;
 
-		this.stepsFaildTerm = (stepsFailed-stepsWithDLDTAbuse)*stepsFailedWeight;
+		this.stepsFaildTerm = stepsFailed*stepsFailedWeight;
 		this.stepsWithDLDTAbuseTerm = stepsWithDLDTAbuse*stepsWithDLDTAbuseWeight;
 
 		//Project failed by violating DLDT: -3 Point per active Day.

@@ -229,7 +229,7 @@ public class SomeCommands
 			{
 
 				TimeSpanCreator tsc = st.getTimeSpanCreator();
-				List<TimeSpanData> tsdList = tsc.timeSpansMostPositive(ChronoUnit.WEEKS);
+				List<TimeSpanData> tsdList = tsc.timeSpansMostPositive(ChronoUnit.DAYS);
 				Set<TimeSpanData> tsdSet = new HashSet<>(tsdList);
 				tsdList = new ArrayList<>(tsdSet);
 				Collections.sort(tsdList, new Comparator<TimeSpanData>()
