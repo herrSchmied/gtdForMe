@@ -602,7 +602,9 @@ public class TimeSpanCreator
 		for(TimeSpanData tsd: list)
 		{
 	
-			Double m = positivityIndexTimeSpan(tsd);
+			PositivityOfATSD pTSD = new PositivityOfATSD(tsd);
+			Double m = pTSD.getValue();
+			
 			if(n<m)
 			{
 				n=m;

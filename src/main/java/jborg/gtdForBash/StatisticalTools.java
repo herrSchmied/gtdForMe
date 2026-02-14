@@ -24,9 +24,6 @@ import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
 
 
-import static jborg.gtdForBash.ProjectJSONKeyz.*;
-
-
 
 
 public class StatisticalTools

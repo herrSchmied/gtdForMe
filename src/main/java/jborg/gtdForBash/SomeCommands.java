@@ -249,7 +249,7 @@ public class SomeCommands
 				for(int n=0;n<tsdList.size();n++)
 				{
 					TimeSpanData tsd = tsdList.get(n);
-					output += tsd.toString();
+					output += new PositivityOfATSD(tsd).toString();
 				}
 				
 				System.out.println(output);
