@@ -40,6 +40,7 @@ import someMath.NaturalNumberException;
 
 public class TimeSpanData
 {
+
 	private final LocalDateTime begin, end;
 	private final int timeNr;
 	
@@ -211,73 +212,36 @@ public class TimeSpanData
 		return terminated;
 	}
 
-	public Map<String, Integer> getStepsSucceededThisTimeSpan()
+	public Set<JSONObject> getStepsSucceededThisTimeSpan()
 	{
 
-		Map<String, Integer> successes = new HashMap<>();
-		Map<String, Integer> terminatedSteps = getStepsTerminatedThisTimeSpan();
+		Set<JSONObject> winner = new HashSet<>();
 
-		for(String pName: terminatedSteps.keySet())
+		for(JSONObject sJSON: allTheStepsOfAllActiveProjects())
 		{
-			successes.put(pName, 0);
+
+			String stepStatus = sJSON.getString(StepJSONKeyz.statusKey);
+			
+			if(StatusMGMT.success.equals(stepStatus))winner.add(sJSON);
 		}
 
-		for(String pName: terminatedSteps.keySet())
-		{
-			int k = terminatedSteps.get(pName);
-			if(k==0)continue;
-			JSONObject pJSON = projectJSONObjByName(pName);
-			iterateOverSteps(pJSON, (jo)->
-			{
-				String stepStatus = jo.getString(StepJSONKeyz.statusKey);
-				if(StatusMGMT.success.equals(stepStatus))
-				{
-					int m = successes.get(pName)+1;
-					successes.put(pName, m);
-				}
-
-			});
-		}
-
-		return successes;
+		return winner;
 	}
 	
 	public int howManyStepsSucceededInThisTSD()
 	{
-
-		int n = 0;
-
-		for(Integer i: getStepsSucceededThisTimeSpan().values())n += i;
-
-		return n;
+		return getStepsSucceededThisTimeSpan().size();
 	}
 
-	public Map<String, Integer> getStepsFailedThisTimeSpan()
+	public Set<JSONObject> getStepsFailedThisTimeSpan()
 	{
 
-		Map<String, Integer> fails = new HashMap<>();
-		Map<String, Integer> terminated = getStepsTerminatedThisTimeSpan();
+		Set<JSONObject> fails = new HashSet<>();
 
-		for(String pName: terminated.keySet())
+		for(JSONObject sJSON: allTheStepsOfAllActiveProjects())
 		{
-			fails.put(pName, 0);
-		}
-
-		for(String pName: terminated.keySet())
-		{
-			int k = terminated.get(pName);
-			if(k==0)continue;
-			JSONObject pJSON = projectJSONObjByName(pName);
-			iterateOverSteps(pJSON, (jo)->
-			{
-				String stepStatus = jo.getString(StepJSONKeyz.statusKey);
-				if(StatusMGMT.failed.equals(stepStatus))
-				{
-					int m = fails.get(pName)+1;
-					fails.put(pName, m);
-				}
-
-			});
+			String stepStatus = sJSON.getString(StepJSONKeyz.statusKey);
+			if(stepStatus.equals(StatusMGMT.failed))fails.add(sJSON);
 		}
 
 		return fails;
@@ -285,12 +249,7 @@ public class TimeSpanData
 	
 	public int howManyStepsFailedInThisTSD()
 	{
-
-		int n = 0;
-
-		for(Integer i: getStepsFailedThisTimeSpan().values())n += i;
-
-		return n;
+		return getStepsFailedThisTimeSpan().size();
 	}
 
 	public int howManyNewStepsInThisTSD() throws IOException, URISyntaxException
@@ -307,116 +266,77 @@ public class TimeSpanData
 		return n;
 	}
 	
-	public Map<String, Integer> stepsViolatedDLThisTimeSpan()
+	public Set<JSONObject> stepsViolatedDLThisTimeSpan()
 	{
 
-		Map<String, Integer> violations = new HashMap<>();
-		Map<String, Integer> howManyInWichProjectMap = getStepsFailedThisTimeSpan();
+		Set<JSONObject> violaters = new HashSet<>();
 		
-		for(String pName: howManyInWichProjectMap.keySet())
-		{
-			violations.put(pName, 0);
-		}
 
-		for(String pName: howManyInWichProjectMap.keySet())
+		for(JSONObject sJSON: getStepsFailedThisTimeSpan())
 		{
-
-			int h = howManyInWichProjectMap.get(pName);
-			if(h==0)continue;
-			JSONObject pJSON = projectJSONObjByName(pName);
-			iterateOverSteps(pJSON, (sJSON)->
+			if(sJSON.has(StepJSONKeyz.TDTNoteKey)&&
+				(sJSON.getString(StepJSONKeyz.TDTNoteKey).equals(tdtNoteStpDLDTAbuse)))
 			{
-				if(sJSON.has(StepJSONKeyz.TDTNoteKey)&&
-					(sJSON.getString(StepJSONKeyz.TDTNoteKey).equals(tdtNoteStpDLDTAbuse)))
-				{
-					
-					int m = violations.get(pName)+1;
-					violations.put(pName, m);
-				}
-
-			});
+				violaters.add(sJSON);
+			}
 		}
 		
-		return violations;
+		return violaters;
 	}
 	
 	public int howManyStepsViolatedDLInThisTSD()
 	{
-		return stepsViolatedDLThisTimeSpan().values().size();
+		return stepsViolatedDLThisTimeSpan().size();
 	}
 
-	public Map<String, JSONObject> getAllActiveStepDLs() throws IOException, URISyntaxException
+	public Set<JSONObject> getAllActiveStepWithDLs() throws IOException, URISyntaxException
 	{
 
-		Map<String, JSONObject> output = new HashMap<>();
+		Set<JSONObject> activeDLSteps = new HashSet<>();
 
-		for(JSONObject pJSON: allTheProjectJSON())
+		for(JSONObject sJSON: allTheStepsOfAllActiveProjects())
 		{
 
-			if(isMODProject.test(pJSON))continue;
-			if(!lastStepIsTerminated.test(pJSON))
+			if(!stepIsTerminated.test(sJSON))
 			{
-
-				String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
-				JSONObject sJSON = getLastStepOfProject(pJSON);
 				String dldtStr = sJSON.getString(StepJSONKeyz.DLDTKey);
-				if(!dldtStr.equals(stepDeadlineNone))
-				{
-					output.put(pName, sJSON);					
-				}
+				if(!dldtStr.equals(stepDeadlineNone))activeDLSteps.add(sJSON);
 			}
 		}
-	
-		return output;
+
+		return activeDLSteps;
 	}
 
-	public Map<String, LocalDateTime> getStepDLsThisTimeSpan() throws IOException, URISyntaxException
+
+	public Set<JSONObject> mostPressingStepDeadline() throws IOException, URISyntaxException, NaturalNumberException
 	{
 
-		Map<String, LocalDateTime> outputMap = new HashMap<>();
+		Set<JSONObject> pressingers  = new HashSet<>();
 
-		Map<String, JSONObject> map = getAllActiveStepDLs();
-		for(String pName: map.keySet())
-		{
-
-			String dldtStr = map.get(pName).getString(StepJSONKeyz.DLDTKey);
-			LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);
-			if(isInThisTimeSpan(dldt))outputMap.put(pName, dldt);
-		}
-
-		return outputMap;
-	}
-
-	public Map<String, LocalDateTime> mostPressingStepDeadline() throws IOException, URISyntaxException, NaturalNumberException
-	{
-
-		Map<String, LocalDateTime> output  = new HashMap<>();
-
-		int secs = 0;
+		int secs = (int)Math.pow(10, 21);
 		LocalDateTime jetzt = LocalDateTime.now();
 	
-		Map<String, JSONObject> map = getAllActiveStepDLs();
+		Set<JSONObject> dlSet = getAllActiveStepWithDLs();
 		
-		for(String pName: map.keySet())
+		for(JSONObject sJSON: dlSet)
 		{
 
-			JSONObject sJSON = map.get(pName);
 			LocalDateTime dldt = extractLDT(sJSON, StepJSONKeyz.DLDTKey);
 			ExactPeriode ep = new ExactPeriode(jetzt, dldt);
 			if(Math.abs(secs)>Math.abs(ep.getAbsoluteSeconds()))
 			{
 				secs = ep.getAbsoluteSeconds();
-				output.clear();
-				output.put(pName, dldt);
+				pressingers.clear();
+				pressingers.add(sJSON);
 			}
 
 			if(Math.abs(secs)==Math.abs(ep.getAbsoluteSeconds()))
 			{
-				output.put(pName, dldt);
+				pressingers.add(sJSON);
 			}
 		}
 
-		return output;
+		return pressingers;
 	}
 
 	public Set<String> projectsSucceededThisTimeSpan()
@@ -518,10 +438,10 @@ public class TimeSpanData
 		return violations;
 	}
 
-	public Map<String, LocalDateTime> getAllActiveProjectDLs() throws IOException, URISyntaxException
+	public Set<JSONObject> getAllActiveProjectDLs() throws IOException, URISyntaxException
 	{
 
-		Map<String, LocalDateTime> output = new HashMap<>();
+		Set<JSONObject> projectsWithDLs = new HashSet<>();
 
 		for(JSONObject pJSON: getActiveProjects())
 		{
@@ -532,58 +452,61 @@ public class TimeSpanData
 				if(dldtStr.equals(prjctDeadlineNone))continue;
 				String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 				LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
-				output.put(pName, dldt);					
+				projectsWithDLs.add(pJSON);				
 			}
 		}
 	
-		return output;
+		return projectsWithDLs;
 	}
 
-	public Set<String> getProjectDLsThisTimeSpan() throws IOException, URISyntaxException
+	public Set<String> getProjectNamesWithDLsThisTimeSpan() throws IOException, URISyntaxException
 	{
 
 		Set<String> names = new HashSet<>();
 
-		Map<String, LocalDateTime> map = getAllActiveProjectDLs();
-		for(String pName: map.keySet())
+		Set<JSONObject> set = getAllActiveProjectDLs();
+		for(JSONObject pJSON: set)
 		{
 
-			LocalDateTime dldt = map.get(pName);
-			if(isInThisTimeSpan(dldt))names.add(pName);
+			LocalDateTime dldt = extractLDT(pJSON, DLDTKey);
+			if(isInThisTimeSpan(dldt))
+			{
+				String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+				names.add(name);
+			}
 		}
 
 		return names;
 	}
 
-	public Set<String> mostPressingProjectDeadline() throws IOException, URISyntaxException, NaturalNumberException
+	public Set<JSONObject> mostPressingProjectDeadline() throws IOException, URISyntaxException, NaturalNumberException
 	{
 
-		int secs = (int) Math.pow(10, 12);
+		int secs = (int) Math.pow(10, 21);
 		LocalDateTime jetzt = LocalDateTime.now();
-		Set<String> currentNames= new HashSet<>();
+		Set<JSONObject> projects = new HashSet<>();
 
-		Map<String, LocalDateTime> map = getAllActiveProjectDLs();
+		Set<JSONObject> set = getAllActiveProjectDLs();
 
-		for(String pName: map.keySet())
+		for(JSONObject pJSON: set)
 		{
 
-			JSONObject pJSON = projectJSONObjByName(pName);
 			LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
-			if(dldt.isBefore(jetzt))continue;
+
 			ExactPeriode ep = new ExactPeriode(jetzt, dldt);
 			if(Math.abs(secs)>Math.abs(ep.getAbsoluteSeconds()))
 			{
 				secs = ep.getAbsoluteSeconds();
-				currentNames.clear();
-				currentNames.add(pName);
+				projects.clear();
+				projects.add(pJSON);
 			}
 			if(Math.abs(secs)==Math.abs(ep.getAbsoluteSeconds()))
 			{
-				currentNames.add(pName);
+				projects.add(pJSON);
 			}
 		}
 
-		return currentNames;
+		return projects;
 	}
 
 	public JSONObject projectJSONObjByName(String name)
@@ -677,7 +600,7 @@ public class TimeSpanData
 		String beginStr = LittleTimeTools.timeString(begin);
 		String endStr = LittleTimeTools.timeString(end);
 		
-		return 		"Nr: " + timeNr + "\n"
+		return 		"TSD Nr: " + timeNr + "\n"
 				+	"ChronoUnit: " + cu + "\n"
 				+	"Begin: " + beginStr + "\n"
 				+	"End: " + endStr + "\n"

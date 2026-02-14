@@ -421,14 +421,14 @@ public class SomeCommands
 
 				TimeSpanData tsd = tsc.getCurrentTimeSpan(ChronoUnit.HOURS);
 
-				Set<String> prjctNames = tsd.mostPressingProjectDeadline();
+				Set<JSONObject> prjx = tsd.mostPressingProjectDeadline();
 				List<List<String>> rows = new ArrayList<>();
 
-				for(String pName: prjctNames)
+				for(JSONObject pJSON: prjx)
 				{
 					List<String> singleRow = new ArrayList<>();
-					JSONObject pJSON = tsd.projectJSONObjByName(pName);
 					String timeStr = pJSON.getString(DLDTKey);
+					String pName = pJSON.getString(nameKey);
 					singleRow.add(pName);
 					singleRow.add(timeStr);
 					rows.add(singleRow);

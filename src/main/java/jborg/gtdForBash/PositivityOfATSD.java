@@ -144,6 +144,7 @@ public class PositivityOfATSD
 	{
 		String output = "";
 		
+		output += "Positivity of a TSD:" + "\n";
 		output += "TSD Nr.: " + tsd.getTimeNr() + "\n";
 		output += "Positivity: " + overAllValue + "\n";
 		
