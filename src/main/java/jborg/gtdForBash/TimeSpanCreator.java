@@ -3,7 +3,6 @@ package jborg.gtdForBash;
 
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
-import static jborg.gtdForBash.PositivityOfATSD.*;
 
 
 import java.io.IOException;

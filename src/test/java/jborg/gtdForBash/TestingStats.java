@@ -7,24 +7,18 @@ import java.io.IOException;
 
 import java.net.URISyntaxException;
 
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-
-import allgemein.LittleTimeTools;
 
 
 import javafx.util.Pair;
@@ -36,7 +30,6 @@ import someMath.exceptions.ConsoleToolsException;
 
 
 
-import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;

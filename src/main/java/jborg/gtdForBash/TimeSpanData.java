@@ -450,8 +450,6 @@ public class TimeSpanData
 			{
 				String dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
 				if(dldtStr.equals(prjctDeadlineNone))continue;
-				String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
-				LocalDateTime dldt = extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
 				projectsWithDLs.add(pJSON);				
 			}
 		}
