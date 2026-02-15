@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import org.json.JSONObject;
 
 import allgemein.ExactPeriode;
+import allgemein.LittleTimeTools;
 import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
@@ -143,8 +144,11 @@ public class PositivityOfATSD
 	public String toString()
 	{
 		String output = "";
+		String beginStr = LittleTimeTools.timeString(tsd.getBegin());
+		String endStr = LittleTimeTools.timeString(tsd.getEnd());
 		
 		output += "Positivity of a TSD:" + "\n";
+		output += "Begin: " + beginStr +"   End: " + endStr + "\n";
 		output += "TSD Nr.: " + tsd.getTimeNr() + "\n";
 		output += "Positivity: " + overAllValue + "\n";
 		
