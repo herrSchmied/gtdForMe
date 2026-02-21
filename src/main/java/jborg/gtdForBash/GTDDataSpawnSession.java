@@ -165,7 +165,7 @@ public class GTDDataSpawnSession
 	public static final String prjctTDTBeforeNDDT = "Termination can't be before Note-Down-Date-Time";
 	public static final String prjctTDTAfterNow = "TDT can't be after now.";
 	
-	
+	public static final String isAMODProjectNoKill = "JSONObject is a MOD-Project Format. No Kill!";
 	public static final String lastStepIsNotTerminated = "Last Step is not Terminated.";
 	public static final String projectHasNoStepArrayOrHasNoSteps = "Project Has no Step Array or Has no Steps.";
 	public static final String cantTerminateNullDataProjectJSONObject = "Can't Terminate Null. Project JSON-Object is Null.";
@@ -184,7 +184,6 @@ public class GTDDataSpawnSession
 	public static final Set<String> commands = new HashSet<>();
 
 
-	
 	final InputStreamSession iss;
 	
 	/**
@@ -567,42 +566,41 @@ public class GTDDataSpawnSession
 	 * Project according to that. Infos are transfered via 
 	 * InputStreamSession
 	 *
-	 * @param pJson JSONObject Project-Data.
+	 * @param pJSON JSONObject Project-Data.
 	 * 
 	 * @throws IOException if something goes wrong with the InputStreamSession.
 	 */
-	public void terminateProject(JSONObject pJson) throws IOException
+	public void terminateProject(JSONObject pJSON) throws IOException
 	{
 		
-		if(pJson==null)
+		if(pJSON==null)
 		{
 			System.out.println(cantTerminateNullDataProjectJSONObject);
 			return;
 		}
 
-		if(projectIsAlreadyTerminated(pJson)) 
+		if(projectIsAlreadyTerminated(pJSON)) 
 		{
 			System.out.println(prjctTExcAllreadyDeadMsg);
 			return;
 		}
 
-		JSONObject stepJson = getLastStepOfProject(pJson);
-		
-		if(stepJson==null)
+		if(isMODProject.test(pJSON))
 		{
-			System.out.println(projectHasNoStepArrayOrHasNoSteps);
-			return;
+			System.out.println(isAMODProjectNoKill);
 		}
 		
+		JSONObject stepJson = getLastStepOfProject(pJSON);
+				
 		if(!stepIsAlreadyTerminated(stepJson))
 		{
 			System.out.println(lastStepIsNotTerminated);
 			return;
 		}
-		
-		
+
+
 		System.out.println(infoAlertTxtPhrase);
-		
+
 		
 		LocalDateTime jetzt = LocalDateTime.now();
 		
@@ -619,10 +617,10 @@ public class GTDDataSpawnSession
 		boolean wantChangeTDTQuestion = iss.forcedYesOrNo(wantToChangeTDTOfPrjctQ);
 		LocalDateTime tdt = jetzt;
 		
-		LocalDateTime lastAction = getLastDateTimeOfProject(pJson);
+		LocalDateTime lastAction = getLastDateTimeOfProject(pJSON);
 		if(wantChangeTDTQuestion)tdt = iss.forcedDateTimeInOneLine(prjctWhenTDTR, lastAction, jetzt);
 
-		String dldtStr = pJson.getString(ProjectJSONKeyz.DLDTKey);
+		String dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
 		
 		LocalDateTime dldt;
 		if(dldtStr.equals(prjctDeadlineNone))dldt = farInFuture;
@@ -634,7 +632,7 @@ public class GTDDataSpawnSession
 			return;
 		}
 				
-		String adtStr = pJson.getString(ADTKey);
+		String adtStr = pJSON.getString(ADTKey);
 		LocalDateTime adt = LittleTimeTools.LDTfromTimeString(adtStr);
 				
 		if(tdt.isBefore(adt))
@@ -649,11 +647,11 @@ public class GTDDataSpawnSession
 			return;
 		}
 				
-		pJson.put(ProjectJSONKeyz.statusKey, prjctStatus);
+		pJSON.put(ProjectJSONKeyz.statusKey, prjctStatus);
 				
 		String tdtStr = LittleTimeTools.timeString(tdt);
-		pJson.put(ProjectJSONKeyz.TDTKey, tdtStr);
+		pJSON.put(ProjectJSONKeyz.TDTKey, tdtStr);
 
-		if(!terminalNote.trim().equals(""))pJson.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);
+		if(!terminalNote.trim().equals(""))pJSON.put(ProjectJSONKeyz.TDTNoteKey, terminalNote);
 	}
 }

@@ -388,7 +388,7 @@ public class TimeSpanCreator
 		return false;
 	}
 
-	public TimeSpanData getCurrentTimeSpan(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
+	public TimeSpanData getCurrentTimeSpanDataObject(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
 	{
 
 		int nr = isInWhichTimeSpan(cu, LocalDateTime.now());

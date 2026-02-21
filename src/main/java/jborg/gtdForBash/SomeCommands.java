@@ -3,7 +3,9 @@ package jborg.gtdForBash;
 
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
+
 import java.sql.SQLException;
 
 import java.time.LocalDateTime;
@@ -39,7 +41,11 @@ import consoleTools.BashSigns;
 import consoleTools.InputStreamSession;
 
 import consoleTools.TerminalTableDisplay;
+
+
 import javafx.util.Pair;
+
+
 import jborg.gtdForBash.DBIssues.DBSink;
 import jborg.gtdForBash.exceptions.CLICMDException;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
@@ -47,7 +53,6 @@ import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
-
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
@@ -150,7 +155,6 @@ public class SomeCommands
 	private List<String> columnList = Arrays.asList("Name", "Status", "ADT", "Age");
 	private List<String> stepColumns = Arrays.asList("Desc", "Status", "ADT", "DLDT");
 
-
     public boolean isOtherCommand(String command)
     {
     	
@@ -161,7 +165,7 @@ public class SomeCommands
     	
     	return false;
     }
-    
+
     public boolean isModifierCommand(String command)
     {
 
@@ -376,7 +380,7 @@ public class SomeCommands
 		ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
 		
 		registerCmd(new_Project, pmcSetName, ioArray, newProject);
-		
+
 		MeatOfCLICmd<JSONObject> newMODProject = (s)->
 		{
 			
@@ -409,8 +413,7 @@ public class SomeCommands
 		ioArray.addAll(Arrays.asList(false, false, false, false));
 		
 		registerCmd(exit, ocSetName, ioArray, leave);
-		
-    
+
 		MeatOfCLICmd<String> nearestDeadline = (s)->
 		{
 
@@ -419,7 +422,7 @@ public class SomeCommands
 			try
 			{
 
-				TimeSpanData tsd = tsc.getCurrentTimeSpan(ChronoUnit.HOURS);
+				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
 
 				Set<JSONObject> prjx = tsd.mostPressingProjectDeadline();
 				List<List<String>> rows = new ArrayList<>();
@@ -1041,7 +1044,7 @@ public class SomeCommands
 
     		ds.terminateProject(pJSON);
     		sLog.logNow("Terminated Project: " + pName);
-
+    		knownProjects.put(pName, pJSON);
     		return pJSON;
 		};
 		

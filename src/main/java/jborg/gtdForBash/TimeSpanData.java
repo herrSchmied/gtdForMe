@@ -445,6 +445,8 @@ public class TimeSpanData
 
 		for(JSONObject pJSON: getActiveProjects())
 		{
+			
+			if(projectIsTerminated.test(pJSON))continue;
 
 			if(pJSON.has(ProjectJSONKeyz.DLDTKey))
 			{
