@@ -82,8 +82,8 @@ public class SomeCommands
 	//private static final String correct_last_step = "correct last step";//TODO
 	public static final String view_Project = "view project";
 	public static final String view_last_steps_of_Projects = "last steps";
-	public static final String project_Deadlines = "near project deadline";
-	public static final String step_Deadlines = "near step deadline";
+	public static final String project_Deadlines = "project deadlines";
+	public static final String step_Deadlines = "step deadlines";
 	public static final String view_statistics = "stats";
 	public static final String next_Step = "next step";
 	public static final String justPrjctNames = "names";
