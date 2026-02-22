@@ -7,7 +7,7 @@ import java.util.Set;
 public class StepJSONKeyz 
 {
 
-	public static final String Project = "Project_Name";
+	public static final String projectKey = "Project_Name";
 	public static final String statusKey ="Status_of_Step";
 	public static final String descKey = "Description_of_Step";
 	

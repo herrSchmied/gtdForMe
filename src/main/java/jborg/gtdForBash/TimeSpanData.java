@@ -289,7 +289,7 @@ public class TimeSpanData
 		return stepsViolatedDLThisTimeSpan().size();
 	}
 
-	public Set<JSONObject> getAllActiveStepWithDLs() throws IOException, URISyntaxException
+	public Set<JSONObject> getAllActiveStepsWithDLs() throws IOException, URISyntaxException
 	{
 
 		Set<JSONObject> activeDLSteps = new HashSet<>();
@@ -316,7 +316,7 @@ public class TimeSpanData
 		int secs = (int)Math.pow(10, 21);
 		LocalDateTime jetzt = LocalDateTime.now();
 	
-		Set<JSONObject> dlSet = getAllActiveStepWithDLs();
+		Set<JSONObject> dlSet = getAllActiveStepsWithDLs();
 		
 		for(JSONObject sJSON: dlSet)
 		{

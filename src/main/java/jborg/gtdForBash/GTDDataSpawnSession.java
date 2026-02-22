@@ -331,7 +331,7 @@ public class GTDDataSpawnSession
 
 		JSONObject newStep = new JSONObject();
 		String projectName = pJson.getString(nameKey);
-		newStep.put(StepJSONKeyz.Project, projectName);
+		newStep.put(StepJSONKeyz.projectKey, projectName);
 
 		int index = getIndexOfLastStepInPrjct(pJson);
 		JSONObject oldStep;

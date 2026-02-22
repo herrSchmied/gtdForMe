@@ -82,7 +82,8 @@ public class SomeCommands
 	//private static final String correct_last_step = "correct last step";//TODO
 	public static final String view_Project = "view project";
 	public static final String view_last_steps_of_Projects = "last steps";
-	public static final String view_nearest_Deadline = "nearest deadline";
+	public static final String view_nearest_Project_Deadline = "near project deadline";
+	public static final String view_nearest_Step_Deadline = "near step deadline";
 	public static final String view_statistics = "stats";
 	public static final String next_Step = "next step";
 	public static final String justPrjctNames = "names";
@@ -128,7 +129,8 @@ public class SomeCommands
 	public final String newPrjctStgClsd = "New Project Stage closed.";
 	
 	private final String projectStr = "Project";
-	private final String nearestDeadlineStr = "nearest Deadline of Projects.";
+	private final String nearestProjectDeadlineStr = "nearest Deadline of Projects.";
+	private final String nearestStepDeadlineStr = "nearest Deadline of Project Steps.";
 	private final String descStr = "Desc";
 	private final String statusStr = "Status";
 	private final String deadlineStr = "Deadline";
@@ -414,7 +416,7 @@ public class SomeCommands
 		
 		registerCmd(exit, ocSetName, ioArray, leave);
 
-		MeatOfCLICmd<String> nearestDeadline = (s)->
+		MeatOfCLICmd<String> nearestStepDeadline = (s)->
 		{
 
 			sLog.logNow("Nearest Deadline display.");
@@ -424,20 +426,20 @@ public class SomeCommands
 
 				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
 
-				Set<JSONObject> prjx = tsd.mostPressingProjectDeadline();
+				Set<JSONObject> prjx = tsd.getAllActiveStepsWithDLs();
 				List<List<String>> rows = new ArrayList<>();
 
-				for(JSONObject pJSON: prjx)
+				for(JSONObject sJSON: prjx)
 				{
 					List<String> singleRow = new ArrayList<>();
-					String timeStr = pJSON.getString(DLDTKey);
-					String pName = pJSON.getString(nameKey);
+					String timeStr = sJSON.getString(StepJSONKeyz.DLDTKey);
+					String pName = sJSON.getString(StepJSONKeyz.projectKey);
 					singleRow.add(pName);
 					singleRow.add(timeStr);
 					rows.add(singleRow);
 				}
 
-	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestDeadlineStr));
+	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestStepDeadlineStr));
 
 	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
 
@@ -455,7 +457,50 @@ public class SomeCommands
 		ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
-		registerCmd(view_nearest_Deadline, sdcSetName, ioArray, nearestDeadline);
+		registerCmd(view_nearest_Project_Deadline, sdcSetName, ioArray, nearestStepDeadline);
+
+		MeatOfCLICmd<String> nearestProjectDeadline = (s)->
+		{
+
+			sLog.logNow("Nearest Deadline display.");
+
+			try
+			{
+
+				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
+
+				Set<JSONObject> prjx = tsd.getAllActiveProjectDLs();
+				List<List<String>> rows = new ArrayList<>();
+
+				for(JSONObject pJSON: prjx)
+				{
+					List<String> singleRow = new ArrayList<>();
+					String timeStr = pJSON.getString(DLDTKey);
+					String pName = pJSON.getString(nameKey);
+					singleRow.add(pName);
+					singleRow.add(timeStr);
+					rows.add(singleRow);
+				}
+
+	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestProjectDeadlineStr));
+
+	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+
+	    		System.out.println(ttd);
+				
+	    		return ttd.toString();
+			}
+			catch (TimeSpanException | URISyntaxException | ConsoleToolsException e)
+			{
+	
+				return "Error";
+			}
+		};
+		
+		ioArray.clear();
+		ioArray.addAll(Arrays.asList(false, false, true, false));
+		
+		registerCmd(view_nearest_Project_Deadline, sdcSetName, ioArray, nearestProjectDeadline);
     
 		MeatOfCLICmd<String> listNames = (s)->
 		{
