@@ -153,16 +153,16 @@ public class PositivityOfATSD
 		output += "Positivity: " + overAllValue + "\n";
 		
 		
-		output += "New Projects Term: " + newProjectsTerm + "(" + newProjects + ")" + "\n"
-				+ "Projects Succeed Term: " + projectsSucceedTerm + "(" + projectsSucceed + ")" + "\n"
+		output += "New Projects Term: " + newProjectsTerm + "(" + newProjects + " Projects) * (" + newProjectsWeight + " per project)" + "\n"
+				+ "Projects Succeed Term: " + projectsSucceedTerm + "(" + projectsSucceed + " Projects) * (" + projectsSucceedWeight + " per project)" + "\n"
 				+ "Projects Failed Term(No DLDT Abuse): " + projectsFailedTerm + 
 				"(" + projectsFailed + ", " + sumFailDays +" Days)\n"
 				+ "Projects violate DLDT Term: " + projectsWithDLDTAbuseTerm + 
 				"(" + projectsWithDLDTAbuse + ", " + sumDLDTAbuseFailDays + " Days)\n"
-				+ "New Steps Term: " + newStepsTerm + "(" + newSteps + ")"+"\n"
-				+ "Steps succeed Term: " + stepsSucceedTerm + "(" + stepsSucceed + ")" + "\n"
-				+ "Steps Failed Term(No DLDT Abuse): " + stepsFaildTerm + "(" + stepsFailed + ")"+ "\n"
-				+ "Steps violate DLDT Term: " + stepsWithDLDTAbuseTerm + "(" + stepsWithDLDTAbuse + ")"+ "\n";
+				+ "New Steps Term: " + newStepsTerm + "(" + newSteps + " Steps) * (" + newStepsWeight + " per Step)" + "\n"
+				+ "Steps succeed Term: " + stepsSucceedTerm + "(" + stepsSucceed + " Steps) * (" + stepsSucceedWeight + " per Step)" + "\n"
+				+ "Steps Failed Term(No DLDT Abuse): " + stepsFaildTerm + "(" + stepsFailed + " Steps) * ("+ stepsFailedWeight + " per Step)" + "\n"
+				+ "Steps violate DLDT Term: " + stepsWithDLDTAbuseTerm + "(" + stepsWithDLDTAbuse + " Steps) * (" + stepsWithDLDTAbuseWeight + " per Step)" + "\n";
 
 		return output;
 	}
