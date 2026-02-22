@@ -617,37 +617,28 @@ public class TimeSpanCreator
 		return tsdList;
 	}
 
-	public Pair<Integer, List<TimeSpanData>> timeSpansWithMostLDTs(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, TimeSpanException, StatisticalToolsException
+	public Set<TimeSpanData> timeSpansWithMostLDTs(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, TimeSpanException, StatisticalToolsException
 	{
-	
+
 		List<TimeSpanData> list = getTimeSpanList(cu);
-		List<TimeSpanData> tsdList = new ArrayList<>();
-	
+		Set<TimeSpanData> tsdSet = new HashSet<>();
+
 		int n = 0;
 		for(TimeSpanData tsd: list)
 		{
-	
+
 			int m = tsd.timeSpansLDTs(jsonKey);
 			if(n<m)
 			{
 				n=m;
-				tsdList.clear();
-				tsdList.add(tsd);
+				tsdSet.clear();
+				tsdSet.add(tsd);
 			}
-	
-			if(n==m)tsdList.add(tsd);
+
+			if(n==m)tsdSet.add(tsd);
 		}
-	
-		return new Pair<>(n, tsdList);
-	}
-	
-	private JSONObject projectJSONObjByName(String name)
-	{
 
-		JSONObject pJSON;
-		pJSON = ProjectJSONToolBox.pickProjectByName(name, prjctSet);
-
-		return pJSON;
+		return tsdSet;
 	}
 
 	public Double someAggregateOfProjects(Function<Collection<JSONObject>, Double> aggregator)

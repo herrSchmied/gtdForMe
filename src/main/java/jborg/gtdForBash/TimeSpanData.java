@@ -300,7 +300,12 @@ public class TimeSpanData
 			if(!stepIsTerminated.test(sJSON))
 			{
 				String dldtStr = sJSON.getString(StepJSONKeyz.DLDTKey);
-				if(!dldtStr.equals(stepDeadlineNone))activeDLSteps.add(sJSON);
+				if(!dldtStr.equals(stepDeadlineNone))
+				{
+					LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);					
+					if(dldt.isBefore(LocalDateTime.now()))continue;
+					activeDLSteps.add(sJSON);
+				}
 			}
 		}
 

@@ -140,13 +140,17 @@ public class TestingTSDs
 			int projectsFailed =  weekDatas.get(n).projectsFailedThisTimeSpan().size();
 			TimeSpanData tsd = weekDatas.get(n);
 			
+			List<String> pNames = tsd.mostPressingProjectDeadline()
+										.stream()
+										.map(p->p.getString(nameKey))
+										.toList();
 			System.out.println(tsd);
 			System.out.println("Projects succeeded: " 
 								+ tsd.projectsSucceededThisTimeSpan() + "\n");
 			System.out.println("Projects failed: " 
 								+ tsd.projectsFailedThisTimeSpan() + "\n");
 			System.out.println("Most Pressing Deadline: " 
-								+ tsd.mostPressingProjectDeadline() + "\n"
+								+ pNames + "\n"
 								+ tsd.toString());
 			Thread.sleep(4000);
 

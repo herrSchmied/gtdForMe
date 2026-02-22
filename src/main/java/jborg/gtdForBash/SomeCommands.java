@@ -82,8 +82,8 @@ public class SomeCommands
 	//private static final String correct_last_step = "correct last step";//TODO
 	public static final String view_Project = "view project";
 	public static final String view_last_steps_of_Projects = "last steps";
-	public static final String view_nearest_Project_Deadline = "near project deadline";
-	public static final String view_nearest_Step_Deadline = "near step deadline";
+	public static final String project_Deadlines = "near project deadline";
+	public static final String step_Deadlines = "near step deadline";
 	public static final String view_statistics = "stats";
 	public static final String next_Step = "next step";
 	public static final String justPrjctNames = "names";
@@ -416,10 +416,10 @@ public class SomeCommands
 		
 		registerCmd(exit, ocSetName, ioArray, leave);
 
-		MeatOfCLICmd<String> nearestStepDeadline = (s)->
+		MeatOfCLICmd<String> stepDeadlines = (s)->
 		{
 
-			sLog.logNow("Nearest Deadline display.");
+			sLog.logNow("Step Deadline display.");
 
 			try
 			{
@@ -457,12 +457,12 @@ public class SomeCommands
 		ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
-		registerCmd(view_nearest_Step_Deadline, sdcSetName, ioArray, nearestStepDeadline);
+		registerCmd(step_Deadlines, sdcSetName, ioArray, stepDeadlines);
 
-		MeatOfCLICmd<String> nearestProjectDeadline = (s)->
+		MeatOfCLICmd<String> projectDeadlines = (s)->
 		{
 
-			sLog.logNow("Nearest Deadline display.");
+			sLog.logNow("Project Deadlines display.");
 
 			try
 			{
@@ -500,7 +500,7 @@ public class SomeCommands
 		ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
-		registerCmd(view_nearest_Project_Deadline, sdcSetName, ioArray, nearestProjectDeadline);
+		registerCmd(project_Deadlines, sdcSetName, ioArray, projectDeadlines);
     
 		MeatOfCLICmd<String> listNames = (s)->
 		{
