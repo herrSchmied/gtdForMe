@@ -457,7 +457,7 @@ public class SomeCommands
 		ioArray.clear();
 		ioArray.addAll(Arrays.asList(false, false, true, false));
 		
-		registerCmd(view_nearest_Project_Deadline, sdcSetName, ioArray, nearestStepDeadline);
+		registerCmd(view_nearest_Step_Deadline, sdcSetName, ioArray, nearestStepDeadline);
 
 		MeatOfCLICmd<String> nearestProjectDeadline = (s)->
 		{
