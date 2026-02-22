@@ -190,7 +190,7 @@ public class TimeSpanCreator
 			{
 				
 				LocalDateTime a = start.plusDays(day);
-				LocalDateTime b = a.plusDays(1);
+				LocalDateTime b = a.plusDays(1).minusNanos(1);
 				
 				Pair<LocalDateTime, LocalDateTime> pair = new Pair<>(a, b);
 				
@@ -209,7 +209,7 @@ public class TimeSpanCreator
 			{
 				
 				LocalDateTime a = start.plusHours(hour);
-				LocalDateTime b = a.plusHours(1);
+				LocalDateTime b = a.plusHours(1).minusNanos(1);
 				
 				Pair<LocalDateTime, LocalDateTime> pair = new Pair<>(a, b);
 				
