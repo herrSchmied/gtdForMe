@@ -111,9 +111,9 @@ public class GTDCLI implements Beholder<String>
     	System.out.println(sLog.getSessionString());
 
     	ds = new GTDDataSpawnSession(this.iss);
-    	Path p = getDataFolder();
+    	Path dataFolder = getDataFolder();
     	
-		boolean isThereDataFolder = Files.exists(p)&&Files.isDirectory(p);
+		boolean isThereDataFolder = Files.exists(dataFolder)&&Files.isDirectory(dataFolder);
 
 		if(isThereDataFolder)
 		{
@@ -132,30 +132,40 @@ public class GTDCLI implements Beholder<String>
 		else 
 		{
 			System.out.println(thereIsNoDataFolder);
-			Path directoryPath = getDataFolder();
 
-	        File directory = directoryPath.toFile();
+	        File directory = dataFolder.toFile();
 
 	        // Create the directory
-	        if (directory.mkdir())
-	        {
-	            System.out.println(dataFolderCreated);
-				scds = new SomeCommands(this, knownProjects, states, ds, sLog);
-				commandMap = scds.getCommandMap();
-	        }	    				        
+	        if(Files.notExists(dataFolder))
+	        {	
+	        	if(directory.mkdir())
+	        	{
+	        		System.out.println(dataFolderCreated);
+	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog);
+	        		commandMap = scds.getCommandMap();
+	        	}	    				        
+	        	else
+	        	{
+	        	
+	        		scds = null;
+	        		commandMap = null;
+	        		System.out.println(failedToCreateDirectory);
+	        		System.out.println(sayGoodBye);
+	        		System.exit(0);
+	        	}
+	        }
 	        else
 	        {
-	        	
-	        	scds = null;
-	        	commandMap = null;
-	            System.out.println(failedToCreateDirectory);
-	            System.out.println(sayGoodBye);
-	            System.exit(0);
+        		scds = null;
+        		commandMap = null;
+        		System.out.println(failedToCreateDirectory);
+        		System.out.println(sayGoodBye);
+        		System.exit(0);
 	        }
-	        
-    		greetings();
+    			
+	        greetings();
 
-			loopForCommands();
+	        loopForCommands();
 		}		
 	}
          
