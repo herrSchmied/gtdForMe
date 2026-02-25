@@ -320,10 +320,9 @@ public class TimeSpanData
 
 		int secs = (int)Math.pow(10, 21);
 		LocalDateTime jetzt = LocalDateTime.now();
-	
-		Set<JSONObject> dlSet = getAllActiveStepsWithDLs();
-		
-		for(JSONObject sJSON: dlSet)
+
+
+		for(JSONObject sJSON: getAllActiveStepsWithDLs())
 		{
 
 			LocalDateTime dldt = extractLDT(sJSON, StepJSONKeyz.DLDTKey);
@@ -348,7 +347,7 @@ public class TimeSpanData
 	{
 
 		Set<String> successes = new HashSet<>();
-		
+
 		for(JSONObject pJSON: getProjectsTerminated())
 		{
 
@@ -383,7 +382,7 @@ public class TimeSpanData
 
 		for(JSONObject pJSON: getProjectsTerminated())
 		{
-			
+
 			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
 			if(StatusMGMT.failed.equals(status))fails.add(pName);
@@ -410,23 +409,23 @@ public class TimeSpanData
 
 	public Set<String> projectsViolatedDLThisTimeSpan()
 	{
-		
+
 		Set<String> violations = new HashSet<>();
 
 		for(JSONObject pJSON: getProjectsTerminated())
 		{
-			
+
 			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
 			if(StatusMGMT.failed.equals(status))
 			{
-				
+
 				boolean gotNoteArray = pJSON.has(ProjectJSONKeyz.noteArrayKey);
-				
+
 				if(gotNoteArray)
 				{
 					JSONArray noteArray = pJSON.getJSONArray(ProjectJSONKeyz.noteArrayKey);
-					
+
 					for(int n=0;n<noteArray.length();n++)
 					{
 						String note = noteArray.getString(n);
@@ -450,7 +449,7 @@ public class TimeSpanData
 
 		for(JSONObject pJSON: getActiveProjects())
 		{
-			
+
 			if(projectIsTerminated.test(pJSON))continue;
 
 			if(pJSON.has(ProjectJSONKeyz.DLDTKey))
@@ -535,7 +534,7 @@ public class TimeSpanData
 
 	public Set<String> allTheNames()
 	{
-		
+
 		Set<String> names = new HashSet<>();
 	    names.addAll(allTheProjectJSON().stream().map(mapJSONToName)
 	    		.collect(Collectors.toSet()));
@@ -545,19 +544,22 @@ public class TimeSpanData
 	
 	public Set<JSONObject> allTheStepsOfAllActiveProjects()
 	{
+
 		Set<JSONObject> output = new HashSet<>();
-		
+
 		for(JSONObject pJSON: getActiveProjects())
 		{
+
 			JSONArray stepJSONArray = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-			
+
 			for(Object obj: stepJSONArray)
 			{
+
 				JSONObject sJSON = (JSONObject) obj;
 				output.add(sJSON);
 			}
 		}
-		
+
 		return output;
 	}
 

@@ -2,6 +2,8 @@ package jborg.gtdForBash;
 
 
 
+import java.awt.Color;
+import java.awt.Point;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
@@ -427,8 +429,12 @@ public class SomeCommands
 				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
 
 				Set<JSONObject> prjx = tsd.getAllActiveStepsWithDLs();
+				Set<JSONObject> steps = tsd.mostPressingStepDeadline();
+				
 				List<List<String>> rows = new ArrayList<>();
-
+				Set<Pair<Color, Point>> highlights = new HashSet<>();
+				int row = 1;
+				Color c = Color.RED;
 				for(JSONObject sJSON: prjx)
 				{
 					List<String> singleRow = new ArrayList<>();
@@ -437,14 +443,28 @@ public class SomeCommands
 					singleRow.add(pName);
 					singleRow.add(timeStr);
 					rows.add(singleRow);
+					if(steps.contains(sJSON))
+					{
+						Point p = new Point(0, row);
+						Point p2 = new Point(1, row);
+						
+						Pair<Color, Point> pair = new Pair<>(c, p);
+						Pair<Color, Point> pair2 = new Pair<>(c, p2);
+						highlights.add(pair);
+						highlights.add(pair2);
+					}
+					row++;
 				}
 
 	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestStepDeadlineStr));
 
-	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+	    		TerminalTableDisplay ttd;
+
+	    		if(highlights.isEmpty())ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+	    		else ttd = new TerminalTableDisplay(headers, rows, '|', 18, highlights);
 
 	    		System.out.println(ttd);
-				
+
 	    		return ttd.toString();
 			}
 			catch (TimeSpanException | URISyntaxException | ConsoleToolsException e)
@@ -470,8 +490,12 @@ public class SomeCommands
 				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
 
 				Set<JSONObject> prjx = tsd.getAllActiveProjectDLs();
+				Set<JSONObject> pressingPrjx = tsd.mostPressingProjectDeadline();
+				
+				Set<Pair<Color, Point>> highlights = new HashSet<>();
 				List<List<String>> rows = new ArrayList<>();
-
+				int row = 1;
+				Color c = Color.RED;
 				for(JSONObject pJSON: prjx)
 				{
 					List<String> singleRow = new ArrayList<>();
@@ -480,11 +504,27 @@ public class SomeCommands
 					singleRow.add(pName);
 					singleRow.add(timeStr);
 					rows.add(singleRow);
+					if(pressingPrjx.contains(pJSON))
+					{
+						
+						Point p = new Point(0, row);
+						Point p2 = new Point(1, row);
+						
+						Pair<Color, Point> pair = new Pair<>(c, p);
+						Pair<Color, Point> pair2 = new Pair<>(c, p2);
+						highlights.add(pair);
+						highlights.add(pair2);
+					}
+
+					row++;
 				}
 
 	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestProjectDeadlineStr));
 
-	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+	    		TerminalTableDisplay ttd;
+
+	    		if(highlights.isEmpty())ttd = new TerminalTableDisplay(headers, rows,'|', 18);
+	    		else ttd = new TerminalTableDisplay(headers, rows, '|', 18, highlights);
 
 	    		System.out.println(ttd);
 				

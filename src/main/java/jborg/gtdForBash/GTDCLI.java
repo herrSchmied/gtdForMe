@@ -125,13 +125,9 @@ public class GTDCLI implements Beholder<String>
 				String pName = json.getString(ProjectJSONKeyz.nameKey);
 				knownProjects.put(pName, json);
 			}
-				
-			greetings();
 			
 			scds = new SomeCommands(this, knownProjects, states, ds, sLog);
 			commandMap = scds.getCommandMap();
-			
-			loopForCommands();
 		}
 		else 
 		{
@@ -144,21 +140,9 @@ public class GTDCLI implements Beholder<String>
 	        if (directory.mkdir())
 	        {
 	            System.out.println(dataFolderCreated);
-	        	
-	    		Set<JSONObject> prjctSet = loadProjects();
-	    		for(JSONObject json: prjctSet)
-	    		{
-	    			String pName = json.getString(ProjectJSONKeyz.nameKey);
-	    			knownProjects.put(pName, json);
-	    		}
-	    			
-	    		greetings();
-
 				scds = new SomeCommands(this, knownProjects, states, ds, sLog);
 				commandMap = scds.getCommandMap();
-
-				loopForCommands();
-	        }
+	        }	    				        
 	        else
 	        {
 	        	
@@ -168,6 +152,10 @@ public class GTDCLI implements Beholder<String>
 	            System.out.println(sayGoodBye);
 	            System.exit(0);
 	        }
+	        
+    		greetings();
+
+			loopForCommands();
 		}		
 	}
          
@@ -214,7 +202,11 @@ public class GTDCLI implements Beholder<String>
     		
     				String argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
     				
-    				/*Object obj = */ clicmd.executeCmd(argument);
+    				Object obj =  clicmd.executeCmd(argument);
+    				if(obj instanceof JSONObject)
+    				{
+    					
+    				}
     				break;
     			}
     			cmdCounter++;
