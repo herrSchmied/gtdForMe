@@ -440,7 +440,9 @@ public class SomeCommands
 					List<String> singleRow = new ArrayList<>();
 					String timeStr = sJSON.getString(StepJSONKeyz.DLDTKey);
 					String pName = sJSON.getString(StepJSONKeyz.projectKey);
+					String desc = sJSON.getString(StepJSONKeyz.descKey);
 					singleRow.add(pName);
+					singleRow.add(desc);
 					singleRow.add(timeStr);
 					rows.add(singleRow);
 					if(steps.contains(sJSON))
@@ -456,7 +458,7 @@ public class SomeCommands
 					row++;
 				}
 
-	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestStepDeadlineStr));
+	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr,  descStr, nearestStepDeadlineStr));
 
 	    		TerminalTableDisplay ttd;
 
@@ -1456,9 +1458,9 @@ public class SomeCommands
     		
     		rows.add(row);
     	}
-    	
+
 		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
-		
+
 		System.out.println(ttd.toString());
     }
 }
