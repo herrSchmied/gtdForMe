@@ -57,6 +57,9 @@ public class GTDCLI implements Beholder<String>
 {
 
 
+	private final static String projectSchemaPath = "/projectJSONSchema.json";
+	private final static String modProjectSchemaPath = "/modProjectJSONSchema.json";
+
 	private final static ProjectJSONValidator pjv = new ProjectJSONValidator();;
 	private final String statesFileName = "statusMGMT.states";
 	private final StatusMGMT states = StatusMGMT.getInstance();
@@ -104,7 +107,7 @@ public class GTDCLI implements Beholder<String>
 	
 	public final int jsonPrintStyle = 4;
 	
-    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
 
     	this.iss = iss;
@@ -182,7 +185,7 @@ public class GTDCLI implements Beholder<String>
     	System.out.println("Time: " + time + '\n');
     }
 
-    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
@@ -271,7 +274,7 @@ public class GTDCLI implements Beholder<String>
     	}
     }
     
-    public Set<JSONObject> loadProjects() throws IOException, URISyntaxException
+    public Set<JSONObject> loadProjects() throws IOException, URISyntaxException, InterruptedException
     {
     	
     	Path path = getDataFolder();
@@ -279,7 +282,7 @@ public class GTDCLI implements Beholder<String>
     	return loadProjects(path);
     }
 
-    public static Set<JSONObject> loadProjects(Path path) throws IOException, URISyntaxException
+    public static Set<JSONObject> loadProjects(Path path) throws IOException, URISyntaxException, InterruptedException
     {
 
     	Set<JSONObject> prjctSet = new HashSet<>();
@@ -293,14 +296,11 @@ public class GTDCLI implements Beholder<String>
     		String name = file.getName();
     		if(file.isFile()&&name.endsWith(fileMarker))
     		{
-    			
+
     			String joText = loadText(path +"/" + name);
     			
-    			pjv.validate(joText);
-    			
     			JSONObject jo = new JSONObject(joText);
-    			
-    			prjctSet.add(jo);
+        		prjctSet.add(jo);
     		}
     	}
     	

@@ -536,7 +536,7 @@ public class ProjectJSONToolBox
 		return false;
 	};
 	
-	public LocalDateTime extractLDT(String name, String key) throws IOException, URISyntaxException
+	public LocalDateTime extractLDT(String name, String key) throws IOException, URISyntaxException, InterruptedException
 	{
 		
         Set<JSONObject> jsonSet = GTDCLI.loadProjects(GTDCLI.getDataFolder());

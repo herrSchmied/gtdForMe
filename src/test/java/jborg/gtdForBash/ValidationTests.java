@@ -31,9 +31,8 @@ public class ValidationTests
 	static Set<JSONObject> projects;
 	
 	@BeforeEach
-	public void setDataFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	public void setDataFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
-
 
 		projects = ProjectSetForTesting.get();
 
