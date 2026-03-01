@@ -47,5 +47,11 @@ public class ValidationTests
 		ProjectJSONValidator pjv = new ProjectJSONValidator();
 		
 		assert(pjv.validate(pJSON.toString()));
+		
+		pJSON = pickProjectByName("MOD_Project", projects);
+		
+		pjv.setSchema("/modProjectJSONSchema.json");
+		
+		assert(pjv.validate(pJSON.toString()));
 	}
 }
