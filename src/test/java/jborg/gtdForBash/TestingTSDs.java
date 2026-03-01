@@ -152,7 +152,7 @@ public class TestingTSDs
 			System.out.println("Most Pressing Deadline: " 
 								+ pNames + "\n"
 								+ tsd.toString());
-			Thread.sleep(4000);
+			//Thread.sleep(4000);
 
 			if(n==0)
 			{	
