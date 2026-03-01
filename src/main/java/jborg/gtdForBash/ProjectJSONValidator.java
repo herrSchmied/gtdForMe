@@ -17,23 +17,12 @@ import org.json.JSONTokener;
 public class ProjectJSONValidator
 {
 
-	private final Schema schema;
+	private Schema schema;
 
 	public ProjectJSONValidator()
 	{
-
-		String path = "/projectJSONSchema.json";
-		try(InputStream schemaStream = getClass().getResourceAsStream(path))
-		{
-	
-			JSONObject rawSchema = new JSONObject(new JSONTokener(schemaStream));
-			schema = SchemaLoader.load(rawSchema);
-		}
-	    catch(Exception e)
-	    {
-	    	throw new RuntimeException("Failed to load schema", e);
-	    }
-	 }
+		setSchema("/projectJSONSchema.json");
+	}
 
 	public boolean validate(String jsonString)
 	{
@@ -49,5 +38,21 @@ public class ProjectJSONValidator
 		{
 			return false;
 		}
+	}
+	
+	public void setSchema(String schemaPathStr)
+	{
+
+		try(InputStream schemaStream = getClass().getResourceAsStream(schemaPathStr))
+		{
+
+			JSONObject rawSchema = new JSONObject(new JSONTokener(schemaStream));
+			schema = SchemaLoader.load(rawSchema);
+		}
+	    catch(Exception e)
+	    {
+	    	throw new RuntimeException("Failed to load schema", e);
+	    }
+
 	}
 }

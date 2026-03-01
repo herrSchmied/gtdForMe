@@ -36,7 +36,7 @@ public class ValidationTests
 
 
 		projects = ProjectSetForTesting.get();
-		
+
 		assert(!projects.isEmpty());
 	}
 

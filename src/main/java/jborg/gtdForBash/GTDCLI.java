@@ -57,6 +57,7 @@ public class GTDCLI implements Beholder<String>
 {
 
 
+	private final static ProjectJSONValidator pjv = new ProjectJSONValidator();;
 	private final String statesFileName = "statusMGMT.states";
 	private final StatusMGMT states = StatusMGMT.getInstance();
 	
@@ -294,6 +295,8 @@ public class GTDCLI implements Beholder<String>
     		{
     			
     			String joText = loadText(path +"/" + name);
+    			
+    			pjv.validate(joText);
     			
     			JSONObject jo = new JSONObject(joText);
     			
