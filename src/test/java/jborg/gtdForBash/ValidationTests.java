@@ -31,24 +31,10 @@ public class ValidationTests
 	static Set<JSONObject> projects;
 	
 	@BeforeEach
-	public void clearFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	public void setDataFolder() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{
 
-	    // Create a guaranteed-empty temp directory for all project data
-        Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
 
-        // IMPORTANT: Override the CLI project data directory for this test
-        GTDCLI.setDataFolder(tempProjectDir);
-        System.out.println(formatBashStringBoldAndGreen(GTDCLI.getDataFolder().toString()));
-
-    	File[] listOfFiles = GTDCLI.getListOfFilesFromDataFolder();
-    	
-    	for(File file: listOfFiles)
-    	{
-    		
-    		if(file.isFile())file.delete();
-    	}
-  	
 		projects = ProjectSetForTesting.get();
 		
 		assert(!projects.isEmpty());

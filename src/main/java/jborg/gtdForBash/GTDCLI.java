@@ -162,11 +162,11 @@ public class GTDCLI implements Beholder<String>
         		System.out.println(sayGoodBye);
         		System.exit(0);
 	        }
-    			
-	        greetings();
+		}
+		
+        greetings();
 
-	        loopForCommands();
-		}		
+        loopForCommands();
 	}
          
     public void greetings() throws IOException
@@ -313,6 +313,8 @@ public class GTDCLI implements Beholder<String>
 
     public void saveProjects() throws JSONException, IOException
     {
+    	
+    	
     	for(JSONObject jo: knownProjects.values())
     	{
     		saveText(getDataFolder().toString() + "/" + jo.getString(nameKey)+fileMarker, jo.toString(jsonPrintStyle));
