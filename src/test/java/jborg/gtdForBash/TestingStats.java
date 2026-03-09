@@ -118,8 +118,10 @@ public class TestingStats
         TimeSpanCreator tsc = st.getTimeSpanCreator();
  
         System.out.println("\nNr. of Projects: " + prjctSet.size());
-
-        List<Pair<LocalDateTime, LocalDateTime>> wochen = tsc.createTimeSpanFrames(ChronoUnit.WEEKS);
+        
+        LocalDateTime start = tsc.getBeginAnker();
+        LocalDateTime stop = tsc.getEndAnker();
+        List<Pair<LocalDateTime, LocalDateTime>> wochen = tsc.createTimeSpanFrames(ChronoUnit.WEEKS, start, stop);
 
         int weeksSize = wochen.size();
 
@@ -154,7 +156,7 @@ public class TestingStats
 		//Thread.sleep(750);
 
         List<Pair<LocalDateTime, LocalDateTime>> hours 
-        			= tsc.createTimeSpanFrames(ChronoUnit.HOURS);
+        			= tsc.createTimeSpanFrames(ChronoUnit.HOURS, start, stop);
 
         int hoursSize = hours.size();
 

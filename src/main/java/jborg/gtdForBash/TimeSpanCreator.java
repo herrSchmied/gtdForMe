@@ -18,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,6 +83,57 @@ public class TimeSpanCreator
     	return 0;
     };
 
+    public static final Comparator<TimeSpanData> TSDComparator = (a,b) ->
+    {
+
+    	return a.getTimeNr()-b.getTimeNr();
+    };
+
+    public TimeSpanCreator(Set<JSONObject> prjctSet, List<TimeSpanData> yearList, List<TimeSpanData> monthList, List<TimeSpanData> weekList, List<TimeSpanData> dayList, List<TimeSpanData> hourList) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException
+    {
+    	
+		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
+		this.prjctSet = prjctSet;
+		
+		if(prjctSet.isEmpty())
+		{
+			LocalDateTime now = LocalDateTime.now();
+			this.beginAnker = now;
+			this.endAnker = now;
+		}
+		else
+		{
+			
+			Pair<String, LocalDateTime> oldPair = oldestLDTOverall();
+			Pair<String, LocalDateTime> youngPair = youngestLDTOverall();
+	    
+			this.beginAnker = oldPair.getValue();
+			this.endAnker = youngPair.getValue();
+		}
+		
+		this.yearList.addAll(yearList);
+		//Remember: Does this sort the right way around?????
+		Collections.sort(yearList, TSDComparator);;
+		this.monthList.addAll(monthList);
+		//Remember: Does this sort the right way around?????
+		Collections.sort(monthList, TSDComparator);;
+		this.weekList.addAll(weekList);
+		//Remember: Does this sort the right way around?????
+		Collections.sort(weekList, TSDComparator);;
+		this.dayList.addAll(dayList);
+		//Remember: Does this sort the right way around?????
+		Collections.sort(dayList, TSDComparator);;
+		this.hourList.addAll(hourList);
+		//Remember: Does this sort the right way around?????
+		Collections.sort(hourList, TSDComparator);;
+
+		pickupListsAndExtrapolateThem(ChronoUnit.YEARS);
+		pickupListsAndExtrapolateThem(ChronoUnit.MONTHS);
+		pickupListsAndExtrapolateThem(ChronoUnit.WEEKS);
+		pickupListsAndExtrapolateThem(ChronoUnit.DAYS);
+		pickupListsAndExtrapolateThem(ChronoUnit.HOURS);
+    }
+
 	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException
 	{
 
@@ -107,19 +159,19 @@ public class TimeSpanCreator
 		createListsOfAllChronoUnitTimeSpans();
 	}
 	
-	public List<Pair<LocalDateTime, LocalDateTime>> createTimeSpanFrames(ChronoUnit cu) throws IOException, URISyntaxException
+	public List<Pair<LocalDateTime, LocalDateTime>> createTimeSpanFrames(ChronoUnit cu, LocalDateTime startAnker, LocalDateTime stopAnker) throws IOException, URISyntaxException
 	{
 
 		List<Pair<LocalDateTime, LocalDateTime>> outputSpans = new ArrayList<>();
-		if(beginAnker.equals(endAnker))return outputSpans;
+		if(startAnker.equals(stopAnker))return outputSpans;
 
 		LocalDateTime start = null;
 		LocalDateTime end = null;
 
 		if(cu.equals(ChronoUnit.YEARS))
 		{
-			start = LocalDateTime.of(beginAnker.getYear(), Month.JANUARY, 1, 0, 0);
-			end = LocalDateTime.of(endAnker.getYear()+1, Month.JANUARY, 1, 0, 0).minusNanos(1);
+			start = LocalDateTime.of(startAnker.getYear(), Month.JANUARY, 1, 0, 0);
+			end = LocalDateTime.of(stopAnker.getYear()+1, Month.JANUARY, 1, 0, 0).minusNanos(1);
 
 			for(int year=start.getYear();year<=end.getYear();year++)
 			{
@@ -133,8 +185,8 @@ public class TimeSpanCreator
 		
 		if(cu.equals(ChronoUnit.MONTHS))
 		{
-			start = LocalDateTime.of(beginAnker.getYear(), beginAnker.getMonth(), 1, 0, 0);
-			end = LocalDateTime.of(endAnker.getYear(), endAnker.getMonth(), 1, 0, 0).minusNanos(1);
+			start = LocalDateTime.of(startAnker.getYear(), startAnker.getMonth(), 1, 0, 0);
+			end = LocalDateTime.of(stopAnker.getYear(), stopAnker.getMonth(), 1, 0, 0).minusNanos(1);
 
 			int k = end.getMonthValue()-start.getMonthValue()+1;
 			int y = end.getYear()-start.getYear();
@@ -154,13 +206,13 @@ public class TimeSpanCreator
 		if(cu.equals(ChronoUnit.WEEKS))
 		{
 
-		   	start = getLastMonday(beginAnker);
+		   	start = getLastMonday(startAnker);
 		   	
 		   	//Get the very last Sunday. At the last NanoSeconde.
-		   	DayOfWeek dow = endAnker.getDayOfWeek();
+		   	DayOfWeek dow = stopAnker.getDayOfWeek();
 		   	int dowNr = dow.getValue();
 		   	//Next Monday
-		   	LocalDate endLD = endAnker.plusDays(8-dowNr).toLocalDate();
+		   	LocalDate endLD = stopAnker.plusDays(8-dowNr).toLocalDate();
 		   	//Tada!!!
 		   	end = LocalDateTime.of(endLD, earlyInTheDay).minusNanos(1);
 		   	
@@ -181,8 +233,8 @@ public class TimeSpanCreator
 
 		if(cu.equals(ChronoUnit.DAYS))
 		{
-			start = LocalDateTime.of(beginAnker.getYear(), beginAnker.getMonthValue(), beginAnker.getDayOfMonth(), 0, 0);
-			end = LocalDateTime.of(endAnker.getYear(), endAnker.getMonthValue(), endAnker.getDayOfMonth(), 0, 0);
+			start = LocalDateTime.of(startAnker.getYear(), startAnker.getMonthValue(), startAnker.getDayOfMonth(), 0, 0);
+			end = LocalDateTime.of(stopAnker.getYear(), stopAnker.getMonthValue(), stopAnker.getDayOfMonth(), 0, 0);
 		
 			int d=(int)ChronoUnit.DAYS.between(start, end);
 			
@@ -200,8 +252,8 @@ public class TimeSpanCreator
 
 		if(cu.equals(ChronoUnit.HOURS))
 		{
-			start = LocalDateTime.of(beginAnker.getYear(), beginAnker.getMonthValue(), beginAnker.getDayOfMonth(), beginAnker.getHour(), 0);
-			end = LocalDateTime.of(endAnker.getYear(), endAnker.getMonthValue(), endAnker.getDayOfMonth(), endAnker.getHour(), 0);
+			start = LocalDateTime.of(startAnker.getYear(), startAnker.getMonthValue(), startAnker.getDayOfMonth(), startAnker.getHour(), 0);
+			end = LocalDateTime.of(stopAnker.getYear(), stopAnker.getMonthValue(), stopAnker.getDayOfMonth(), stopAnker.getHour(), 0);
 
 			int d = (int)ChronoUnit.HOURS.between(start, end);
 			
@@ -229,11 +281,80 @@ public class TimeSpanCreator
 	   	return LocalDateTime.of(startLD, earlyInTheDay);
 	}
 
+	
+	private void pickupListsAndExtrapolateThem(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
+	{
+
+		List<TimeSpanData> tsdList = yearList;
+
+		if(cu.equals(ChronoUnit.MONTHS))tsdList = monthList;
+		if(cu.equals(ChronoUnit.WEEKS))tsdList = weekList;
+		if(cu.equals(ChronoUnit.DAYS))tsdList = dayList;
+		if(cu.equals(ChronoUnit.HOURS))tsdList = hourList;
+		
+		int lastInPastIndex = findLastInPast(tsdList);
+
+		for(int n=lastInPastIndex+1;n<tsdList.size();n++)
+		{
+			tsdList.remove(n);
+		}
+
+		TimeSpanData lastTSD = tsdList.getLast();
+		
+		LocalDateTime startAnker = lastTSD.getEnd().plusNanos(1);
+		int unitTimeNr = lastTSD.getTimeNr();
+		tsdList.addAll(pickup(cu, unitTimeNr, startAnker, endAnker));
+	}
+	
+	private List<TimeSpanData> pickup(ChronoUnit cu, int unitTimeNr, LocalDateTime startAnker, LocalDateTime stopAnker) throws IOException, URISyntaxException, TimeSpanException
+	{
+
+		List<TimeSpanData> outputList = new ArrayList<>();
+		List<Pair<LocalDateTime, LocalDateTime>> frames = createTimeSpanFrames(cu, startAnker, stopAnker);
+		
+		int howManyFrames = frames.size();
+		int plus = unitTimeNr+1;
+		for(int n=plus;n<howManyFrames+plus;n++)
+		{
+
+			Pair<LocalDateTime, LocalDateTime> span = frames.get(n);
+			LocalDateTime start = span.getKey();
+			LocalDateTime end = span.getValue();
+
+			TimeSpanData tsd = new TimeSpanData(cu, start, end, n);
+
+			for(JSONObject pJSON: prjctSet)
+			{
+				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(pJSON);
+				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(pJSON);
+				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(pJSON);
+			}
+			outputList.add(tsd);
+		}
+
+		return outputList;
+
+	}
+	
+	private int findLastInPast(List<TimeSpanData> tsdList)
+	{
+		
+		for(int n=0;n<tsdList.size();n++)
+		{
+			TimeSpanData tsd = tsdList.get(n);
+			
+			if(tsd.timeSpanIsInThePast())continue;
+			else return n;
+		}
+
+		return tsdList.size()-1;
+	}
+	
 	private List<TimeSpanData> createListOfChronoUnitTimeSpan(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
 	{
 
 		List<TimeSpanData> outputList = new ArrayList<>();
-		List<Pair<LocalDateTime, LocalDateTime>> frames = createTimeSpanFrames(cu);
+		List<Pair<LocalDateTime, LocalDateTime>> frames = createTimeSpanFrames(cu, beginAnker, endAnker);
 		
 		int howManyFrames = frames.size();
 		
@@ -651,4 +772,15 @@ public class TimeSpanCreator
 		List<TimeSpanData> tsdList = getTimeSpanList(cu);
 		return aggregator.apply(tsdList);
 	}
+	
+	public LocalDateTime getBeginAnker()
+	{
+		return beginAnker;
+	}
+	
+	public LocalDateTime getEndAnker()
+	{
+		return endAnker;
+	}
+
 }

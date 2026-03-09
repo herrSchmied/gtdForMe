@@ -89,7 +89,9 @@ public class TestingTSDs
         StatisticalTools st = new StatisticalTools(prjctSet);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
-        List<Pair<LocalDateTime, LocalDateTime>> wochen = tsc.createTimeSpanFrames(ChronoUnit.WEEKS);
+        LocalDateTime start = tsc.getBeginAnker();
+        LocalDateTime stop = tsc.getEndAnker();
+        List<Pair<LocalDateTime, LocalDateTime>> wochen = tsc.createTimeSpanFrames(ChronoUnit.WEEKS, start, stop);
         List<TimeSpanData> weekDatas = tsc.getTimeSpanList(ChronoUnit.WEEKS);
         
         for(Pair<LocalDateTime, LocalDateTime> pair: wochen)
