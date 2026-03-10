@@ -1,6 +1,7 @@
 package jborg.gtdForBash;
 
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -32,13 +33,18 @@ public class SequenzesForISS
 	public static final  String noticeOne = "Note1";
 	public static final  String noticeTwo = "Note2";
 	
-	static final LocalDateTime jetzt = LocalDateTime.now();
-	static final LocalDateTime oldestBDT = getBDT(1);
-	static final LocalDateTime prjctDLDT = jetzt.plusDays(14);
-	static final LocalDateTime stepDLDT = jetzt.plusDays(7);
 
-	public static String sequenzNXTStep(String prjctName)
+	static Clock clock;
+
+	public SequenzesForISS(Clock clock)
 	{
+		this.clock = clock;
+	}
+	
+	public String sequenzNXTStep(String prjctName)
+	{
+
+		LocalDateTime stepDLDT = LocalDateTime.now(clock).plusDays(7);
 
 		String chosenFromStatieList = "1";//ATBD
 		String dldtQuestion = "yes";
@@ -53,7 +59,7 @@ public class SequenzesForISS
 		return data;
 	}
 	
-	public static String sequenzKillStep(String prjctName)
+	public String sequenzKillStep(String prjctName)
 	{
 	
 		String stepWasSuccessQstn  = "No";
@@ -68,9 +74,11 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String sequenzNewProject(String prjctName)
+	public String sequenzNewProject(String prjctName)
 	{
-		
+		LocalDateTime prjctDLDT = LocalDateTime.now(clock).plusDays(14);
+		LocalDateTime stepDLDT = LocalDateTime.now(clock).plusDays(7);
+
 		String dldtQuestion = "yes";
 		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
 		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
@@ -90,7 +98,7 @@ public class SequenzesForISS
 	}
 
 
-	public static String sequenzNewProjectNoDLDT(String prjctName)
+	public String sequenzNewProjectNoDLDT(String prjctName)
 	{
 		
 		String dldtQuestion = "no";
@@ -107,7 +115,7 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String sequenzMODProject(String prjctName)
+	public String sequenzMODProject(String prjctName)
 	{
 
 		String data = SomeCommands.new_MOD + '\n'
@@ -118,7 +126,7 @@ public class SequenzesForISS
 	}
 	
 
-	public static String sequenzAddNote(String prjctName)
+	public String sequenzAddNote(String prjctName)
 	{
 
 		String data = SomeCommands.add_Note + " " + prjctName + '\n'
@@ -129,8 +137,11 @@ public class SequenzesForISS
 		return data;
 	}
 	
-	public static String sequenzWakeMODProject(String prjctName)
+	public String sequenzWakeMODProject(String prjctName)
 	{
+
+		LocalDateTime prjctDLDT = LocalDateTime.now(clock).plusDays(14);
+		LocalDateTime stepDLDT = LocalDateTime.now(clock).plusDays(7);
 
 		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
 		String chosenFromStatieList = "1";
@@ -148,7 +159,7 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String sequenzProjectSucceeds(String prjctName)
+	public String sequenzProjectSucceeds(String prjctName)
 	{
 
 		String projectWasSuccessQstn  = "Yes";
@@ -163,7 +174,7 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String sequenzProjectFails(String prjctName)
+	public String sequenzProjectFails(String prjctName)
 	{
 
 		String projectWasSuccessQstn  = "No";
@@ -178,7 +189,7 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String sequenzOfFourNewProjects()
+	public String sequenzOfFourNewProjects()
 	{
 
 		int s = 4;
@@ -194,14 +205,17 @@ public class SequenzesForISS
 		return data;
 	}
 	
-	public static LocalDateTime getBDT(int n)
+	public LocalDateTime getBDT(int n)
 	{
+		
+		LocalDateTime jetzt = LocalDateTime.now(clock);
+
 		LocalDate mLDT = TimeSpanCreator.getLastMonday(jetzt).toLocalDate();
 		
 		return LocalDateTime.of(mLDT, LocalTime.of(0, n)).minusDays(14);
 	}
 
-	public static String sequenzManyProjects()
+	public String sequenzManyProjects()
 	{
 
 		String data = sequenzOfFourNewProjects()
@@ -222,7 +236,7 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public static String getNewProjectName(int n)
+	public String getNewProjectName(int n)
 	{
 		return "New_Project_"+n;
 	}

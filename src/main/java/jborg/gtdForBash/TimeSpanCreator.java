@@ -8,7 +8,7 @@ import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
-
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,6 +45,8 @@ import static jborg.gtdForBash.ProjectJSONToolBox.*;
 public class TimeSpanCreator
 {
 
+	
+	private final Clock clock;
 	private final LocalDateTime beginAnker;
 	private final LocalDateTime endAnker;
 	
@@ -89,15 +91,16 @@ public class TimeSpanCreator
     	return a.getTimeNr()-b.getTimeNr();
     };
 
-    public TimeSpanCreator(Set<JSONObject> prjctSet, List<TimeSpanData> yearList, List<TimeSpanData> monthList, List<TimeSpanData> weekList, List<TimeSpanData> dayList, List<TimeSpanData> hourList) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException
+    public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock, List<TimeSpanData> yearList, List<TimeSpanData> monthList, List<TimeSpanData> weekList, List<TimeSpanData> dayList, List<TimeSpanData> hourList) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException
     {
     	
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
 		this.prjctSet = prjctSet;
+		this.clock = clock;
 		
 		if(prjctSet.isEmpty())
 		{
-			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime now = LocalDateTime.now(clock);
 			this.beginAnker = now;
 			this.endAnker = now;
 		}
@@ -134,15 +137,16 @@ public class TimeSpanCreator
 		pickupListsAndExtrapolateThem(ChronoUnit.HOURS);
     }
 
-	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException
+	public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException
 	{
 
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
 		this.prjctSet = prjctSet;
-		
+		this.clock = clock;
+
 		if(prjctSet.isEmpty())
 		{
-			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime now = LocalDateTime.now(clock);
 			this.beginAnker = now;
 			this.endAnker = now;
 		}
@@ -427,7 +431,7 @@ public class TimeSpanCreator
 	public List<JSONObject> sortedListStepsByLDT(String jsonKey) throws IOException, URISyntaxException, TimeSpanCreatorException, ToolBoxException
 	{
 		
-		LocalDateTime oldestLDT = LocalDateTime.now();
+		LocalDateTime oldestLDT = LocalDateTime.now(clock);
 
 		String name = "";
 		Set<JSONObject> stepSet = allSteps();
@@ -512,7 +516,7 @@ public class TimeSpanCreator
 	public TimeSpanData getCurrentTimeSpanDataObject(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
 	{
 
-		int nr = isInWhichTimeSpan(cu, LocalDateTime.now());
+		int nr = isInWhichTimeSpan(cu, LocalDateTime.now(clock));
 
     	List<TimeSpanData> list = null;
 

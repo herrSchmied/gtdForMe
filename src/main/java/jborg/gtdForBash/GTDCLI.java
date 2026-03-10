@@ -11,12 +11,14 @@ import java.io.PrintStream;
 
 import java.net.URISyntaxException;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.HashMap;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,7 +47,6 @@ import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
-
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 
@@ -56,11 +57,15 @@ import static fileShortCuts.TextAndObjSaveAndLoad.*;
 public class GTDCLI implements Beholder<String>
 {
 
+	static Clock realClock = Clock.systemDefaultZone();
 
-	private final static String projectSchemaPath = "/projectJSONSchema.json";
-	private final static String modProjectSchemaPath = "/modProjectJSONSchema.json";
-
-	private final static ProjectJSONValidator pjv = new ProjectJSONValidator();;
+	Clock useThisClock;
+	
+	
+//	private final static String projectSchemaPath = "/projectJSONSchema.json";
+//	private final static String modProjectSchemaPath = "/modProjectJSONSchema.json";
+//
+//	private final static ProjectJSONValidator pjv = new ProjectJSONValidator();;
 	private final String statesFileName = "statusMGMT.states";
 	private final StatusMGMT states = StatusMGMT.getInstance();
 	
@@ -107,14 +112,15 @@ public class GTDCLI implements Beholder<String>
 	
 	public final int jsonPrintStyle = 4;
 	
-    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	public GTDCLI(InputStreamSession iss, Clock clock) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
-
+		this.useThisClock = clock;
+		
     	this.iss = iss;
     	this.sLog =  new SimpleLogger(projectDataFolderRelativePath.toAbsolutePath()+actionLog, "Log of GTD ");
     	System.out.println(sLog.getSessionString());
 
-    	ds = new GTDDataSpawnSession(this.iss);
+    	ds = new GTDDataSpawnSession(this.iss, this.useThisClock);
     	Path dataFolder = getDataFolder();
     	
 		boolean isThereDataFolder = Files.exists(dataFolder)&&Files.isDirectory(dataFolder);
@@ -130,7 +136,7 @@ public class GTDCLI implements Beholder<String>
 				knownProjects.put(pName, json);
 			}
 			
-			scds = new SomeCommands(this, knownProjects, states, ds, sLog);
+			scds = new SomeCommands(this, knownProjects, states, ds, sLog, useThisClock);
 			commandMap = scds.getCommandMap();
 		}
 		else 
@@ -145,7 +151,7 @@ public class GTDCLI implements Beholder<String>
 	        	if(directory.mkdir())
 	        	{
 	        		System.out.println(dataFolderCreated);
-	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog);
+	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog, useThisClock);
 	        		commandMap = scds.getCommandMap();
 	        	}	    				        
 	        	else
@@ -171,11 +177,17 @@ public class GTDCLI implements Beholder<String>
         greetings();
 
         loopForCommands();
+
+	}
+	
+    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	{
+    	this(iss, realClock);
 	}
          
     public void greetings() throws IOException
     {
-    	LocalDateTime inTheMoment = LocalDateTime.now();
+    	LocalDateTime inTheMoment = LocalDateTime.now(useThisClock);
     	String day = inTheMoment.getDayOfWeek().toString();
     	int day2 = inTheMoment.getDayOfMonth();
     	int year = inTheMoment.getYear();
@@ -266,8 +278,8 @@ public class GTDCLI implements Beholder<String>
 
     		if(ProjectJSONToolBox.activeProject.test(pJSON))
     		{
-    			boolean stepDidIt = ProjectJSONToolBox.checkStepForDeadlineAbuse(pJSON);
-    			boolean projectDidIt = ProjectJSONToolBox.checkProjectForDeadlineAbuse(pJSON);
+    			boolean stepDidIt = ProjectJSONToolBox.checkStepForDeadlineAbuse(pJSON, useThisClock);
+    			boolean projectDidIt = ProjectJSONToolBox.checkProjectForDeadlineAbuse(pJSON, useThisClock);
     		
     			if(stepDidIt|| projectDidIt)ProjectJSONToolBox.alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
     		}

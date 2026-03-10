@@ -42,7 +42,7 @@ public class ValidationTests
 	@Test
 	public void test()
 	{
-		JSONObject pJSON = pickProjectByName(SequenzesForISS.getNewProjectName(1), projects);
+		JSONObject pJSON = pickProjectByName(ProjectSetForTesting.getSqzFISS().getNewProjectName(1), projects);
 		ProjectJSONValidator pjv = new ProjectJSONValidator();
 		
 		assert(pjv.validate(pJSON.toString()));

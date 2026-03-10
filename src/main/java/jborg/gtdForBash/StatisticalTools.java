@@ -6,7 +6,7 @@ package jborg.gtdForBash;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
-
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 
@@ -31,13 +31,15 @@ public class StatisticalTools
 
 	final Set<JSONObject> prjctSet;
 	final TimeSpanCreator tsc;
+	final Clock clock;
 
-	public StatisticalTools(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	public StatisticalTools(Set<JSONObject> prjctSet, Clock clock) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{
 
 		if(prjctSet==null)throw new NullPointerException("Argument is null.");
 		this.prjctSet = prjctSet;
-		tsc = new TimeSpanCreator(prjctSet);
+		this.clock = clock;
+		tsc = new TimeSpanCreator(prjctSet, clock);
 	}
 
  

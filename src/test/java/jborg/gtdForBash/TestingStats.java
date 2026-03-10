@@ -60,7 +60,7 @@ public class TestingStats
 	public void sortingLists() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
 
-        StatisticalTools st = new StatisticalTools(prjctSet);
+        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock());
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
         List<JSONObject> list = tsc.sortedListProjectsByLDT(NDTKey);
@@ -85,7 +85,7 @@ public class TestingStats
 	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
 	{
 
-        StatisticalTools st = new StatisticalTools(prjctSet);
+        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock());
         TimeSpanCreator tsc = st.getTimeSpanCreator();
 
         Pair<String, LocalDateTime> oldPair = tsc.oldestLDTOverall();
@@ -114,7 +114,7 @@ public class TestingStats
 	{
 		
 		assert(!prjctSet.isEmpty());
-        StatisticalTools st = new StatisticalTools(prjctSet);
+        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock());
         TimeSpanCreator tsc = st.getTimeSpanCreator();
  
         System.out.println("\nNr. of Projects: " + prjctSet.size());
@@ -132,7 +132,7 @@ public class TestingStats
 		int weekNr = tsd.getTimeNr();
 		int n = tsd.allTheNames().size();
 		System.out.println("Week with the most NDTs: " + weekNr + ".\n" + n + " Projects written..\n");
-		//Thread.sleep(750);
+		Thread.sleep(3750);
 		
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, ADTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);

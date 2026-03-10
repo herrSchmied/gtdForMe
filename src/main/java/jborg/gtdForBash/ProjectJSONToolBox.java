@@ -4,6 +4,7 @@ package jborg.gtdForBash;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -140,12 +141,12 @@ public class ProjectJSONToolBox
 		return stepArray.getJSONObject(n);
 	}
 
-	public static boolean checkProjectForDeadlineAbuse(JSONObject pJSON)
+	public static boolean checkProjectForDeadlineAbuse(JSONObject pJSON, Clock clock)
 	{
 			
 		if(projectIsTerminated.test(pJSON))return false;
 	
-		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime jetzt = LocalDateTime.now(clock);
 	
 		String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
 		if(projectDLDTStr.equals(prjctDeadlineNone))return false;
@@ -157,12 +158,12 @@ public class ProjectJSONToolBox
 		return false;
 	}
 
-	public static boolean checkStepForDeadlineAbuse(JSONObject pJSON)
+	public static boolean checkStepForDeadlineAbuse(JSONObject pJSON, Clock clock)
 	{
 	
 		if(projectIsTerminated.test(pJSON))return false;
 		
-		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime jetzt = LocalDateTime.now(clock);
 			
 		JSONObject step = getLastStepOfProject(pJSON);
 	

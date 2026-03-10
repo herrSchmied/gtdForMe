@@ -4,6 +4,7 @@ import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -186,6 +187,8 @@ public class GTDDataSpawnSession
 
 	final InputStreamSession iss;
 	
+	final Clock clock;
+	
 	/**
 	 * The Constructor
 	 * 
@@ -193,9 +196,10 @@ public class GTDDataSpawnSession
 	 * from System.in.
 	 */
 
-	public GTDDataSpawnSession(InputStreamSession iss)
+	public GTDDataSpawnSession(InputStreamSession iss, Clock clock)
 	{
 		this.iss = iss;
+		this.clock = clock;
 	}
 
 	/**
@@ -232,7 +236,7 @@ public class GTDDataSpawnSession
 		String goal = iss.getString(goalR);
 			
 
-		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime jetzt = LocalDateTime.now(clock);
 		LocalDateTime ndt = jetzt;
 		String ndtStr = LittleTimeTools.timeString(ndt);
 		
@@ -273,7 +277,7 @@ public class GTDDataSpawnSession
 		JSONObject pJson = new JSONObject();
  
 		String status = "";
-		LocalDateTime adt = LocalDateTime.now();
+		LocalDateTime adt = LocalDateTime.now(clock);
 		LocalDateTime dldt = null;
 			
 		System.out.println("");
@@ -295,7 +299,7 @@ public class GTDDataSpawnSession
 			System.out.println("");
 			System.out.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
 			
-			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, LocalDateTime.now(clock).plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now(clock).plusYears(maxYearsInFutureDLDT));
 			String deadLineStr = LittleTimeTools.timeString(dldt);
 			pJson.put(DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 		}
@@ -354,7 +358,7 @@ public class GTDDataSpawnSession
 			}
 		}
 		
-		LocalDateTime ndtOfStep = LocalDateTime.now();
+		LocalDateTime ndtOfStep = LocalDateTime.now(clock);
 
 		String stepStatus = "";
 			
@@ -377,7 +381,7 @@ public class GTDDataSpawnSession
 			
 			System.out.println("");
 
-			LocalDateTime minLDT = LocalDateTime.now();
+			LocalDateTime minLDT = LocalDateTime.now(clock);
 			LocalDateTime maxLDT;
 			if(!prjctDeadLine.equals(prjctDeadlineNone))maxLDT = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
 			else maxLDT = farInFuture;
@@ -463,13 +467,13 @@ public class GTDDataSpawnSession
 		String deadLineStr = "";
 		if(gotDLDT)
 		{
-			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, LocalDateTime.now().plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now().plusYears(maxYearsInFutureDLDT));
+			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, LocalDateTime.now(clock).plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now(clock).plusYears(maxYearsInFutureDLDT));
 			deadLineStr = LittleTimeTools.timeString(dldt);
 		}
 		else deadLineStr = prjctDeadlineNone;
 		
 		pJson.put(DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
-		String adtStr = LittleTimeTools.timeString(LocalDateTime.now());
+		String adtStr = LittleTimeTools.timeString(LocalDateTime.now(clock));
 		pJson.put(ADTKey, adtStr);
 
 		if(timeAndGoalOfActiveProjectIsValide(pJson))
@@ -526,7 +530,7 @@ public class GTDDataSpawnSession
 			return;
 		}
 
-		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime jetzt = LocalDateTime.now(clock);
 		String jetztStr = LittleTimeTools.timeString(jetzt);
 		
 		String adtStr = sJson.getString(StepJSONKeyz.ADTKey);
@@ -542,7 +546,7 @@ public class GTDDataSpawnSession
 		boolean thereIsATerminalNote = iss.forcedYesOrNo(wantToMakeTerminalNotePhrase);
 		if(thereIsATerminalNote)terminalNote = iss.forcedString(stepTerminationNotePhrase);
 			
-		LocalDateTime tdt = LocalDateTime.now();
+		LocalDateTime tdt = LocalDateTime.now(clock);
 		boolean wantToChangeTDTOfStep = iss.forcedYesOrNo(wantToChangeTDTOfStepQstn);
 		if(wantToChangeTDTOfStep)
 		{
@@ -602,7 +606,7 @@ public class GTDDataSpawnSession
 		System.out.println(infoAlertTxtPhrase);
 
 		
-		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime jetzt = LocalDateTime.now(clock);
 		
 		String prjctStatus = "";
 		boolean success = iss.forcedYesOrNo(prjctSuccessQ);

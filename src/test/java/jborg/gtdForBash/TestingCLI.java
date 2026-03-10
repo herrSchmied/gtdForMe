@@ -34,12 +34,14 @@ public class TestingCLI
 
 	static Set<JSONObject> projects = new HashSet<>();
 
-	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
-	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
+//	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
+//	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
 	@BeforeEach
 	public void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{    	
+		
+		
 		projects = 
 				ProjectSetForTesting.get();
 	}
@@ -48,8 +50,8 @@ public class TestingCLI
 	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		LocalDateTime jetzt = LocalDateTime.now().plusMinutes(1);
-		JSONObject newProject = pickProjectByName(SequenzesForISS.getNewProjectName(1), projects);
+		LocalDateTime jetzt = LocalDateTime.now(ProjectSetForTesting.getClock()).plusMinutes(1);
+		JSONObject newProject = pickProjectByName(ProjectSetForTesting.getSqzFISS().getNewProjectName(1), projects);
 		
 		String status = newProject.getString(ProjectJSONKeyz.statusKey);
 		assert(status.equals(StatusMGMT.atbd));
@@ -108,9 +110,10 @@ public class TestingCLI
 	public void testAddNoteToProject() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(2), projects);
+		JSONObject project = pickProjectByName(ProjectSetForTesting.getSqzFISS().getNewProjectName(2), projects);
 		assert(project!=null);
-
+		System.out.println("Project with No Notes: " + project.getString(nameKey) + " *** " + project);
+		
 		JSONArray notesArr = project.getJSONArray(ProjectJSONKeyz.noteArrayKey);
 		String note1 = notesArr.getString(0); String note2 = notesArr.getString(1);
 		assert(note1.equals(noticeOne)); assert(note2.equals(noticeTwo));
@@ -134,7 +137,7 @@ public class TestingCLI
 	public void testKillProject() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(3), projects);
+		JSONObject project = pickProjectByName(ProjectSetForTesting.getSqzFISS().getNewProjectName(3), projects);
 		assert(project!=null);
 
 		JSONObject step = getLastStep(project);
@@ -148,7 +151,7 @@ public class TestingCLI
 	public void testKillStep() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(3), projects);
+		JSONObject project = pickProjectByName(ProjectSetForTesting.getSqzFISS().getNewProjectName(3), projects);
 		assert(project!=null);
 		
 		JSONObject step = getLastStep(project);
@@ -159,7 +162,7 @@ public class TestingCLI
 	public void testNextStep() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		JSONObject project = pickProjectByName(SequenzesForISS.getNewProjectName(4), projects);
+		JSONObject project = pickProjectByName(ProjectSetForTesting.getSqzFISS().getNewProjectName(4), projects);
 		assert(project!=null);
 
 		JSONObject step2 = getLastStep(project);
