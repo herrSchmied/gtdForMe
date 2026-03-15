@@ -55,11 +55,11 @@ public class TimeSpanCreator
 
 	private Map<ChronoUnit, List<TimeSpanData>> chronoUnitTimeSpanMap = new HashMap<>();
 		
-	private List<TimeSpanData> yearList;
-	private List<TimeSpanData> monthList;
-	private List<TimeSpanData> weekList;
-	private List<TimeSpanData> dayList;
-	private List<TimeSpanData> hourList;
+	private List<TimeSpanData> yearList = new ArrayList<>();
+	private List<TimeSpanData> monthList = new ArrayList<>();
+	private List<TimeSpanData> weekList = new ArrayList<>();
+	private List<TimeSpanData> dayList = new ArrayList<>();
+	private List<TimeSpanData> hourList = new ArrayList<>();
 	
 	private static final LocalTime earlyInTheDay = LocalTime.of(0, 0);
 
@@ -91,7 +91,7 @@ public class TimeSpanCreator
     	return a.getTimeNr()-b.getTimeNr();
     };
 
-    public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock, List<TimeSpanData> yearList, List<TimeSpanData> monthList, List<TimeSpanData> weekList, List<TimeSpanData> dayList, List<TimeSpanData> hourList) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException
+    public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock, List<List<TimeSpanData>> listOfTSDLists) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException
     {
     	
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
@@ -114,21 +114,25 @@ public class TimeSpanCreator
 			this.endAnker = youngPair.getValue();
 		}
 		
-		this.yearList.addAll(yearList);
+		this.yearList.addAll(listOfTSDLists.get(GTDCLI.yearListIndex));
 		//Remember: Does this sort the right way around?????
-		Collections.sort(yearList, TSDComparator);;
-		this.monthList.addAll(monthList);
+		Collections.sort(yearList, TSDComparator);
+		
+		this.monthList.addAll(listOfTSDLists.get(GTDCLI.monthListIndex));
 		//Remember: Does this sort the right way around?????
-		Collections.sort(monthList, TSDComparator);;
-		this.weekList.addAll(weekList);
+		Collections.sort(monthList, TSDComparator);
+		
+		this.weekList.addAll(listOfTSDLists.get(GTDCLI.weekListIndex));
 		//Remember: Does this sort the right way around?????
-		Collections.sort(weekList, TSDComparator);;
-		this.dayList.addAll(dayList);
+		Collections.sort(weekList, TSDComparator);
+		
+		this.dayList.addAll(listOfTSDLists.get(GTDCLI.dayListIndex));
 		//Remember: Does this sort the right way around?????
-		Collections.sort(dayList, TSDComparator);;
-		this.hourList.addAll(hourList);
+		Collections.sort(dayList, TSDComparator);
+		
+		this.hourList.addAll(listOfTSDLists.get(GTDCLI.hourListIndex));
 		//Remember: Does this sort the right way around?????
-		Collections.sort(hourList, TSDComparator);;
+		Collections.sort(hourList, TSDComparator);
 
 		pickupListsAndExtrapolateThem(ChronoUnit.YEARS);
 		pickupListsAndExtrapolateThem(ChronoUnit.MONTHS);
@@ -296,6 +300,12 @@ public class TimeSpanCreator
 		if(cu.equals(ChronoUnit.DAYS))tsdList = dayList;
 		if(cu.equals(ChronoUnit.HOURS))tsdList = hourList;
 		
+		if(tsdList.isEmpty())
+		{
+			tsdList.addAll(createListOfChronoUnitTimeSpan(cu));
+			return;
+		}
+
 		int lastInPastIndex = findLastInPast(tsdList);
 
 		for(int n=lastInPastIndex+1;n<tsdList.size();n++)
@@ -303,6 +313,7 @@ public class TimeSpanCreator
 			tsdList.remove(n);
 		}
 
+		
 		TimeSpanData lastTSD = tsdList.getLast();
 		
 		LocalDateTime startAnker = lastTSD.getEnd().plusNanos(1);

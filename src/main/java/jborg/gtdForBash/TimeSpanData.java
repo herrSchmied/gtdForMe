@@ -3,7 +3,7 @@ package jborg.gtdForBash;
 
 
 import java.io.IOException;
-
+import java.io.Serializable;
 import java.net.URISyntaxException;
 
 import java.time.LocalDateTime;
@@ -38,8 +38,10 @@ import someMath.NaturalNumberException;
 
 
 
-public class TimeSpanData
+public class TimeSpanData implements Serializable
 {
+
+	private static final long serialVersionUID = 1L;
 
 	private final LocalDateTime begin, end;
 	private final int timeNr;

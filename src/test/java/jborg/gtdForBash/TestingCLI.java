@@ -38,7 +38,7 @@ public class TestingCLI
 //	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
 	@BeforeEach
-	public void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	public void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
 	{    	
 		
 		

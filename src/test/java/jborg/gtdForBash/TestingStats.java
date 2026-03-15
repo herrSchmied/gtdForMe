@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class TestingStats
     static Set<JSONObject> prjctSet;
 
 	@BeforeEach
-	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, ClassNotFoundException
 	{
 
 		prjctSet = ProjectSetForTesting.get();
@@ -60,7 +61,9 @@ public class TestingStats
 	public void sortingLists() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
 
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock());
+		List<List<TimeSpanData>> empty = new ArrayList<>();
+		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
+        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
         List<JSONObject> list = tsc.sortedListProjectsByLDT(NDTKey);
@@ -84,8 +87,10 @@ public class TestingStats
 	@Test
 	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
 	{
-
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock());
+		
+		List<List<TimeSpanData>> empty = new ArrayList<>();
+		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
+        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
 
         Pair<String, LocalDateTime> oldPair = tsc.oldestLDTOverall();
@@ -114,7 +119,11 @@ public class TestingStats
 	{
 		
 		assert(!prjctSet.isEmpty());
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock());
+		
+		
+		List<List<TimeSpanData>> empty = new ArrayList<>();
+		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
+        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
  
         System.out.println("\nNr. of Projects: " + prjctSet.size());

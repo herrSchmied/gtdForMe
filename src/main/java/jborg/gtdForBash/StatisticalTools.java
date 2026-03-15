@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.LocalDateTime;
-
-
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,13 +33,13 @@ public class StatisticalTools
 	final TimeSpanCreator tsc;
 	final Clock clock;
 
-	public StatisticalTools(Set<JSONObject> prjctSet, Clock clock) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	public StatisticalTools(Set<JSONObject> prjctSet, Clock clock, List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
 	{
 
 		if(prjctSet==null)throw new NullPointerException("Argument is null.");
 		this.prjctSet = prjctSet;
 		this.clock = clock;
-		tsc = new TimeSpanCreator(prjctSet, clock);
+		tsc = new TimeSpanCreator(prjctSet, clock, listOfTSDLists);
 	}
 
  
@@ -80,6 +80,11 @@ public class StatisticalTools
 		pJSON = ProjectJSONToolBox.pickProjectByName(name, prjctSet);
 
 		return pJSON;
+	}
+	
+	public List<TimeSpanData> getTSDList(ChronoUnit cu) throws TimeSpanException
+	{
+		return tsc.getTimeSpanList(cu);
 	}
 	
 }

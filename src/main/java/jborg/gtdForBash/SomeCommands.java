@@ -217,7 +217,8 @@ public class SomeCommands
 	private final TimeSpanCreator tsc;
 	
 	public SomeCommands(GTDCLI cli, Map<String, JSONObject> knownProjects, StatusMGMT states, 
-    		GTDDataSpawnSession ds, SimpleLogger sLog, Clock clock) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+    		GTDDataSpawnSession ds, SimpleLogger sLog, Clock clock, 
+    		List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
     {
 
     	this.iss = cli.getInputStreamSession();
@@ -225,7 +226,7 @@ public class SomeCommands
     	this.nowDef = LocalDateTime.now(clock);
 
     	Set<JSONObject> pSet = new HashSet<>(knownProjects.values());
-    	st = new StatisticalTools(pSet, clock);
+    	st = new StatisticalTools(pSet, clock, listOfTSDLists);
     	tsc = st.getTimeSpanCreator();
 
 		List<Boolean> ioArray;
@@ -407,8 +408,16 @@ public class SomeCommands
 		MeatOfCLICmd<String> leave = (s)->
 		{
 			
-			sLog.logNow("Exit.");
-			cli.stop();//Save than exit.
+			
+			try
+			{
+				sLog.logNow("Exit.");
+				cli.stop();
+			}
+			catch (JSONException | TimeSpanException e)
+			{
+				e.printStackTrace();
+			}
 			
 			return ""; //Unreachable!!!!
 		};
@@ -837,9 +846,17 @@ public class SomeCommands
 		MeatOfCLICmd<String> saviore = (s)->
 		{
 			
-			sLog.logNow("Saved Data.");
-			sLog.saveLog();
-			cli.saveAll();
+			try
+			{
+				sLog.logNow("Saved Data.");
+				sLog.saveLog();
+				cli.saveAll();
+			}
+			catch (JSONException | TimeSpanException e)
+			{
+				e.printStackTrace();
+			}
+
 			return "";
 		};
 
@@ -1462,5 +1479,10 @@ public class SomeCommands
 		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
 
 		System.out.println(ttd.toString());
+    }
+
+    public List<TimeSpanData> getTSDList(ChronoUnit cu) throws TimeSpanException
+    {
+    	return tsc.getTimeSpanList(cu);
     }
 }

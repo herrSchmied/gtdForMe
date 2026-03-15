@@ -50,7 +50,7 @@ public class ProjectSetForTesting
     private static SequenzesForISS sqzFISS = new SequenzesForISS(testClock);
 
 
-	public static Set<JSONObject> get() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	public static Set<JSONObject> get() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
 	{
 		
 		

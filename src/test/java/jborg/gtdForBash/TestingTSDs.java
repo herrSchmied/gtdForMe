@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +46,7 @@ public class TestingTSDs
     static Set<JSONObject> prjctSet;
 
 	@BeforeEach
-	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, ClassNotFoundException
 	{
 
 		prjctSet = ProjectSetForTesting.get();
@@ -63,7 +64,9 @@ public class TestingTSDs
 	public void timeSpanTests() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
 
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock());
+		List<List<TimeSpanData>> empty = new ArrayList<>();
+		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
+        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
 
         List<TimeSpanData> tspdListHours = tsc.getTimeSpanList(ChronoUnit.HOURS);
@@ -86,7 +89,9 @@ public class TestingTSDs
 	{
 		makeUpProjectWithLaterNDTAndADT();
 
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock());
+		List<List<TimeSpanData>> empty = new ArrayList<>();
+		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
+        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
         LocalDateTime start = tsc.getBeginAnker();
