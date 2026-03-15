@@ -141,7 +141,7 @@ public class TestingStats
 		int weekNr = tsd.getTimeNr();
 		int n = tsd.allTheNames().size();
 		System.out.println("Week with the most NDTs: " + weekNr + ".\n" + n + " Projects written..\n");
-		Thread.sleep(3750);
+		//Thread.sleep(3750);
 		
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, ADTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);

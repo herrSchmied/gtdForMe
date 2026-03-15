@@ -340,9 +340,11 @@ public class TimeSpanCreator
 
 			for(JSONObject pJSON: prjctSet)
 			{
-				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(pJSON);
-				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(pJSON);
-				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(pJSON);
+				
+				String prjctStr = pJSON.toString();
+				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(prjctStr);
+				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(prjctStr);
+				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(prjctStr);
 			}
 			outputList.add(tsd);
 		}
@@ -384,9 +386,10 @@ public class TimeSpanCreator
 
 			for(JSONObject pJSON: prjctSet)
 			{
-				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(pJSON);
-				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(pJSON);
-				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(pJSON);
+				String prjctStr = pJSON.toString();
+				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(prjctStr);
+				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(prjctStr);
+				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(prjctStr);
 			}
 			outputList.add(tsd);
 		}

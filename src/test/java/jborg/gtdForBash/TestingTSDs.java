@@ -99,7 +99,7 @@ public class TestingTSDs
         
         System.out.println("Start Anker: " + start);
         System.out.println("Stop Anker: " + stop);
-        Thread.sleep(5000);
+        //Thread.sleep(5000);
 
         List<Pair<LocalDateTime, LocalDateTime>> wochen = tsc.createTimeSpanFrames(ChronoUnit.WEEKS, start, stop);
         List<TimeSpanData> weekDatas = tsc.getTimeSpanList(ChronoUnit.WEEKS);
@@ -116,7 +116,7 @@ public class TestingTSDs
         
         System.out.println(weeksSize);
         assert(weeksSize==cnt);
-        Thread.sleep(3000);
+        //Thread.sleep(3000);
 
         assert(weeksSize==12);
 
@@ -161,7 +161,7 @@ public class TestingTSDs
 
 			System.out.println(tsd);
 			System.out.println("Most Pressing Deadline: " + pNames + "\n");
-			Thread.sleep(4000);
+			//Thread.sleep(4000);
 
 //			System.out.println("Projects succeeded: " 
 //								+ tsd.projectsSucceededThisTimeSpan() + "\n");

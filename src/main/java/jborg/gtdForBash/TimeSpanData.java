@@ -46,11 +46,11 @@ public class TimeSpanData implements Serializable
 	private final LocalDateTime begin, end;
 	private final int timeNr;
 	
-	private final Set<JSONObject> projectsActive;
+	private final Set<String> projectsActive;
 
-	private final Set<JSONObject> newProjectsWrittenDown;
+	private final Set<String> newProjectsWrittenDown;
 	
-	private final Set<JSONObject> projectsTerminated;
+	private final Set<String> projectsTerminated;
 
 	public static final String weekBeginExceptionMsg = "Week must begin Monday.";
 
@@ -90,34 +90,34 @@ public class TimeSpanData implements Serializable
 		return begin.isAfter(LocalDateTime.now());
 	}
 
-	public void addProjectActive(JSONObject pJSON)
+	public void addProjectActive(String prjctStr)
 	{
-		projectsActive.add(pJSON);
+		projectsActive.add(prjctStr);
 	}
 	
-	public void setProjectsActive(Set<JSONObject> pJSONs) throws WeekDataException
+	public void setProjectsActive(Set<String> prjctStrs) throws WeekDataException
 	{
-		projectsActive.addAll(pJSONs);
+		projectsActive.addAll(prjctStrs);
 	}
 
-	public void addProjectWrittenDown(JSONObject pJSON)
+	public void addProjectWrittenDown(String prjctStr)
 	{
-		newProjectsWrittenDown.add(pJSON);
+		newProjectsWrittenDown.add(prjctStr);
 	}
 
-	public void setProjectsWrittenDown(Set<JSONObject> pJSONs) throws WeekDataException
+	public void setProjectsWrittenDown(Set<String> prjctStrs) throws WeekDataException
 	{
-		newProjectsWrittenDown.addAll(pJSONs);
+		newProjectsWrittenDown.addAll(prjctStrs);
 	}
 	
-	public void addProjectTerminated(JSONObject pJSON)
+	public void addProjectTerminated(String prjctStr)
 	{
-		projectsTerminated.add(pJSON);
+		projectsTerminated.add(prjctStr);
 	}
 
-	public void setProjectsTerminated(Set<JSONObject> projectNames)
+	public void setProjectsTerminated(Set<String> prjctStrs)
 	{
-		projectsTerminated.addAll(projectNames);
+		projectsTerminated.addAll(prjctStrs);
 	}
 
 	public LocalDateTime getBegin()
@@ -146,7 +146,7 @@ public class TimeSpanData implements Serializable
 	 * Returns immutable Set!
 	 * @return
 	 */
-	public Set<JSONObject> getActiveProjects()
+	public Set<String> getActiveProjects()
 	{
 		return Set.copyOf(projectsActive);
 	}
@@ -155,7 +155,7 @@ public class TimeSpanData implements Serializable
 	 * Returns immutable Set!
 	 * @return
 	 */
-	public Set<JSONObject> getProjectsWrittenDown()
+	public Set<String> getProjectsWrittenDown()
 	{
 		return Set.copyOf(newProjectsWrittenDown);
 	}
@@ -164,7 +164,7 @@ public class TimeSpanData implements Serializable
 	 * Returns immutable Set!
 	 * @return
 	 */
-	public Set<JSONObject> getProjectsTerminated()
+	public Set<String> getProjectsTerminated()
 	{
 		return Set.copyOf(projectsTerminated);
 	}
@@ -350,9 +350,9 @@ public class TimeSpanData implements Serializable
 
 		Set<String> successes = new HashSet<>();
 
-		for(JSONObject pJSON: getProjectsTerminated())
+		for(String prjctStr: getProjectsTerminated())
 		{
-
+			JSONObject pJSON = new JSONObject(prjctStr);
 			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
 			if(StatusMGMT.success.equals(status))successes.add(pName);
@@ -382,9 +382,10 @@ public class TimeSpanData implements Serializable
 
 		Set<String> fails= new HashSet<>();
 
-		for(JSONObject pJSON: getProjectsTerminated())
+		for(String prjctStr: getProjectsTerminated())
 		{
-
+			
+			JSONObject pJSON = new JSONObject(prjctStr);
 			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
 			if(StatusMGMT.failed.equals(status))fails.add(pName);
@@ -414,9 +415,10 @@ public class TimeSpanData implements Serializable
 
 		Set<String> violations = new HashSet<>();
 
-		for(JSONObject pJSON: getProjectsTerminated())
+		for(String prjctStr: getProjectsTerminated())
 		{
 
+			JSONObject pJSON = new JSONObject(prjctStr);
 			String pName = pJSON.getString(ProjectJSONKeyz.nameKey);
 			String status = pJSON.getString(ProjectJSONKeyz.statusKey);
 			if(StatusMGMT.failed.equals(status))
@@ -449,9 +451,10 @@ public class TimeSpanData implements Serializable
 
 		Set<JSONObject> projectsWithDLs = new HashSet<>();
 
-		for(JSONObject pJSON: getActiveProjects())
+		for(String prjctStr: getActiveProjects())
 		{
 
+			JSONObject pJSON = new JSONObject(prjctStr);
 			if(projectIsTerminated.test(pJSON))continue;
 
 			if(pJSON.has(ProjectJSONKeyz.DLDTKey))
@@ -527,9 +530,10 @@ public class TimeSpanData implements Serializable
 	public Set<JSONObject> allTheProjectJSON()
 	{
 		Set<JSONObject> all = new HashSet<>();
-		all.addAll(newProjectsWrittenDown);
-		all.addAll(projectsActive);
-		all.addAll(projectsTerminated);
+		
+		for(String prjctStr: newProjectsWrittenDown)all.add(new JSONObject(prjctStr));
+		for(String prjctStr: projectsActive)all.add(new JSONObject(prjctStr));
+		for(String prjctStr: projectsTerminated)all.add(new JSONObject(prjctStr));
 
 		return all;
 	}
@@ -549,9 +553,10 @@ public class TimeSpanData implements Serializable
 
 		Set<JSONObject> output = new HashSet<>();
 
-		for(JSONObject pJSON: getActiveProjects())
+		for(String prjctStr: getActiveProjects())
 		{
 
+			JSONObject pJSON = new JSONObject(prjctStr);
 			JSONArray stepJSONArray = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
 
 			for(Object obj: stepJSONArray)
