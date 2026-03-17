@@ -1,15 +1,14 @@
 package jborg.gtdForBash;
 
 
-import static consoleTools.TerminalXDisplay.formatBashStringBoldAndGreen;
-import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
-import java.io.File;
+
 import java.io.IOException;
+
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+
 import java.util.Set;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,12 +16,19 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
+import static jborg.gtdForBash.ProjectJSONToolBox.*;
+
+
 import someMath.NaturalNumberException;
+
+
+
 
 public class ValidationTests
 {

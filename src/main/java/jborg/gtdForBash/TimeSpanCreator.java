@@ -305,14 +305,6 @@ public class TimeSpanCreator
 			tsdList.addAll(createListOfChronoUnitTimeSpan(cu));
 			return;
 		}
-
-		int lastInPastIndex = findLastInPast(tsdList);
-
-		for(int n=lastInPastIndex+1;n<tsdList.size();n++)
-		{
-			tsdList.remove(n);
-		}
-
 		
 		TimeSpanData lastTSD = tsdList.getLast();
 		
@@ -352,21 +344,7 @@ public class TimeSpanCreator
 		return outputList;
 
 	}
-	
-	private int findLastInPast(List<TimeSpanData> tsdList)
-	{
-		
-		for(int n=0;n<tsdList.size();n++)
-		{
-			TimeSpanData tsd = tsdList.get(n);
-			
-			if(tsd.timeSpanIsInThePast())continue;
-			else return n;
-		}
 
-		return tsdList.size()-1;
-	}
-	
 	private List<TimeSpanData> createListOfChronoUnitTimeSpan(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
 	{
 
