@@ -81,7 +81,13 @@ public class GTDCLI implements Beholder<String>
 	public static final String yearListFileName = "yearList.tsdList";
 	public static final int yearListIndex = 4;
 
+	Map<ChronoUnit, String> chronoMap = Map.of(ChronoUnit.HOURS, hourListFileName, 
+											   ChronoUnit.DAYS, dayListFileName,
+											   ChronoUnit.WEEKS, weekListFileName,
+											   ChronoUnit.MONTHS, monthListFileName,
+											   ChronoUnit.YEARS, yearListFileName);
 
+	
 	private final StatusMGMT states = StatusMGMT.getInstance();
 	
 	//private final List<String> history = new ArrayList<>();
@@ -424,25 +430,25 @@ public class GTDCLI implements Beholder<String>
     public void saveTSDLists() throws TimeSpanException, IOException
     {
 
-    	List<TimeSpanData> hourList = scds.getTSDList(ChronoUnit.HOURS);
-    	for(TimeSpanData tsd: hourList)if(!tsd.timeSpanIsInThePast())hourList.remove(tsd);
-    	saveObject(getDataFolder()+hourListFileName, hourList);
+	   	List<TimeSpanData> tsdList;
+    	for(ChronoUnit cu: chronoMap.keySet())
+    	{
+    		tsdList = scds.getTSDList(cu);
+        	removeTheFutureAndSaveThePast(tsdList, cu);
+    	}
+    }
+    
+    public void removeTheFutureAndSaveThePast(List<TimeSpanData> tsdList, ChronoUnit cu) throws IOException
+    {
 
-    	List<TimeSpanData> dayList = scds.getTSDList(ChronoUnit.DAYS);
-    	for(TimeSpanData tsd: dayList)if(!tsd.timeSpanIsInThePast())dayList.remove(tsd);
-    	saveObject(getDataFolder()+dayListFileName, dayList);
+    	String fileName = chronoMap.get(cu);
+    	List<TimeSpanData> toBeSaved = new ArrayList<>();
+    	for(TimeSpanData tsd: tsdList)
+    	{
+    		if(tsd.timeSpanIsInThePast())toBeSaved.add(tsd);
+    	}
 
-    	List<TimeSpanData> weekList = scds.getTSDList(ChronoUnit.WEEKS);
-    	for(TimeSpanData tsd: weekList)if(!tsd.timeSpanIsInThePast())weekList.remove(tsd);
-    	saveObject(getDataFolder()+weekListFileName, weekList);
-
-    	List<TimeSpanData> monthList = scds.getTSDList(ChronoUnit.MONTHS);
-    	for(TimeSpanData tsd: monthList)if(!tsd.timeSpanIsInThePast())monthList.remove(tsd);
-    	saveObject(getDataFolder()+monthListFileName, monthList);
-
-    	List<TimeSpanData> yearList = scds.getTSDList(ChronoUnit.YEARS);
-    	for(TimeSpanData tsd: yearList)if(!tsd.timeSpanIsInThePast())yearList.remove(tsd);
-    	saveObject(getDataFolder()+yearListFileName, yearList);
+    	saveObject(getDataFolder()+fileName, toBeSaved);
     }
 
     public void saveProjects() throws JSONException, IOException

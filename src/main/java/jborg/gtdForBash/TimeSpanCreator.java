@@ -310,6 +310,7 @@ public class TimeSpanCreator
 		
 		LocalDateTime startAnker = lastTSD.getEnd().plusNanos(1);
 		int unitTimeNr = lastTSD.getTimeNr();
+		System.out.println("Pickup Nr: " + unitTimeNr);
 		tsdList.addAll(pickup(cu, unitTimeNr, startAnker, endAnker));
 	}
 	
