@@ -116,9 +116,8 @@ public class TestingTSDs
         
         System.out.println(weeksSize);
         assert(weeksSize==cnt);
-        //Thread.sleep(3000);
 
-        //assert(weeksSize==13 or 12???);Remember:?????????????
+        assert(weeksSize==3||weeksSize==2);
 
         JSONObject pJSON = st.projectJSONObjByName(wakeProjectName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, NDTKey, st));
@@ -194,7 +193,7 @@ public class TestingTSDs
 		pJSON.put(statusKey, StatusMGMT.atbd);
 		pJSON.put(goalKey, "Testing.");
 		
-		LocalDateTime ldt = LocalDateTime.now().plusDays(7);
+		LocalDateTime ldt = LocalDateTime.now(ProjectSetForTesting.getClock()).plusDays(7);
 		String ldtStr =  LittleTimeTools.timeString(ldt);
 		pJSON.put(NDTKey, ldtStr);
 		pJSON.put(ADTKey, ldtStr);

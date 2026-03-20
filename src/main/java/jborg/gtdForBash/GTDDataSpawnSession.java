@@ -261,8 +261,9 @@ public class GTDDataSpawnSession
 	 * @throws IOException only if something with the InputStreamSession goes wrong.
 	 * @throws URISyntaxException 
 	 * @throws JSONException 
+	 * @throws InterruptedException 
 	 */
-	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException, JSONException, URISyntaxException
+	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException, JSONException, URISyntaxException, InterruptedException
 	{
 		
 		System.out.println("");
@@ -307,9 +308,7 @@ public class GTDDataSpawnSession
 
 		if(timeAndGoalOfActiveProjectIsValide(pJson))
 		{
-			
-			spawnStep(pJson);//Here status will be overwritten. Here step status will be equal project status.
-			
+			spawnStep(pJson);//Here status will be overwritten. Here step status will be equal project status.	
 			return pJson;
 		}
 		else

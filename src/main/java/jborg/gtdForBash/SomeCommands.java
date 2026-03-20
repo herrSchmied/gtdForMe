@@ -370,7 +370,7 @@ public class SomeCommands
 			{
 				pJSON = ds.spawnNewProject(knownProjects.keySet(), states);
 			}
-			catch(JSONException | URISyntaxException e)
+			catch(JSONException | URISyntaxException | InterruptedException e)
 			{
 				e.printStackTrace();
 			}
