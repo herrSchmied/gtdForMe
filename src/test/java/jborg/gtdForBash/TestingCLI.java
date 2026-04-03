@@ -11,6 +11,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,8 +38,8 @@ public class TestingCLI
 //	final  LocalDateTime prjctDLDT = jetzt.plusHours(1);
 //	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
-	@BeforeEach
-	public void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
+	@BeforeAll
+	static void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
 	{    	
 		
 		

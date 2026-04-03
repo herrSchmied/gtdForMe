@@ -72,7 +72,7 @@ public class SomeCommands
 	 * Write a Method to check that!!!!!!
 	 * */
 
-	public static final String bestDay = "best day";
+	public static final String bestDay = "best";
 	public static final String oldest = "oldest project";
 	public static final String transferSteps = "transfer Steps";
 	public static final String transferProjectHeads = "transfer PH";
@@ -231,14 +231,20 @@ public class SomeCommands
 
 		List<Boolean> ioArray;
 
-		MeatOfCLICmd<String> bestTSDDay = (s)->
+		MeatOfCLICmd<String> bestTSD = (s)->
 		{
+
+			ChronoUnit cu = ChronoUnit.HOURS;
+			if(s.equals("day"))cu = ChronoUnit.DAYS;
+			if(s.equals("week"))cu = ChronoUnit.WEEKS;
+			if(s.equals("month"))cu = ChronoUnit.MONTHS;
+			if(s.equals("year"))cu = ChronoUnit.YEARS;
 
 			try
 			{
 
 				TimeSpanCreator tsc = st.getTimeSpanCreator();
-				List<TimeSpanData> tsdList = tsc.timeSpansMostPositive(ChronoUnit.DAYS);
+				List<TimeSpanData> tsdList = tsc.timeSpansMostPositive(cu);
 				Set<TimeSpanData> tsdSet = new HashSet<>(tsdList);
 				tsdList = new ArrayList<>(tsdSet);
 				Collections.sort(tsdList, new Comparator<TimeSpanData>()
@@ -274,9 +280,9 @@ public class SomeCommands
 			throw new RuntimeException("This should not happen.");
 		};
 		
-		ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
+		ioArray = new ArrayList<>(Arrays.asList(true, false, true, false));
 
-		registerCmd(bestDay, sdcSetName, ioArray, bestTSDDay);
+		registerCmd(bestDay, sdcSetName, ioArray, bestTSD);
 	
 		MeatOfCLICmd<String> oldestPrjct = (s)->
 		{

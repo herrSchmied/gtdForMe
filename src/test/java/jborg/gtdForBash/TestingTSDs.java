@@ -14,8 +14,11 @@ import static jborg.gtdForBash.SequenzesForISS.modPrjctName;
 import static jborg.gtdForBash.SequenzesForISS.newPrjctNoDLDT;
 import static jborg.gtdForBash.SequenzesForISS.wakeProjectName;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -26,10 +29,12 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import allgemein.LittleTimeTools;
+import consoleTools.InputStreamSession;
 import javafx.util.Pair;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
@@ -45,19 +50,33 @@ public class TestingTSDs
     static GTDCLI gtdCli;
     static Set<JSONObject> prjctSet;
 
-	@BeforeEach
-	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, ClassNotFoundException
+	@BeforeAll
+	static void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, ClassNotFoundException
 	{
 
-		prjctSet = ProjectSetForTesting.get();
+    	System.out.println("Test Setup//\\TestingTSDs");
+    	Thread.sleep(1000);
+    	
+    	prjctSet = ProjectSetForTesting.get();
 
     	assert(!prjctSet.isEmpty());
+    	
 	}
-
+	
 	@Test
-	public void testOne()
+	public void pickUpTest() throws JSONException, ClassNotFoundException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
-		
+	    // Create a guaranteed-empty temp directory for all project data
+        Path tempProjectDir = ProjectSetForTesting.getTempProjectDir();
+        String tempPrjctDirStr = tempProjectDir.toString();
+        System.out.println("Temp Dir: " + tempPrjctDirStr);
+
+		String data = SomeCommands.exit;
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
+		InputStreamSession iss = new InputStreamSession(bais);
+
+        GTDCLI cli = new GTDCLI(iss, ProjectSetForTesting.getClock());
 	}
 	
 	@Test
@@ -114,10 +133,10 @@ public class TestingTSDs
         int weeksSize = wochen.size();
         int firstWeekIndex = 0;
         
-        System.out.println(weeksSize);
+        System.out.println("Weeksize: " + weeksSize);
+        Thread.sleep(2000);
         assert(weeksSize==cnt);
-
-        assert(weeksSize==3||weeksSize==2);
+        assert(weeksSize==3);
 
         JSONObject pJSON = st.projectJSONObjByName(wakeProjectName);
 		assert(pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, NDTKey, st));
@@ -212,8 +231,8 @@ public class TestingTSDs
 		pJSON.put(stepArrayKey, steps);
 
 		prjctSet.add(pJSON);
-		
 	}
+
 	public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
 	{
 

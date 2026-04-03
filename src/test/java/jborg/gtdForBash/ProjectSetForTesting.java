@@ -49,13 +49,14 @@ public class ProjectSetForTesting
 
     private static SequenzesForISS sqzFISS = new SequenzesForISS(testClock);
 
-
+    private static Path tempProjectDir;
+    
 	public static Set<JSONObject> get() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
 	{
 		
 		
 	    // Create a guaranteed-empty temp directory for all project data
-        Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
+        tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
         String tempPrjctDirStr = tempProjectDir.toString();
         System.out.println("Temp Dir: " + tempPrjctDirStr);
 
@@ -102,6 +103,11 @@ public class ProjectSetForTesting
 		return testClock;
 	}
 	
+	public static Path getTempProjectDir()
+	{
+		return tempProjectDir;
+	}
+
 	public static SequenzesForISS getSqzFISS()
 	{
 		return sqzFISS;

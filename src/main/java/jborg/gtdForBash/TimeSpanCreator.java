@@ -88,7 +88,7 @@ public class TimeSpanCreator
     public static final Comparator<TimeSpanData> TSDComparator = (a,b) ->
     {
 
-    	return a.getTimeNr()-b.getTimeNr();
+    	return b.getTimeNr()-a.getTimeNr();
     };
 
     public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock, List<List<TimeSpanData>> listOfTSDLists) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException

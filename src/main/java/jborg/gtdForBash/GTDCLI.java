@@ -434,11 +434,11 @@ public class GTDCLI implements Beholder<String>
     	for(ChronoUnit cu: chronoMap.keySet())
     	{
     		tsdList = scds.getTSDList(cu);
-        	removeTheFutureAndSaveThePast(tsdList, cu);
+        	saveThePast(tsdList, cu);
     	}
     }
     
-    public void removeTheFutureAndSaveThePast(List<TimeSpanData> tsdList, ChronoUnit cu) throws IOException
+    public void saveThePast(List<TimeSpanData> tsdList, ChronoUnit cu) throws IOException
     {
 
     	String fileName = chronoMap.get(cu);
