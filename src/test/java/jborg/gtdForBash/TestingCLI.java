@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import allgemein.LittleTimeTools;
 
 import consoleTools.BashSigns;
+
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;

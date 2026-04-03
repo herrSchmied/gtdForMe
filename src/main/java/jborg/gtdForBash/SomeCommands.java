@@ -72,7 +72,12 @@ public class SomeCommands
 	 * Write a Method to check that!!!!!!
 	 * */
 
-	public static final String bestDay = "best";
+	public static final String best = "best";
+	private static final Map<String, ChronoUnit> bestArguments = Map.of("hour", ChronoUnit.HOURS,
+																		"day", ChronoUnit.DAYS,
+																		"week", ChronoUnit.WEEKS,
+																		"month", ChronoUnit.MONTHS,
+																		"year", ChronoUnit.YEARS);
 	public static final String oldest = "oldest project";
 	public static final String transferSteps = "transfer Steps";
 	public static final String transferProjectHeads = "transfer PH";
@@ -234,11 +239,15 @@ public class SomeCommands
 		MeatOfCLICmd<String> bestTSD = (s)->
 		{
 
-			ChronoUnit cu = ChronoUnit.HOURS;
-			if(s.equals("day"))cu = ChronoUnit.DAYS;
-			if(s.equals("week"))cu = ChronoUnit.WEEKS;
-			if(s.equals("month"))cu = ChronoUnit.MONTHS;
-			if(s.equals("year"))cu = ChronoUnit.YEARS;
+			String arg = s.trim();
+			String output = "";
+			if(!bestArguments.keySet().contains(arg))
+			{
+				System.out.println("Unknown Argument. Command needs valide argument.");
+				return output;
+			}
+
+			ChronoUnit cu = bestArguments.get(arg);
 
 			try
 			{
@@ -260,7 +269,6 @@ public class SomeCommands
 					}
 				});
 				
-				String output = "";
 				for(int n=0;n<tsdList.size();n++)
 				{
 					TimeSpanData tsd = tsdList.get(n);
@@ -282,7 +290,7 @@ public class SomeCommands
 		
 		ioArray = new ArrayList<>(Arrays.asList(true, false, true, false));
 
-		registerCmd(bestDay, sdcSetName, ioArray, bestTSD);
+		registerCmd(best, sdcSetName, ioArray, bestTSD);
 	
 		MeatOfCLICmd<String> oldestPrjct = (s)->
 		{

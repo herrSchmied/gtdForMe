@@ -20,8 +20,6 @@ import org.json.JSONObject;
 
 
 import consoleTools.InputStreamSession;
-
-
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;

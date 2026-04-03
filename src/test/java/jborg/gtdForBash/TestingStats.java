@@ -33,6 +33,8 @@ import someMath.exceptions.ConsoleToolsException;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
+
+import jborg.gtdForBash.exceptions.CLICMDException;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;

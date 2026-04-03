@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -123,7 +124,7 @@ public class GTDCLI implements Beholder<String>
 	//Command related
 	private final String hereAListOfCmds = "Here a list of Commands.";
 	private final String unknownCmdStr = "Unknown command!";
-
+	private final String cmdNeedsArgument = "Command Needs a valide Argument.";
 	
 	//File related.
 	private final String dataFolderCreated = "Data Folder created successfully.";
@@ -221,7 +222,7 @@ public class GTDCLI implements Beholder<String>
     	System.out.println("Time: " + time + '\n');
     }
 
-    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
+    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, CLICMDException
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
@@ -238,19 +239,23 @@ public class GTDCLI implements Beholder<String>
 
     	checkAllForDLDTAbuse();
     	saveAll();
+    	
 
     	try
     	{
-        	int numberOfCmds = commandMap.size();
-        	int cmdCounter = 0;
+ 
+        	isValideCommand(fullCmdWithOptArgTyped);
 
         	for(String commandKnown: commandMap.keySet())
     		{
     			if(fullCmdWithOptArgTyped.startsWith(commandKnown))
     			{
     				CLICommand<?> clicmd = commandMap.get(commandKnown);
-    		
-    				String argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
+    				String argument = "";
+    				if(clicmd.mustHaveArgument||clicmd.canHaveArgument)
+    				{
+    					argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
+    				}
     				
     				Object obj =  clicmd.executeCmd(argument);
     				if(obj instanceof JSONObject)
@@ -259,15 +264,6 @@ public class GTDCLI implements Beholder<String>
     				}
     				break;
     			}
-    			cmdCounter++;
-    		}
-
-    		if(cmdCounter==numberOfCmds)
-    		{
-    			System.out.println('\n'+unknownCmdStr);
-    			System.out.println(hereAListOfCmds);
-    			CLICommand<?> clicmd = commandMap.get(SomeCommands.list_commands);
-    			clicmd.executeCmd("");
     		}
     	}
     	catch(CLICMDException | NaturalNumberException | IOException e)
@@ -284,8 +280,56 @@ public class GTDCLI implements Beholder<String>
     	String argument = "";
    		int l = commandKnown.length();
    		argument = commandTyped.substring(l);
-
+   		
    		return argument;
+    }
+    
+    public void isValideCommand(String commandTyped) throws CLICMDException
+    {
+    	
+    	int cnt = 0;
+    	for(String commandKnown: commandMap.keySet())
+    	{
+    		if(!commandTyped.startsWith(commandKnown))
+    		{
+    			cnt++;
+    			continue;
+    		}
+
+			CLICommand<?> clicmd = commandMap.get(commandKnown);
+			if(clicmd.mustHaveArgument)
+			{
+				if(!hasArgument(commandTyped, commandKnown))throw new CLICMDException(cmdNeedsArgument);
+			}
+
+    	}
+    	
+    	if(cnt==commandMap.keySet().size())
+    	{
+
+    		System.out.println(unknownCmdStr);
+    		System.out.println(hereAListOfCmds);
+    		List<String> cmdList = new ArrayList<>(commandMap.keySet());
+    		Collections.sort(cmdList);
+    		for(int n=0;n<cmdList.size();n++)
+    		{
+    			String s = cmdList.get(n);
+    			System.out.println(s);
+    		}
+    		throw new CLICMDException(unknownCmdStr);
+    	}
+ 
+    }
+
+    public boolean hasArgument(String commandTyped, String commandKnown)
+    {
+    	
+    	if(commandTyped.length()<=commandKnown.length())return false;
+    	String argument = getArgumentOfCommand(commandTyped, commandKnown);
+
+   		if(!argument.matches("\\s[A-Za-z]+"))return false;
+    	
+    	return true;
     }
 
 	public void nxtStp(JSONObject pJSON) throws InputArgumentException, IOException, JSONException, URISyntaxException
