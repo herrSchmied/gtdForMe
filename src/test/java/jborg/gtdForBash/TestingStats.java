@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,10 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+
 import CollectionTools.CollectionManipulation;
+
+
 import javafx.util.Pair;
 
 
@@ -30,11 +34,8 @@ import someMath.exceptions.CollectionException;
 import someMath.exceptions.ConsoleToolsException;
 
 
-
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
-
-import jborg.gtdForBash.exceptions.CLICMDException;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
@@ -201,9 +202,9 @@ public class TestingStats
 		System.out.println("Hour with the most TDTs: " + hourNr + ".\n" + n + " Projects active..\n");
 		//Thread.sleep(750);
 
-		List<TimeSpanData>tsdList = tsc.timeSpansMostPositive(ChronoUnit.WEEKS);
+		Set<TimeSpanData>tsdList = tsc.timeSpansMostPositive(ChronoUnit.WEEKS);
 		Set<TimeSpanData> tsdSet = new HashSet<>(tsdList);
-		tsd = tsdList.get(0);
+		tsd = CollectionManipulation.catchRandomElementOfSet(tsdSet);
 		System.out.println("Week Most Positive: \n" + (new PositivityOfATSD(tsd).toString()));
 		//Thread.sleep(4000);
 		assert(tsd.getTimeNr()==0);

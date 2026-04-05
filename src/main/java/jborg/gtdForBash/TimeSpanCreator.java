@@ -29,7 +29,7 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
-
+import CollectionTools.CollectionManipulation;
 import consoleTools.TerminalXDisplay;
 
 
@@ -38,6 +38,7 @@ import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
+import someMath.exceptions.CollectionException;
 import someMath.exceptions.NaturalNumberException;
 
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
@@ -709,11 +710,11 @@ public class TimeSpanCreator
     	return new Pair<>(NDTKey, ldt);
     }
 
-	public List<TimeSpanData> timeSpansMostPositive(ChronoUnit cu) throws IOException, URISyntaxException, NaturalNumberException, TimeSpanException, someMath.NaturalNumberException
+	public Set<TimeSpanData> timeSpansMostPositive(ChronoUnit cu) throws IOException, URISyntaxException, NaturalNumberException, TimeSpanException, someMath.NaturalNumberException
 	{
 	
 		List<TimeSpanData> list = getTimeSpanList(cu);
-		List<TimeSpanData> tsdList = new ArrayList<>();
+		Set<TimeSpanData> tsdSet = new HashSet<>();
 	
 		Double n = 0.0;
 		for(TimeSpanData tsd: list)
@@ -725,14 +726,44 @@ public class TimeSpanCreator
 			if(n<m)
 			{
 				n=m;
-				tsdList.clear();
-				tsdList.add(tsd);
+				tsdSet.clear();
+				tsdSet.add(tsd);
 			}
 	
-			if(n==m)tsdList.add(tsd);
+			if(n==m)tsdSet.add(tsd);
 		}
 	
-		return tsdList;
+		return tsdSet;
+	}
+
+	public Set<TimeSpanData> timeSpansLeastPositive(ChronoUnit cu) throws IOException, URISyntaxException, NaturalNumberException, TimeSpanException, someMath.NaturalNumberException, CollectionException
+	{
+	
+		List<TimeSpanData> list = getTimeSpanList(cu);
+		Set<TimeSpanData> least = new HashSet<>();
+		Set<TimeSpanData> most = timeSpansMostPositive(cu);
+		TimeSpanData tsd0 = CollectionManipulation.catchRandomElementOfSet(most);
+		
+		PositivityOfATSD pTSD0 = new PositivityOfATSD(tsd0);
+		Double n = pTSD0.getValue();
+		
+		for(TimeSpanData tsd: list)
+		{
+	
+			PositivityOfATSD pTSD = new PositivityOfATSD(tsd);
+			Double m = pTSD.getValue();
+			
+			if(n>m)
+			{
+				n=m;
+				least.clear();
+				least.add(tsd);
+			}
+	
+			if(n==m)least.add(tsd);
+		}
+	
+		return least;
 	}
 
 	public Set<TimeSpanData> timeSpansWithMostLDTs(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, TimeSpanException, StatisticalToolsException

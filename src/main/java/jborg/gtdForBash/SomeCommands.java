@@ -60,7 +60,7 @@ import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 
 import someMath.NaturalNumberException;
-
+import someMath.exceptions.CollectionException;
 import someMath.exceptions.ConsoleToolsException;
 
 
@@ -72,6 +72,7 @@ public class SomeCommands
 	 * Write a Method to check that!!!!!!
 	 * */
 
+	public static final String worst = "worst";
 	public static final String best = "best";
 	private static final Map<String, ChronoUnit> bestArguments = Map.of("hour", ChronoUnit.HOURS,
 																		"day", ChronoUnit.DAYS,
@@ -236,6 +237,62 @@ public class SomeCommands
 
 		List<Boolean> ioArray;
 
+		MeatOfCLICmd<String> worstTSD = (s)->
+		{
+
+			String output = "";
+
+			String arg = s.trim();
+
+			if(!bestArguments.keySet().contains(arg))
+			{
+				System.out.println("Unknown Argument. Command needs valide argument.");
+				return output;
+			}
+
+			ChronoUnit cu = bestArguments.get(arg);
+
+			try
+			{
+
+				TimeSpanCreator tsc = st.getTimeSpanCreator();
+				Set<TimeSpanData> most = tsc.timeSpansLeastPositive(cu);
+				List<TimeSpanData>tsdList = new ArrayList<>(most);
+				Collections.sort(tsdList, new Comparator<TimeSpanData>()
+				{
+					@Override
+					public int compare(TimeSpanData tsd1, TimeSpanData tsd2)
+					{
+
+						if(tsd1.getTimeNr()<tsd2.getTimeNr())return -1;
+						if(tsd1.getTimeNr()>tsd2.getTimeNr())return 1;
+
+						return 0;
+					}
+				});
+				
+				for(int n=0;n<tsdList.size();n++)
+				{
+					TimeSpanData tsd = tsdList.get(n);
+					output += new PositivityOfATSD(tsd).toString();
+				}
+				
+				System.out.println(output);
+				return output;
+			}
+			catch (URISyntaxException | someMath.exceptions.NaturalNumberException | TimeSpanException | CollectionException e)
+			{
+
+				e.printStackTrace();
+			}
+
+			throw new RuntimeException("This should not happen.");
+		};
+		
+		ioArray = new ArrayList<>(Arrays.asList(true, false, true, false));
+
+		registerCmd(worst, sdcSetName, ioArray, worstTSD);
+	
 		MeatOfCLICmd<String> bestTSD = (s)->
 		{
 
@@ -253,9 +310,8 @@ public class SomeCommands
 			{
 
 				TimeSpanCreator tsc = st.getTimeSpanCreator();
-				List<TimeSpanData> tsdList = tsc.timeSpansMostPositive(cu);
-				Set<TimeSpanData> tsdSet = new HashSet<>(tsdList);
-				tsdList = new ArrayList<>(tsdSet);
+				Set<TimeSpanData> most = tsc.timeSpansMostPositive(cu);
+				List<TimeSpanData> tsdList = new ArrayList<>(most);
 				Collections.sort(tsdList, new Comparator<TimeSpanData>()
 				{
 					@Override
