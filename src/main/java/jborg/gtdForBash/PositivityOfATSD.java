@@ -3,6 +3,7 @@ package jborg.gtdForBash;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.function.Function;
 
 import org.json.JSONObject;
 
@@ -36,15 +37,15 @@ public class PositivityOfATSD
 	// #Step failed by DLDT abuse	:	-2 Points.
 	// #Project failed				:	-1 Point per active Day. **Fail fast!!!
 	// #Project failed by DLDT abuse:	-3 Point per active Day.
-	private final Double newProjectsWeight = 12.0;
-	private final Double projectsSucceedWeight = 36.0;
-	private final Double projectsFailedWeight = -1.0;//per Day!
-	private final Double projectsWithDLDTAbuseWeight = -3.0;//per Day!
+	private static final Double newProjectsWeight = 12.0;
+	private static final Double projectsSucceedWeight = 36.0;
+	private static final Double projectsFailedWeight = -1.0;//per Day!
+	private static final Double projectsWithDLDTAbuseWeight = -3.0;//per Day!
 
-	private final Double newStepsWeight = 6.0;
-	private final Double stepsSucceedWeight = 18.0;
-	private final Double stepsFailedWeight = -1.0;
-	private final Double stepsWithDLDTAbuseWeight = -2.0;
+	private static final Double newStepsWeight = 6.0;
+	private static final Double stepsSucceedWeight = 18.0;
+	private static final Double stepsFailedWeight = -1.0;
+	private static final Double stepsWithDLDTAbuseWeight = -2.0;
 	
 	private final Double newProjectsTerm;
 	private final Double projectsSucceedTerm;
@@ -60,6 +61,36 @@ public class PositivityOfATSD
 	
 	private final Double overAllValue;
 	private final TimeSpanData tsd;
+	
+	public static final Function<TimeSpanData, Double> posiValue = (tsd)->
+	{
+		try
+		{
+			return new PositivityOfATSD(tsd).getValue();
+		}
+		catch (IOException | URISyntaxException | NaturalNumberException e)
+		{
+			e.printStackTrace();
+		}
+
+		throw new RuntimeException("What the Heck!");
+	};
+
+	public static final Function<TimeSpanData, Double> negPosiValue = (tsd)->
+	{
+
+		try
+		{
+			return -(new PositivityOfATSD(tsd).getValue());
+		}
+		catch (IOException | URISyntaxException | NaturalNumberException e)
+		{
+			e.printStackTrace();
+		}
+
+		throw new RuntimeException("What the Heck!");
+	};
+
 	
 	public PositivityOfATSD(TimeSpanData tsd) throws IOException, URISyntaxException, NaturalNumberException
 	{
@@ -133,7 +164,86 @@ public class PositivityOfATSD
 						+ stepsSucceedTerm
 						+ stepsFaildTerm
 						+ stepsWithDLDTAbuseTerm;
+	}
 
+	public static Double getNewProjectsWeight()
+	{
+		return newProjectsWeight;
+	}
+
+	public static Double getProjectsSucceedWeight()
+	{
+		return projectsSucceedWeight;
+	}
+
+	public static Double getProjectsFailedWeight()
+	{
+		return projectsFailedWeight;
+	}
+
+	public static Double getProjectsWithDLDTAbuseWeight()
+	{
+		return projectsWithDLDTAbuseWeight;
+	}
+
+	public static Double getNewStepsWeight()
+	{
+		return newStepsWeight;
+	}
+
+	public static Double getStepsSucceedWeight()
+	{
+		return stepsSucceedWeight;
+	}
+
+	public static Double getStepsFailedWeight()
+	{
+		return stepsFailedWeight;
+	}
+
+	public static Double getStepsWithDLDTAbuseWeight()
+	{
+		return stepsWithDLDTAbuseWeight;
+	}
+
+	public Double getNewProjectsTerm()
+	{
+		return newProjectsTerm;
+	}
+
+	public Double getProjectsSucceedTerm()
+	{
+		return projectsSucceedTerm;
+	}
+
+	public Double getProjectsFailedTerm()
+	{
+		return projectsFailedTerm;
+	}
+
+	public Double getProjectsWithDLDTAbuseTerm()
+	{
+		return projectsWithDLDTAbuseTerm;
+	}
+
+	public Double getNewStepsTerm()
+	{
+		return newStepsTerm;
+	}
+
+	public Double getStepsSucceedTerm()
+	{
+		return stepsSucceedTerm;
+	}
+
+	public Double getStepsFaildTerm()
+	{
+		return stepsFaildTerm;
+	}
+
+	public Double getStepsWithDLDTAbuseTerm()
+	{
+		return stepsWithDLDTAbuseTerm;
 	}
 
 	public Double getValue()

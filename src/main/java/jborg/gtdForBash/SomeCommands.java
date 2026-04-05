@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -60,7 +61,7 @@ import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 
 import someMath.NaturalNumberException;
-import someMath.exceptions.CollectionException;
+
 import someMath.exceptions.ConsoleToolsException;
 
 
@@ -237,6 +238,7 @@ public class SomeCommands
 
 		List<Boolean> ioArray;
 
+
 		MeatOfCLICmd<String> worstTSD = (s)->
 		{
 
@@ -256,7 +258,7 @@ public class SomeCommands
 			{
 
 				TimeSpanCreator tsc = st.getTimeSpanCreator();
-				Set<TimeSpanData> most = tsc.timeSpansLeastPositive(cu);
+				Set<TimeSpanData> most = tsc.selectSubSetOfTSDListByExtremValue(cu, -10000.0, PositivityOfATSD.negPosiValue);
 				List<TimeSpanData>tsdList = new ArrayList<>(most);
 				Collections.sort(tsdList, new Comparator<TimeSpanData>()
 				{
@@ -280,7 +282,7 @@ public class SomeCommands
 				System.out.println(output);
 				return output;
 			}
-			catch (URISyntaxException | someMath.exceptions.NaturalNumberException | TimeSpanException | CollectionException e)
+			catch (URISyntaxException | TimeSpanException  e)
 			{
 
 				e.printStackTrace();
@@ -310,7 +312,7 @@ public class SomeCommands
 			{
 
 				TimeSpanCreator tsc = st.getTimeSpanCreator();
-				Set<TimeSpanData> most = tsc.timeSpansMostPositive(cu);
+				Set<TimeSpanData> most = tsc.selectSubSetOfTSDListByExtremValue(cu, -10000.0, PositivityOfATSD.posiValue);
 				List<TimeSpanData> tsdList = new ArrayList<>(most);
 				Collections.sort(tsdList, new Comparator<TimeSpanData>()
 				{
@@ -334,7 +336,7 @@ public class SomeCommands
 				System.out.println(output);
 				return output;
 			}
-			catch (URISyntaxException | someMath.exceptions.NaturalNumberException | TimeSpanException e)
+			catch (URISyntaxException | TimeSpanException e)
 			{
 
 				e.printStackTrace();

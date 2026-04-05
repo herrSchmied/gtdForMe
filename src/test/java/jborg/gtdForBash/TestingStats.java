@@ -202,7 +202,7 @@ public class TestingStats
 		System.out.println("Hour with the most TDTs: " + hourNr + ".\n" + n + " Projects active..\n");
 		//Thread.sleep(750);
 
-		Set<TimeSpanData>tsdList = tsc.timeSpansMostPositive(ChronoUnit.WEEKS);
+		Set<TimeSpanData>tsdList = tsc.selectSubSetOfTSDListByExtremValue(ChronoUnit.WEEKS, 0.0, PositivityOfATSD.posiValue);
 		Set<TimeSpanData> tsdSet = new HashSet<>(tsdList);
 		tsd = CollectionManipulation.catchRandomElementOfSet(tsdSet);
 		System.out.println("Week Most Positive: \n" + (new PositivityOfATSD(tsd).toString()));
