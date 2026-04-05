@@ -4,29 +4,35 @@ package jborg.gtdForBash;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
+
 import java.time.LocalDateTime;
+
 import java.util.HashSet;
 import java.util.Set;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 
 import allgemein.LittleTimeTools;
 
+
 import consoleTools.BashSigns;
+
+
+import someMath.NaturalNumberException;
+
 
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
-import someMath.NaturalNumberException;
-
-
 import static jborg.gtdForBash.SequenzesForISS.*;
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;

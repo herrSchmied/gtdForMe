@@ -708,8 +708,6 @@ public class TimeSpanCreator
     	return new Pair<>(NDTKey, ldt);
     }
 
-
-
 	public Set<TimeSpanData> selectSubSetOfTSDListByExtremValue(ChronoUnit cu, Double startValue, Function<TimeSpanData, Double> valueOfTSD) throws TimeSpanException
 	{
 		
@@ -734,7 +732,7 @@ public class TimeSpanCreator
 		
 		return selecao;
 	}
-	
+
 	public Set<TimeSpanData> timeSpansWithMostLDTs(ChronoUnit cu, String jsonKey) throws IOException, URISyntaxException, TimeSpanException, StatisticalToolsException
 	{
 

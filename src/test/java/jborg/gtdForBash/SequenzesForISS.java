@@ -38,7 +38,7 @@ public class SequenzesForISS
 
 	public SequenzesForISS(Clock clock)
 	{
-		this.clock = clock;
+		SequenzesForISS.clock = clock;
 	}
 	
 	public String sequenzNXTStep(String prjctName)

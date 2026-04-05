@@ -29,7 +29,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import allgemein.LittleTimeTools;
@@ -75,7 +74,7 @@ public class TestingTSDs
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
 
-        GTDCLI cli = new GTDCLI(iss, ProjectSetForTesting.getClock());
+        new GTDCLI(iss, ProjectSetForTesting.getClock());
 	}
 	
 	@Test
