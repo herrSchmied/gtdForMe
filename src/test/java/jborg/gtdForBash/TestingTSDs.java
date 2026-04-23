@@ -1,45 +1,47 @@
 package jborg.gtdForBash;
 
-import static jborg.gtdForBash.ProjectJSONKeyz.ADTKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.NDTKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.goalKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.nameKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.statusKey;
-import static jborg.gtdForBash.ProjectJSONKeyz.stepArrayKey;
-import static jborg.gtdForBash.ProjectJSONToolBox.extractLDT;
-import static jborg.gtdForBash.ProjectJSONToolBox.projectIsTerminated;
-import static jborg.gtdForBash.ProjectJSONToolBox.stepDeadlineNone;
-import static jborg.gtdForBash.SequenzesForISS.killPrjctNameNoDLDT;
-import static jborg.gtdForBash.SequenzesForISS.modPrjctName;
-import static jborg.gtdForBash.SequenzesForISS.newPrjctNoDLDT;
-import static jborg.gtdForBash.SequenzesForISS.wakeProjectName;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import allgemein.LittleTimeTools;
-import consoleTools.InputStreamSession;
-import javafx.util.Pair;
+import static jborg.gtdForBash.ProjectJSONKeyz.*;
+import static jborg.gtdForBash.ProjectJSONToolBox.*;
+import static jborg.gtdForBash.SequenzesForISS.*;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
+
+
+import java.io.IOException;
+
+import java.net.URISyntaxException;
+
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+
+import allgemein.LittleTimeTools;
+
+
+import javafx.util.Pair;
+
+
 import someMath.NaturalNumberException;
+
+
 
 public class TestingTSDs
 {
@@ -63,12 +65,12 @@ public class TestingTSDs
 	
 	
 	@Test
-	public void timeSpanTests() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	public void timeSpanTests() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, NaturalNumberException
 	{
 
 		List<List<TimeSpanData>> empty = new ArrayList<>();
 		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
+        StatisticalTools st = new StatisticalTools(prjctSet, empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
 
         List<TimeSpanData> tspdListHours = tsc.getTimeSpanList(ChronoUnit.HOURS);
@@ -93,7 +95,7 @@ public class TestingTSDs
 
 		List<List<TimeSpanData>> empty = new ArrayList<>();
 		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
+        StatisticalTools st = new StatisticalTools(prjctSet, empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
         LocalDateTime start = tsc.getBeginAnker();

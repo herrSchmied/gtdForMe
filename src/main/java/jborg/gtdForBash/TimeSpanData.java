@@ -80,14 +80,14 @@ public class TimeSpanData implements Serializable
 		dataMap = new HashMap<>();
 	}
 
-	public boolean timeSpanIsInThePast()
+	public boolean timeSpanIsInThePast() throws NaturalNumberException
 	{
-		return end.isBefore(LocalDateTime.now());
+		return end.isBefore(GTDCLI.now());
 	}
 
-	public boolean timeSpanIsInTheFuture()
+	public boolean timeSpanIsInTheFuture() throws NaturalNumberException
 	{
-		return begin.isAfter(LocalDateTime.now());
+		return begin.isAfter(GTDCLI.now());
 	}
 
 	public void addProjectActive(String prjctStr)
@@ -291,7 +291,7 @@ public class TimeSpanData implements Serializable
 		return stepsViolatedDLThisTimeSpan().size();
 	}
 
-	public Set<JSONObject> getAllActiveStepsWithDLs() throws IOException, URISyntaxException
+	public Set<JSONObject> getAllActiveStepsWithDLs() throws IOException, URISyntaxException, NaturalNumberException
 	{
 
 		Set<JSONObject> activeDLSteps = new HashSet<>();
@@ -305,7 +305,7 @@ public class TimeSpanData implements Serializable
 				if(!dldtStr.equals(stepDeadlineNone))
 				{
 					LocalDateTime dldt = LittleTimeTools.LDTfromTimeString(dldtStr);					
-					if(dldt.isBefore(LocalDateTime.now()))continue;
+					if(dldt.isBefore(GTDCLI.now()))continue;
 					activeDLSteps.add(sJSON);
 				}
 			}
@@ -321,7 +321,7 @@ public class TimeSpanData implements Serializable
 		Set<JSONObject> pressingers  = new HashSet<>();
 
 		int secs = (int)Math.pow(10, 21);
-		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime jetzt = GTDCLI.now();
 
 
 		for(JSONObject sJSON: getAllActiveStepsWithDLs())
@@ -492,7 +492,7 @@ public class TimeSpanData implements Serializable
 	{
 
 		int secs = (int) Math.pow(10, 21);
-		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime jetzt = GTDCLI.now();
 		Set<JSONObject> projects = new HashSet<>();
 
 		Set<JSONObject> set = getAllActiveProjectDLs();

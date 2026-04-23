@@ -11,8 +11,8 @@ import java.io.PrintStream;
 
 import java.net.URISyntaxException;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +33,7 @@ import someMath.NaturalNumberException;
 import allgemein.SimpleLogger;
 
 import allgemein.Beholder;
-
+import allgemein.ExactPeriode;
 import allgemein.LittleTimeTools;
 
 
@@ -60,9 +60,12 @@ import static fileShortCuts.TextAndObjSaveAndLoad.*;
 public class GTDCLI implements Beholder<String>
 {
 
-	static Clock realClock = Clock.systemDefaultZone();
-
-	Clock useThisClock;
+	
+	private static boolean useOffSetForLDTs = false;
+	
+	private static LocalDateTime offsetLDT;
+	
+	private static LocalDateTime gtdcliStartLDT = LocalDateTime.now();
 
 //	private final static String projectSchemaPath = "/projectJSONSchema.json";
 //	private final static String modProjectSchemaPath = "/modProjectJSONSchema.json";
@@ -134,16 +137,32 @@ public class GTDCLI implements Beholder<String>
 	
 	public final int jsonPrintStyle = 4;
 	
-	public GTDCLI(InputStreamSession iss, Clock clock) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
+	public static LocalDateTime now() throws NaturalNumberException
+	{
+		
+		LocalDateTime jetzt = LocalDateTime.now();
+		if(!useOffSetForLDTs)return jetzt;
+
+		ExactPeriode ep = new ExactPeriode(jetzt, gtdcliStartLDT);
+		
+		return offsetLDT.plusSeconds(ep.getAbsoluteSeconds());
+	}
+	
+	public static void setUseOffSetForLDTs(LocalDateTime offsetLDTSet)
 	{
 
-		this.useThisClock = clock;
+		useOffSetForLDTs = true;
+		offsetLDT = offsetLDTSet;
+	}
+
+	public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
+	{
 
     	this.iss = iss;
     	this.sLog =  new SimpleLogger(projectDataFolderRelativePath.toAbsolutePath()+actionLog, "Log of GTD ");
     	System.out.println(sLog.getSessionString());
 
-    	ds = new GTDDataSpawnSession(this.iss, this.useThisClock);
+    	ds = new GTDDataSpawnSession(this.iss);
     	Path dataFolder = getDataFolder();
 
 		boolean isThereDataFolder = Files.exists(dataFolder)&&Files.isDirectory(dataFolder);
@@ -160,7 +179,7 @@ public class GTDCLI implements Beholder<String>
 				knownProjects.put(pName, json);
 			}
 			
-			scds = new SomeCommands(this, knownProjects, states, ds, sLog, useThisClock, loadTSDLists(getDataFolder()));
+			scds = new SomeCommands(this, knownProjects, states, ds, sLog, loadTSDLists(getDataFolder()));
 			commandMap = scds.getCommandMap();
 		}
 		else 
@@ -175,7 +194,7 @@ public class GTDCLI implements Beholder<String>
 	        	if(directory.mkdir())
 	        	{
 	        		System.out.println(dataFolderCreated);
-	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog, useThisClock, loadTSDLists(getDataFolder()));
+	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog, loadTSDLists(getDataFolder()));
 	        		commandMap = scds.getCommandMap();
 	        	}	    				        
 	        	else
@@ -204,22 +223,20 @@ public class GTDCLI implements Beholder<String>
 
 	}
 	
-    public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
-	{
-    	this(iss, realClock);
-	}
          
-    public void greetings() throws IOException
+    public void greetings() throws IOException, NaturalNumberException
     {
 
-    	LocalDateTime inTheMoment = LocalDateTime.now(useThisClock);
-    	String day = inTheMoment.getDayOfWeek().toString();
-    	int day2 = inTheMoment.getDayOfMonth();
+    	LocalDateTime inTheMoment = now();
+    	String dayOfWeek = inTheMoment.getDayOfWeek().toString();
+    	Month month = inTheMoment.getMonth();
+    	int dayOfMonth = inTheMoment.getDayOfMonth();
     	int year = inTheMoment.getYear();
     	String time = LittleTimeTools.timeString(inTheMoment.toLocalTime());
-
-    	System.out.println("Hello, it is " + day + " the " + day2 + " in the Year "+year);
-    	System.out.println("Time: " + time + '\n');
+    	String seconds = "" + inTheMoment.getSecond();
+    	if(seconds.length()<2)seconds = "0" + seconds;
+    	System.out.println("Hello, Date-> month: " + month.toString() + " day: " + dayOfMonth + " in the Year " + year + ". It's " + dayOfWeek);
+    	System.out.println("Time: " + time + ":" + seconds + '\n');
     }
 
     public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, CLICMDException
@@ -330,12 +347,12 @@ public class GTDCLI implements Beholder<String>
     	return true;
     }
 
-	public void nxtStp(JSONObject pJSON) throws InputArgumentException, IOException, JSONException, URISyntaxException
+	public void nxtStp(JSONObject pJSON) throws InputArgumentException, IOException, JSONException, URISyntaxException, NaturalNumberException
     {
     	ds.spawnStep(pJSON);
     }
 
-    public void checkAllForDLDTAbuse()
+    public void checkAllForDLDTAbuse() throws NaturalNumberException
     {
     	
     	System.out.println(BashSigns.boldYBCPX + "Checking for DLDT-Abuse." + BashSigns.boldYBCSX);
@@ -344,8 +361,8 @@ public class GTDCLI implements Beholder<String>
 
     		if(ProjectJSONToolBox.activeProject.test(pJSON))
     		{
-    			boolean stepDidIt = ProjectJSONToolBox.checkStepForDeadlineAbuse(pJSON, useThisClock);
-    			boolean projectDidIt = ProjectJSONToolBox.checkProjectForDeadlineAbuse(pJSON, useThisClock);
+    			boolean stepDidIt = ProjectJSONToolBox.checkStepForDeadlineAbuse(pJSON);
+    			boolean projectDidIt = ProjectJSONToolBox.checkProjectForDeadlineAbuse(pJSON);
     		
     			if(stepDidIt|| projectDidIt)ProjectJSONToolBox.alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
     		}
@@ -480,7 +497,7 @@ public class GTDCLI implements Beholder<String>
     	return folder.listFiles();
     }
 
-    public void saveTSDLists() throws TimeSpanException, IOException
+    public void saveTSDLists() throws TimeSpanException, IOException, NaturalNumberException
     {
 
 	   	List<TimeSpanData> tsdList;
@@ -491,7 +508,7 @@ public class GTDCLI implements Beholder<String>
     	}
     }
     
-    public void saveThePast(List<TimeSpanData> tsdList, ChronoUnit cu) throws IOException
+    public void saveThePast(List<TimeSpanData> tsdList, ChronoUnit cu) throws IOException, NaturalNumberException
     {
 
     	String fileName = chronoMap.get(cu);
@@ -505,7 +522,8 @@ public class GTDCLI implements Beholder<String>
     	}
 
     	saveObject(getDataFolder()+fileName, toBeSaved);
-    	System.out.println("Saved " + cnt + " TSD's in file: " + fileName);
+    	System.out.println("Saved " + cnt + " TSD's in file"
+    			+ ": " + fileName);
     }
 
     public void saveProjects() throws JSONException, IOException
@@ -523,7 +541,7 @@ public class GTDCLI implements Beholder<String>
     	saveObject(getDataFolder()+statesFileName, StatusMGMT.getInstance());
     }
 
-    public void saveAll() throws JSONException, IOException, TimeSpanException
+    public void saveAll() throws JSONException, IOException, TimeSpanException, NaturalNumberException
     {
 
     	saveProjects();
@@ -531,7 +549,7 @@ public class GTDCLI implements Beholder<String>
     	saveTSDLists();
     }
     
-    public void stop() throws JSONException, IOException, TimeSpanException
+    public void stop() throws JSONException, IOException, TimeSpanException, NaturalNumberException
     {
 
     	saveAll();

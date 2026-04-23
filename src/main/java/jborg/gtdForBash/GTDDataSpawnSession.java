@@ -3,8 +3,9 @@ package jborg.gtdForBash;
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
-import java.time.Clock;
+
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import allgemein.LittleTimeTools;
 
 
 import consoleTools.*;
+import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
@@ -187,8 +189,6 @@ public class GTDDataSpawnSession
 
 	final InputStreamSession iss;
 	
-	final Clock clock;
-	
 	/**
 	 * The Constructor
 	 * 
@@ -196,10 +196,9 @@ public class GTDDataSpawnSession
 	 * from System.in.
 	 */
 
-	public GTDDataSpawnSession(InputStreamSession iss, Clock clock)
+	public GTDDataSpawnSession(InputStreamSession iss)
 	{
 		this.iss = iss;
-		this.clock = clock;
 	}
 
 	/**
@@ -214,8 +213,9 @@ public class GTDDataSpawnSession
 	 * @param statusMGMT allowed Statuses for Projects.
 	 * @return JSONObject MOD-Project-Data.
 	 * @throws IOException only when something with the InputStreamSession goes wrong.
+	 * @throws NaturalNumberException 
 	 */
-	public JSONObject spawnMODProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException 
+	public JSONObject spawnMODProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException, NaturalNumberException 
 	{
 
 		System.out.println("");
@@ -236,7 +236,7 @@ public class GTDDataSpawnSession
 		String goal = iss.getString(goalR);
 			
 
-		LocalDateTime jetzt = LocalDateTime.now(clock);
+		LocalDateTime jetzt = GTDCLI.now();
 		LocalDateTime ndt = jetzt;
 		String ndtStr = LittleTimeTools.timeString(ndt);
 		
@@ -262,8 +262,9 @@ public class GTDDataSpawnSession
 	 * @throws URISyntaxException 
 	 * @throws JSONException 
 	 * @throws InterruptedException 
+	 * @throws NaturalNumberException 
 	 */
-	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException, JSONException, URISyntaxException, InterruptedException
+	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException, JSONException, URISyntaxException, InterruptedException, NaturalNumberException
 	{
 		
 		System.out.println("");
@@ -278,7 +279,7 @@ public class GTDDataSpawnSession
 		JSONObject pJson = new JSONObject();
  
 		String status = "";
-		LocalDateTime adt = LocalDateTime.now(clock);
+		LocalDateTime adt = GTDCLI.now();
 		LocalDateTime dldt = null;
 			
 		System.out.println("");
@@ -300,7 +301,7 @@ public class GTDDataSpawnSession
 			System.out.println("");
 			System.out.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
 			
-			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, LocalDateTime.now(clock).plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now(clock).plusYears(maxYearsInFutureDLDT));
+			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, GTDCLI.now().plusMinutes(minMinutesInFutureDLDT), GTDCLI.now().plusYears(maxYearsInFutureDLDT));
 			String deadLineStr = LittleTimeTools.timeString(dldt);
 			pJson.put(DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 		}
@@ -328,8 +329,9 @@ public class GTDDataSpawnSession
 	 * goes wrong.
 	 * @throws URISyntaxException 
 	 * @throws JSONException 
+	 * @throws NaturalNumberException 
 	 */
-	public void spawnStep(JSONObject pJson) throws IOException, JSONException, URISyntaxException
+	public void spawnStep(JSONObject pJson) throws IOException, JSONException, URISyntaxException, NaturalNumberException
 	{
 
 		JSONObject newStep = new JSONObject();
@@ -357,7 +359,7 @@ public class GTDDataSpawnSession
 			}
 		}
 		
-		LocalDateTime ndtOfStep = LocalDateTime.now(clock);
+		LocalDateTime ndtOfStep = GTDCLI.now();
 
 		String stepStatus = "";
 			
@@ -380,7 +382,7 @@ public class GTDDataSpawnSession
 			
 			System.out.println("");
 
-			LocalDateTime minLDT = LocalDateTime.now(clock);
+			LocalDateTime minLDT = GTDCLI.now();
 			LocalDateTime maxLDT;
 			if(!prjctDeadLine.equals(prjctDeadlineNone))maxLDT = LittleTimeTools.LDTfromTimeString(prjctDeadLine);
 			else maxLDT = farInFuture;
@@ -454,8 +456,9 @@ public class GTDDataSpawnSession
 	 * @throws IOException only when something goes wrong with InputStreamSession.
 	 * @throws URISyntaxException 
 	 * @throws JSONException 
+	 * @throws NaturalNumberException 
 	 */
-	public void wakeMODProject(JSONObject pJson) throws IOException, JSONException, URISyntaxException
+	public void wakeMODProject(JSONObject pJson) throws IOException, JSONException, URISyntaxException, NaturalNumberException
 	{
 		
 		LocalDateTime dldt = null;
@@ -466,13 +469,13 @@ public class GTDDataSpawnSession
 		String deadLineStr = "";
 		if(gotDLDT)
 		{
-			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, LocalDateTime.now(clock).plusMinutes(minMinutesInFutureDLDT), LocalDateTime.now(clock).plusYears(maxYearsInFutureDLDT));
+			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, GTDCLI.now().plusMinutes(minMinutesInFutureDLDT), GTDCLI.now().plusYears(maxYearsInFutureDLDT));
 			deadLineStr = LittleTimeTools.timeString(dldt);
 		}
 		else deadLineStr = prjctDeadlineNone;
 		
 		pJson.put(DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
-		String adtStr = LittleTimeTools.timeString(LocalDateTime.now(clock));
+		String adtStr = LittleTimeTools.timeString(GTDCLI.now());
 		pJson.put(ADTKey, adtStr);
 
 		if(timeAndGoalOfActiveProjectIsValide(pJson))
@@ -499,8 +502,9 @@ public class GTDDataSpawnSession
 	 * @param pJson the Project(-Data) in question.
 	 * 
 	 * @throws IOException only if something with InputStreamSession goes wrong.
+	 * @throws NaturalNumberException 
 	 */
-	public void terminateStep(JSONObject pJson) throws IOException
+	public void terminateStep(JSONObject pJson) throws IOException, NaturalNumberException
 	{
 
 		if(pJson==null)
@@ -529,7 +533,7 @@ public class GTDDataSpawnSession
 			return;
 		}
 
-		LocalDateTime jetzt = LocalDateTime.now(clock);
+		LocalDateTime jetzt = GTDCLI.now();
 		String jetztStr = LittleTimeTools.timeString(jetzt);
 		
 		String adtStr = sJson.getString(StepJSONKeyz.ADTKey);
@@ -545,7 +549,7 @@ public class GTDDataSpawnSession
 		boolean thereIsATerminalNote = iss.forcedYesOrNo(wantToMakeTerminalNotePhrase);
 		if(thereIsATerminalNote)terminalNote = iss.forcedString(stepTerminationNotePhrase);
 			
-		LocalDateTime tdt = LocalDateTime.now(clock);
+		LocalDateTime tdt = GTDCLI.now();
 		boolean wantToChangeTDTOfStep = iss.forcedYesOrNo(wantToChangeTDTOfStepQstn);
 		if(wantToChangeTDTOfStep)
 		{
@@ -572,8 +576,9 @@ public class GTDDataSpawnSession
 	 * @param pJSON JSONObject Project-Data.
 	 * 
 	 * @throws IOException if something goes wrong with the InputStreamSession.
+	 * @throws NaturalNumberException 
 	 */
-	public void terminateProject(JSONObject pJSON) throws IOException
+	public void terminateProject(JSONObject pJSON) throws IOException, NaturalNumberException
 	{
 		
 		if(pJSON==null)
@@ -601,11 +606,9 @@ public class GTDDataSpawnSession
 			return;
 		}
 
-
 		System.out.println(infoAlertTxtPhrase);
 
-		
-		LocalDateTime jetzt = LocalDateTime.now(clock);
+		LocalDateTime jetzt = GTDCLI.now();
 		
 		String prjctStatus = "";
 		boolean success = iss.forcedYesOrNo(prjctSuccessQ);

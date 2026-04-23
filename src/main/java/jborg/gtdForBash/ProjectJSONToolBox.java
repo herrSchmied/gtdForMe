@@ -3,8 +3,9 @@ package jborg.gtdForBash;
 
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
-import java.time.Clock;
+
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import org.json.JSONObject;
 
 import allgemein.LittleTimeTools;
 import jborg.gtdForBash.exceptions.ToolBoxException;
+import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
@@ -141,12 +143,12 @@ public class ProjectJSONToolBox
 		return stepArray.getJSONObject(n);
 	}
 
-	public static boolean checkProjectForDeadlineAbuse(JSONObject pJSON, Clock clock)
+	public static boolean checkProjectForDeadlineAbuse(JSONObject pJSON) throws NaturalNumberException
 	{
 			
 		if(projectIsTerminated.test(pJSON))return false;
 	
-		LocalDateTime jetzt = LocalDateTime.now(clock);
+		LocalDateTime jetzt = GTDCLI.now();
 	
 		String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
 		if(projectDLDTStr.equals(prjctDeadlineNone))return false;
@@ -158,12 +160,12 @@ public class ProjectJSONToolBox
 		return false;
 	}
 
-	public static boolean checkStepForDeadlineAbuse(JSONObject pJSON, Clock clock)
+	public static boolean checkStepForDeadlineAbuse(JSONObject pJSON) throws NaturalNumberException
 	{
 	
 		if(projectIsTerminated.test(pJSON))return false;
 		
-		LocalDateTime jetzt = LocalDateTime.now(clock);
+		LocalDateTime jetzt = GTDCLI.now();
 			
 		JSONObject step = getLastStepOfProject(pJSON);
 	

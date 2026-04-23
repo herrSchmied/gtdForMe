@@ -71,7 +71,7 @@ public class ProjectSetForTesting
 		InputStreamSession iss = new InputStreamSession(bais);
 
 
-        GTDCLI cli = new GTDCLI(iss, testClock);
+        GTDCLI cli = new GTDCLI(iss);
         cli.saveAll();
 
 

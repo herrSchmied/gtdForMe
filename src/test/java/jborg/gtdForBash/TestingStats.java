@@ -61,12 +61,12 @@ public class TestingStats
 
 
 	@Test
-	public void sortingLists() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	public void sortingLists() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, NaturalNumberException
 	{
 
 		List<List<TimeSpanData>> empty = new ArrayList<>();
 		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
+        StatisticalTools st = new StatisticalTools(prjctSet, empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
         List<JSONObject> list = tsc.sortedListProjectsByLDT(NDTKey);
@@ -88,12 +88,12 @@ public class TestingStats
 	}
 	
 	@Test
-	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException
+	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException, NaturalNumberException
 	{
 		
 		List<List<TimeSpanData>> empty = new ArrayList<>();
 		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
+        StatisticalTools st = new StatisticalTools(prjctSet, empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
 
         Pair<String, LocalDateTime> oldPair = tsc.oldestLDTOverall();
@@ -126,7 +126,7 @@ public class TestingStats
 		
 		List<List<TimeSpanData>> empty = new ArrayList<>();
 		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
-        StatisticalTools st = new StatisticalTools(prjctSet, ProjectSetForTesting.getClock(), empty);
+        StatisticalTools st = new StatisticalTools(prjctSet, empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
  
         System.out.println("\nNr. of Projects: " + prjctSet.size());

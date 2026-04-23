@@ -6,9 +6,10 @@ package jborg.gtdForBash;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
-import java.time.Clock;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,7 @@ import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
 import jborg.gtdForBash.exceptions.WeekDataException;
+import someMath.NaturalNumberException;
 
 
 
@@ -31,15 +33,13 @@ public class StatisticalTools
 
 	final Set<JSONObject> prjctSet;
 	final TimeSpanCreator tsc;
-	final Clock clock;
 
-	public StatisticalTools(Set<JSONObject> prjctSet, Clock clock, List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+	public StatisticalTools(Set<JSONObject> prjctSet, List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, NaturalNumberException
 	{
 
 		if(prjctSet==null)throw new NullPointerException("Argument is null.");
 		this.prjctSet = prjctSet;
-		this.clock = clock;
-		tsc = new TimeSpanCreator(prjctSet, clock, listOfTSDLists);
+		tsc = new TimeSpanCreator(prjctSet, listOfTSDLists);
 	}
 
  

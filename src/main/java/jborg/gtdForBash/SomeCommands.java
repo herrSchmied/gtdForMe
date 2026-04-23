@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import java.sql.SQLException;
-import java.time.Clock;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -224,16 +224,16 @@ public class SomeCommands
 	private final TimeSpanCreator tsc;
 	
 	public SomeCommands(GTDCLI cli, Map<String, JSONObject> knownProjects, StatusMGMT states, 
-    		GTDDataSpawnSession ds, SimpleLogger sLog, Clock clock, 
-    		List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException
+    		GTDDataSpawnSession ds, SimpleLogger sLog,
+    		List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, NaturalNumberException
     {
 
     	this.iss = cli.getInputStreamSession();
     	this.knownProjects = knownProjects;
-    	this.nowDef = LocalDateTime.now(clock);
+    	this.nowDef = GTDCLI.now();
 
     	Set<JSONObject> pSet = new HashSet<>(knownProjects.values());
-    	st = new StatisticalTools(pSet, clock, listOfTSDLists);
+    	st = new StatisticalTools(pSet, listOfTSDLists);
     	tsc = st.getTimeSpanCreator();
 
 		List<Boolean> ioArray;
@@ -1151,8 +1151,8 @@ public class SomeCommands
     		if(!aPrjcts.contains(prjct))throw new CLICMDException(projectIsNotActive);
     		
     		JSONObject pJSON = knownProjects.get(prjct);
-			boolean stepDidIt = checkStepForDeadlineAbuse(pJSON, clock);
-			boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON, clock);
+			boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
+			boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
     			
     		if(stepDidIt||projectDidIt)
     		{
@@ -1210,7 +1210,7 @@ public class SomeCommands
     		}
     		
     		JSONObject pJSON = knownProjects.get(pName);
-        	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON, clock);
+        	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
 
         	if(projectDidIt)
         	{
@@ -1254,8 +1254,8 @@ public class SomeCommands
     		}
     		
     		JSONObject pJSON = knownProjects.get(pName);
-        	boolean stepDidIt = checkStepForDeadlineAbuse(pJSON, clock);
-        	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON, clock);
+        	boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
+        	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
 
     		if(stepDidIt||projectDidIt)
     		{

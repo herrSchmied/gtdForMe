@@ -38,14 +38,13 @@ import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
+import someMath.NaturalNumberException;
 
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 public class TimeSpanCreator
 {
 
-	
-	private final Clock clock;
 	private final LocalDateTime beginAnker;
 	private final LocalDateTime endAnker;
 	
@@ -90,16 +89,15 @@ public class TimeSpanCreator
     	return b.getTimeNr()-a.getTimeNr();
     };
 
-    public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock, List<List<TimeSpanData>> listOfTSDLists) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException
+    public TimeSpanCreator(Set<JSONObject> prjctSet, List<List<TimeSpanData>> listOfTSDLists) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException, NaturalNumberException
     {
     	
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
 		this.prjctSet = prjctSet;
-		this.clock = clock;
 		
 		if(prjctSet.isEmpty())
 		{
-			LocalDateTime now = LocalDateTime.now(clock);
+			LocalDateTime now = GTDCLI.now();
 			this.beginAnker = now;
 			this.endAnker = now;
 		}
@@ -140,12 +138,11 @@ public class TimeSpanCreator
 		pickupListsAndExtrapolateThem(ChronoUnit.HOURS);
     }
 
-	public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException
+	public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException, NaturalNumberException
 	{
 
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
 		this.prjctSet = prjctSet;
-		this.clock = clock;
 
 		if(prjctSet.isEmpty())
 		{
@@ -289,7 +286,7 @@ public class TimeSpanCreator
 	}
 
 	
-	private void pickupListsAndExtrapolateThem(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
+	private void pickupListsAndExtrapolateThem(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException
 	{
 
 		List<TimeSpanData> tsdList = yearList;
@@ -313,7 +310,7 @@ public class TimeSpanCreator
 		tsdList.addAll(pickup(cu, unitTimeNr, startAnker, endAnker));
 	}
 	
-	private List<TimeSpanData> pickup(ChronoUnit cu, int unitTimeNr, LocalDateTime startAnker, LocalDateTime stopAnker) throws IOException, URISyntaxException, TimeSpanException
+	private List<TimeSpanData> pickup(ChronoUnit cu, int unitTimeNr, LocalDateTime startAnker, LocalDateTime stopAnker) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException
 	{
 
 		List<TimeSpanData> outputList = new ArrayList<>();
@@ -345,7 +342,7 @@ public class TimeSpanCreator
 
 	}
 
-	private List<TimeSpanData> createListOfChronoUnitTimeSpan(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
+	private List<TimeSpanData> createListOfChronoUnitTimeSpan(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException
 	{
 
 		List<TimeSpanData> outputList = new ArrayList<>();
@@ -375,7 +372,7 @@ public class TimeSpanCreator
 		return outputList;
 	}
 	
-	public void createListsOfAllChronoUnitTimeSpans() throws IOException, URISyntaxException, TimeSpanException
+	public void createListsOfAllChronoUnitTimeSpans() throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException
 	{
 		
 		yearList = createListOfChronoUnitTimeSpan(ChronoUnit.YEARS);
@@ -420,10 +417,10 @@ public class TimeSpanCreator
 		return projectsThatHaveThatKey;
 	}
 
-	public List<JSONObject> sortedListStepsByLDT(String jsonKey) throws IOException, URISyntaxException, TimeSpanCreatorException, ToolBoxException
+	public List<JSONObject> sortedListStepsByLDT(String jsonKey) throws IOException, URISyntaxException, TimeSpanCreatorException, ToolBoxException, NaturalNumberException
 	{
-		
-		LocalDateTime oldestLDT = LocalDateTime.now(clock);
+
+		LocalDateTime oldestLDT = GTDCLI.now();
 
 		String name = "";
 		Set<JSONObject> stepSet = allSteps();
@@ -465,7 +462,7 @@ public class TimeSpanCreator
 		return tsd.isInThisTimeSpan(ldt);
 	}
 
-	public static boolean isActiveGivenTimeSpan(JSONObject pJSON, TimeSpanData tsd) throws IOException, URISyntaxException
+	public static boolean isActiveGivenTimeSpan(JSONObject pJSON, TimeSpanData tsd) throws IOException, URISyntaxException, NaturalNumberException
 	{
 
 		if(isMODProject.test(pJSON))return false;
@@ -505,10 +502,10 @@ public class TimeSpanCreator
 		return false;
 	}
 
-	public TimeSpanData getCurrentTimeSpanDataObject(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException
+	public TimeSpanData getCurrentTimeSpanDataObject(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException
 	{
 
-		int nr = isInWhichTimeSpan(cu, LocalDateTime.now(clock));
+		int nr = isInWhichTimeSpan(cu, GTDCLI.now());
 
     	List<TimeSpanData> list = null;
 
