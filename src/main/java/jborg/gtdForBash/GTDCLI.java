@@ -238,8 +238,6 @@ public class GTDCLI implements Beholder<String>
     	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
 
     	checkAllForDLDTAbuse();
-    	saveAll();
-    	
 
     	try
     	{
@@ -392,6 +390,8 @@ public class GTDCLI implements Beholder<String>
 	public static List<List<TimeSpanData>> loadTSDLists(Path path) throws IOException, URISyntaxException, InterruptedException, ClassNotFoundException
     {
 
+    	System.out.println("Try to load TSDList.");
+    	
     	List<List<TimeSpanData>> output = new ArrayList<>();
 
     	File[] listOfFiles = getListOfFilesFromDataFolder();
@@ -406,57 +406,66 @@ public class GTDCLI implements Beholder<String>
 
     	if(fileNames.keySet().contains(hourListFileName))
     	{
-    		
+    		System.out.println("Found hour TSD List.");
     		output.add((List<TimeSpanData>)loadObject(path+"/"+hourListFileName));
     	}
     	else 
     	{
     		List<TimeSpanData> empty = new ArrayList<>();
     		output.add(empty);
+      		System.out.println("Couldn't Find hour TSD List.");
     	}
     	
     	if(fileNames.keySet().contains(dayListFileName))
     	{
     		
+    		System.out.println("Found day TSD List.");
     		output.add((List<TimeSpanData>)loadObject(path+"/"+dayListFileName));
     	}
     	else 
     	{
     		List<TimeSpanData> empty = new ArrayList<>();
     		output.add(empty);
+      		System.out.println("Couldn't Find day TSD List.");
     	}
 
     	if(fileNames.keySet().contains(weekListFileName))
     	{
     		
+    		System.out.println("Found week TSD List.");
     		output.add((List<TimeSpanData>)loadObject(path+"/"+weekListFileName));
     	}
     	else 
     	{
     		List<TimeSpanData> empty = new ArrayList<>();
     		output.add(empty);
+      		System.out.println("Couldn't Find week TSD List.");
     	}
 
     	if(fileNames.keySet().contains(monthListFileName))
     	{
     		
+    		System.out.println("Found month TSD List.");
     		output.add((List<TimeSpanData>)loadObject(path+"/"+monthListFileName));
     	}
     	else 
     	{
     		List<TimeSpanData> empty = new ArrayList<>();
     		output.add(empty);
+      		System.out.println("Couldn't Find month TSD List.");
     	}
     	
     	if(fileNames.keySet().contains(yearListFileName))
     	{
     		
+    		System.out.println("Found year TSD List.");
     		output.add((List<TimeSpanData>)loadObject(path+"/"+yearListFileName));
     	}
     	else 
     	{
     		List<TimeSpanData> empty = new ArrayList<>();
     		output.add(empty);
+      		System.out.println("Couldn't Find year TSD List.");
     	}
 
     	assert(output.size()==5);
@@ -486,13 +495,17 @@ public class GTDCLI implements Beholder<String>
     {
 
     	String fileName = chronoMap.get(cu);
+    	System.out.println("Saving: " + fileName);
     	List<TimeSpanData> toBeSaved = new ArrayList<>();
+    	int cnt = 0;
     	for(TimeSpanData tsd: tsdList)
     	{
     		if(tsd.timeSpanIsInThePast())toBeSaved.add(tsd);
+    		cnt++;
     	}
 
     	saveObject(getDataFolder()+fileName, toBeSaved);
+    	System.out.println("Saved " + cnt + " TSD's in file: " + fileName);
     }
 
     public void saveProjects() throws JSONException, IOException

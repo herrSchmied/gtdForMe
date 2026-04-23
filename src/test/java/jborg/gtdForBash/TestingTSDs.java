@@ -61,21 +61,6 @@ public class TestingTSDs
     	
 	}
 	
-	@Test
-	public void pickUpTest() throws JSONException, ClassNotFoundException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
-	{
-	    // Create a guaranteed-empty temp directory for all project data
-        Path tempProjectDir = ProjectSetForTesting.getTempProjectDir();
-        String tempPrjctDirStr = tempProjectDir.toString();
-        System.out.println("Temp Dir: " + tempPrjctDirStr);
-
-		String data = SomeCommands.exit;
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
-		InputStreamSession iss = new InputStreamSession(bais);
-
-        new GTDCLI(iss, ProjectSetForTesting.getClock());
-	}
 	
 	@Test
 	public void timeSpanTests() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
