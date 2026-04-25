@@ -145,7 +145,7 @@ public class GTDCLI implements Beholder<String>
 
 		ExactPeriode ep = new ExactPeriode(jetzt, gtdcliStartLDT);
 		
-		return offsetLDT.plusSeconds(ep.getAbsoluteSeconds());
+		return offsetLDT.plusNanos(ep.getAbsoluteSeconds());
 	}
 	
 	public static void setUseOffSetForLDTs(LocalDateTime offsetLDTSet)
