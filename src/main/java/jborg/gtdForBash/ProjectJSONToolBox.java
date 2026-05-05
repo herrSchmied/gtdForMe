@@ -332,8 +332,9 @@ public class ProjectJSONToolBox
 	 * @param goal. The Goal of Project can't be just whitespace or just nothing.
 	 * 
 	 * @return true if DateTimes make Sense and the Goal is not nothing or whitespace.
+	 * @throws NaturalNumberException 
 	 */
-	public static boolean timeAndGoalOfActiveProjectIsValide(JSONObject pJSON)
+	public static boolean timeAndGoalOfActiveProjectIsValide(JSONObject pJSON) throws NaturalNumberException
 	{
 
 		String adtStr = pJSON.getString(ADTKey);
@@ -356,7 +357,7 @@ public class ProjectJSONToolBox
 			return false;
 		}
 		
-		LocalDateTime jetzt = LocalDateTime.now();
+		LocalDateTime jetzt = GTDCLI.now();
 		
 		if(jetzt.isBefore(adt))
 		{
@@ -433,13 +434,14 @@ public class ProjectJSONToolBox
 	 * else some: stepIsNotOkayToItSelfMsgList.get(x).
 	 * @throws URISyntaxException 
 	 * @throws IOException 
+	 * @throws NaturalNumberException 
 	 */
-	public static String stepIsOkToItsSelf(JSONObject step) throws IOException, URISyntaxException
+	public static String stepIsOkToItsSelf(JSONObject step) throws IOException, URISyntaxException, NaturalNumberException
 	{
 
 		LocalDateTime adt = extractLDT(step, StepJSONKeyz.ADTKey);
 		
-		if(LocalDateTime.now().isBefore(adt))return stepIsNotOkayToItSelfMsgList.get(indexOfStpIsBornAfterNow);
+		if(GTDCLI.now().isBefore(adt))return stepIsNotOkayToItSelfMsgList.get(indexOfStpIsBornAfterNow);
 	
 		String deadLineStr = step.getString(StepJSONKeyz.DLDTKey);
 		String desc= step.getString(StepJSONKeyz.descKey);
@@ -466,8 +468,9 @@ public class ProjectJSONToolBox
 	 * @return true if adding the new Step to Project doesn't create a Time Paradox.
 	 * @throws URISyntaxException
 	 * @throws IOException 
+	 * @throws NaturalNumberException 
 	 */
-	public static boolean stepDataIsValide(JSONObject pJson, JSONObject newStep) throws IOException, URISyntaxException
+	public static boolean stepDataIsValide(JSONObject pJson, JSONObject newStep) throws IOException, URISyntaxException, NaturalNumberException
 	{
 	
 		int index = getIndexOfLastStepInPrjct(pJson);

@@ -22,17 +22,37 @@ public class TestingPickUp
 {
 
 	@Test
+	public void timeTest() throws NaturalNumberException, JSONException, ClassNotFoundException, IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	{
+
+		String data = SomeCommands.exit + '\n';
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
+		InputStreamSession iss = new InputStreamSession(bais);
+		new GTDCLI(iss);
+
+		
+		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 0, 0));
+		LocalDateTime nun = GTDCLI.now();
+		System.out.println(nun.getNano() + "");
+		LocalDateTime nun2 = GTDCLI.now();
+		System.out.println(nun2.getNano() + "");
+		
+		assert(nun2.isAfter(nun));
+	}
+
+	@Test
 	public void pickUpTest() throws JSONException, ClassNotFoundException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
 	{
 		
-		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 0, 0));
-		newProject();
-		
-		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 2, 0));
-		doNothing();
-		
-		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 2, 1));
-		doNothing();
+//		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 0, 0));
+//		newProject();
+//		
+//		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 2, 0));
+//		doNothing();
+//		
+//		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 2, 1));
+//		doNothing();
 	}
 
 	public static void newProject() throws IOException, JSONException, ClassNotFoundException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
@@ -54,7 +74,7 @@ public class TestingPickUp
         System.out.println("Loading from this Folder: " + prjctDataFolder);
  
 
-		SequenzesForISS sfiss = new SequenzesForISS(ProjectSetForTesting.getClock());
+		SequenzesForISS sfiss = new SequenzesForISS();
 		
 		String data = sfiss.sequenzNewProject("NewProject")+SomeCommands.exit + '\n';
 		

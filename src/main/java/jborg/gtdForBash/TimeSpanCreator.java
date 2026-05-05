@@ -146,7 +146,7 @@ public class TimeSpanCreator
 
 		if(prjctSet.isEmpty())
 		{
-			LocalDateTime now = LocalDateTime.now(clock);
+			LocalDateTime now = GTDCLI.now();
 			this.beginAnker = now;
 			this.endAnker = now;
 		}
@@ -459,6 +459,7 @@ public class TimeSpanCreator
 	{
 
 		LocalDateTime ldt  = extractLDT(pJSON, NDTKey);
+
 		return tsd.isInThisTimeSpan(ldt);
 	}
 

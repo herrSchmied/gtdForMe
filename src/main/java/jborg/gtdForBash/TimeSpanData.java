@@ -573,10 +573,10 @@ public class TimeSpanData implements Serializable
 	public boolean isInThisTimeSpan(LocalDateTime ldt)
 	{
 
-		LocalDateTime beginBevorBegin = begin.minusNanos(1);
-		LocalDateTime endAfterEnd = end.plusNanos(1);
+		boolean oldEnough = ldt.isAfter(begin) || ldt.equals(begin);
+		boolean youngEnough = ldt.isBefore(end) || ldt.equals(end);
 
-		return ldt.isAfter(beginBevorBegin)&&ldt.isBefore(endAfterEnd);
+		return oldEnough&&youngEnough;
 	}
 
 	public boolean isAfterThisTimeSpan(LocalDateTime ldt)

@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import someMath.NaturalNumberException;
+
 import static consoleTools.InputStreamSession.*;
 
 public class SequenzesForISS
@@ -32,19 +34,16 @@ public class SequenzesForISS
 	
 	public static final  String noticeOne = "Note1";
 	public static final  String noticeTwo = "Note2";
-	
 
-	static Clock clock;
-
-	public SequenzesForISS(Clock clock)
+	public SequenzesForISS()
 	{
-		SequenzesForISS.clock = clock;
+
 	}
 	
-	public String sequenzNXTStep(String prjctName)
+	public String sequenzNXTStep(String prjctName) throws NaturalNumberException
 	{
 
-		LocalDateTime stepDLDT = LocalDateTime.now(clock).plusDays(7);
+		LocalDateTime stepDLDT = GTDCLI.now().plusDays(7);
 
 		String chosenFromStatieList = "1";//ATBD
 		String dldtQuestion = "yes";
@@ -74,10 +73,10 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public String sequenzNewProject(String prjctName)
+	public String sequenzNewProject(String prjctName) throws NaturalNumberException
 	{
-		LocalDateTime prjctDLDT = LocalDateTime.now(clock).plusDays(14);
-		LocalDateTime stepDLDT = LocalDateTime.now(clock).plusDays(7);
+		LocalDateTime prjctDLDT = GTDCLI.now().plusDays(14);
+		LocalDateTime stepDLDT = GTDCLI.now().plusDays(7);
 
 		String dldtQuestion = "yes";
 		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
@@ -137,11 +136,11 @@ public class SequenzesForISS
 		return data;
 	}
 	
-	public String sequenzWakeMODProject(String prjctName)
+	public String sequenzWakeMODProject(String prjctName) throws NaturalNumberException
 	{
 
-		LocalDateTime prjctDLDT = LocalDateTime.now(clock).plusDays(14);
-		LocalDateTime stepDLDT = LocalDateTime.now(clock).plusDays(7);
+		LocalDateTime prjctDLDT = GTDCLI.now().plusDays(14);
+		LocalDateTime stepDLDT = GTDCLI.now().plusDays(7);
 
 		String prjctDLDTStr = translateTimeToAnswerString(prjctDLDT);
 		String chosenFromStatieList = "1";
@@ -189,7 +188,7 @@ public class SequenzesForISS
 		return data;
 	}
 
-	public String sequenzOfFourNewProjects()
+	public String sequenzOfFourNewProjects() throws NaturalNumberException
 	{
 
 		int s = 4;
@@ -205,17 +204,17 @@ public class SequenzesForISS
 		return data;
 	}
 	
-	public LocalDateTime getBDT(int n)
+	public LocalDateTime getBDT(int n) throws NaturalNumberException
 	{
 		
-		LocalDateTime jetzt = LocalDateTime.now(clock);
+		LocalDateTime jetzt = GTDCLI.now();
 
 		LocalDate mLDT = TimeSpanCreator.getLastMonday(jetzt).toLocalDate();
 		
 		return LocalDateTime.of(mLDT, LocalTime.of(0, n)).minusDays(14);
 	}
 
-	public String sequenzManyProjects()
+	public String sequenzManyProjects() throws NaturalNumberException
 	{
 
 		String data = sequenzOfFourNewProjects()

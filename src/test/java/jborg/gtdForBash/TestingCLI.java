@@ -58,7 +58,7 @@ public class TestingCLI
 	public void testNewPrjct() throws JSONException, IOException, URISyntaxException, NaturalNumberException
 	{
 
-		LocalDateTime jetzt = LocalDateTime.now(ProjectSetForTesting.getClock()).plusMinutes(1);
+		LocalDateTime jetzt = GTDCLI.now().plusMinutes(1);
 		JSONObject newProject = pickProjectByName(ProjectSetForTesting.getSqzFISS().getNewProjectName(1), projects);
 		
 		String status = newProject.getString(ProjectJSONKeyz.statusKey);
@@ -213,7 +213,7 @@ public class TestingCLI
 
 		adtStr = step.getString(StepJSONKeyz.ADTKey);
 		LocalDateTime adt = LittleTimeTools.LDTfromTimeString(adtStr);
-		assert(adt.isBefore(LocalDateTime.now()));
+		assert(adt.isBefore(GTDCLI.now()));
 		
 		assert(step.has(StepJSONKeyz.DLDTKey));
 		assert(stepDeadlineNone.equals(step.getString(StepJSONKeyz.DLDTKey)));

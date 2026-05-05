@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,16 +37,7 @@ public class ProjectSetForTesting
 
 	private static Set<JSONObject> prjctSet = new HashSet<>();
 	
-	private static Clock realClock = Clock.systemDefaultZone();
-
-	private static Duration offset = Duration.between(
-		    Instant.now(),
-		    Instant.parse("2026-01-01T00:00:00Z")
-		);
-
-	private static Clock testClock = Clock.offset(realClock, offset);
-
-    private static SequenzesForISS sqzFISS = new SequenzesForISS(testClock);
+    private static SequenzesForISS sqzFISS = new SequenzesForISS();
 
     private static Path tempProjectDir;
     
@@ -65,7 +57,9 @@ public class ProjectSetForTesting
 
         assert(tempPrjctDirStr.equals(tempDirCheck));
 
-		String data = sqzFISS.sequenzManyProjects();
+		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 0, 0));
+
+		String data = sqzFISS.sequenzManyProjects() + '\n';
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
 		InputStreamSession iss = new InputStreamSession(bais);
@@ -96,10 +90,6 @@ public class ProjectSetForTesting
 		throw new IllegalArgumentException("No Project JSON Object by that Name.");
 	}
 	
-	public static Clock getClock()
-	{
-		return testClock;
-	}
 	
 	public static Path getTempProjectDir()
 	{

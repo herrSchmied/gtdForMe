@@ -124,33 +124,33 @@ public class TestingTSDs
         assert(weeksSize==3);
 
         JSONObject pJSON = st.projectJSONObjByName(wakeProjectName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, wakeProjectName, firstWeekIndex, pJSON, NDTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, NDTKey, st));
 		
 		pJSON = st.projectJSONObjByName(modPrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, modPrjctName, firstWeekIndex, pJSON, NDTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, NDTKey, st));
 		
 		String addNotePrjctName = ProjectSetForTesting.getSqzFISS().getNewProjectName(2);
 		pJSON = st.projectJSONObjByName(addNotePrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, addNotePrjctName, firstWeekIndex, pJSON, ADTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 
 		pJSON = st.projectJSONObjByName(killPrjctNameNoDLDT);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, killPrjctNameNoDLDT, firstWeekIndex, pJSON, ADTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 		
 		String killPrjctName = ProjectSetForTesting.getSqzFISS().getNewProjectName(3);
 		pJSON = st.projectJSONObjByName(killPrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, killPrjctName, firstWeekIndex, pJSON, ADTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 		assert(projectIsTerminated.test(pJSON));
 		
 		String killStepPrjctName = ProjectSetForTesting.getSqzFISS().getNewProjectName(3);
 		pJSON = st.projectJSONObjByName(killStepPrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, killStepPrjctName, firstWeekIndex, pJSON, ADTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 
 		String appendStpPrjctName = ProjectSetForTesting.getSqzFISS().getNewProjectName(4);
 		pJSON = st.projectJSONObjByName(appendStpPrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, appendStpPrjctName, firstWeekIndex, pJSON, ADTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 	
 		pJSON = st.projectJSONObjByName(newPrjctNoDLDT);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, newPrjctNoDLDT, firstWeekIndex, pJSON, ADTKey, st));
+		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 
 		for(int n=0;n<weeksSize;n++)
 		{
@@ -188,7 +188,7 @@ public class TestingTSDs
 		}
 	}
 	
-	public void makeUpProjectWithLaterNDTAndADT()
+	public void makeUpProjectWithLaterNDTAndADT() throws NaturalNumberException
 	{
 		
 		JSONObject pJSON = new JSONObject();
@@ -197,7 +197,7 @@ public class TestingTSDs
 		pJSON.put(statusKey, StatusMGMT.atbd);
 		pJSON.put(goalKey, "Testing.");
 		
-		LocalDateTime ldt = LocalDateTime.now(ProjectSetForTesting.getClock()).plusDays(7);
+		LocalDateTime ldt = GTDCLI.now().plusDays(7);
 		String ldtStr =  LittleTimeTools.timeString(ldt);
 		pJSON.put(NDTKey, ldtStr);
 		pJSON.put(ADTKey, ldtStr);
@@ -218,7 +218,7 @@ public class TestingTSDs
 		prjctSet.add(pJSON);
 	}
 
-	public boolean pickAndCheckByName(ChronoUnit cu, String name, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
+	public boolean pickAndCheckByName(ChronoUnit cu, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
 	{
 
 		LocalDateTime ldt = extractLDT(pJSON, jsonKey);

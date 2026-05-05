@@ -81,10 +81,9 @@ public class TestingStats
         	{
         		JSONObject beforePJSON = list.get(n-1);
                 LocalDateTime beforeNDT = extractLDT(beforePJSON, NDTKey);
-        		assert(beforeNDT.isAfter(ndt));
+        		assert(beforeNDT.isAfter(ndt)||beforeNDT.equals(ndt));
         	}
         }
-
 	}
 	
 	@Test
