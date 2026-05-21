@@ -11,8 +11,10 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -64,8 +66,9 @@ public class TestingStats
 	public void sortingLists() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, NaturalNumberException
 	{
 
-		List<List<TimeSpanData>> empty = new ArrayList<>();
-		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
+		Map<String, List<TimeSpanData>> empty = new HashMap<>();
+		for(String fileName: GTDCLI.chronoMap.values())empty.put(fileName, new ArrayList<>());
+		
         StatisticalTools st = new StatisticalTools(prjctSet, empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
         
@@ -90,8 +93,8 @@ public class TestingStats
 	public void oldVSYoungTest() throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, InterruptedException, ConsoleToolsException, TimeSpanCreatorException, NaturalNumberException
 	{
 		
-		List<List<TimeSpanData>> empty = new ArrayList<>();
-		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
+		Map<String, List<TimeSpanData>> empty = new HashMap<>();
+		for(String fileName: GTDCLI.chronoMap.values())empty.put(fileName, new ArrayList<>());
         StatisticalTools st = new StatisticalTools(prjctSet, empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
 
@@ -123,8 +126,8 @@ public class TestingStats
 		assert(!prjctSet.isEmpty());
 		
 		
-		List<List<TimeSpanData>> empty = new ArrayList<>();
-		for(int n=0;n<5;n++)empty.add(new ArrayList<>());
+		HashMap<String, List<TimeSpanData>> empty = new HashMap<>();
+		for(String fileName: GTDCLI.chronoMap.values())empty.put(fileName, new ArrayList<>());
         StatisticalTools st = new StatisticalTools(prjctSet, empty);
         TimeSpanCreator tsc = st.getTimeSpanCreator();
  

@@ -89,7 +89,7 @@ public class TimeSpanCreator
     	return b.getTimeNr()-a.getTimeNr();
     };
 
-    public TimeSpanCreator(Set<JSONObject> prjctSet, List<List<TimeSpanData>> listOfTSDLists) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException, NaturalNumberException
+    public TimeSpanCreator(Set<JSONObject> prjctSet, Map<String, List<TimeSpanData>> MapOfTSDLists) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException, NaturalNumberException
     {
     	
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
@@ -111,23 +111,23 @@ public class TimeSpanCreator
 			this.endAnker = youngPair.getValue();
 		}
 		
-		this.yearList.addAll(listOfTSDLists.get(GTDCLI.yearListIndex));
+		this.yearList.addAll(MapOfTSDLists.get(GTDCLI.yearListFileName));
 		//Remember: Does this sort the right way around?????
 		Collections.sort(yearList, TSDComparator);
 		
-		this.monthList.addAll(listOfTSDLists.get(GTDCLI.monthListIndex));
+		this.monthList.addAll(MapOfTSDLists.get(GTDCLI.monthListFileName));
 		//Remember: Does this sort the right way around?????
 		Collections.sort(monthList, TSDComparator);
 		
-		this.weekList.addAll(listOfTSDLists.get(GTDCLI.weekListIndex));
+		this.weekList.addAll(MapOfTSDLists.get(GTDCLI.weekListFileName));
 		//Remember: Does this sort the right way around?????
 		Collections.sort(weekList, TSDComparator);
 		
-		this.dayList.addAll(listOfTSDLists.get(GTDCLI.dayListIndex));
+		this.dayList.addAll(MapOfTSDLists.get(GTDCLI.dayListFileName));
 		//Remember: Does this sort the right way around?????
 		Collections.sort(dayList, TSDComparator);
 		
-		this.hourList.addAll(listOfTSDLists.get(GTDCLI.hourListIndex));
+		this.hourList.addAll(MapOfTSDLists.get(GTDCLI.hourListFileName));
 		//Remember: Does this sort the right way around?????
 		Collections.sort(hourList, TSDComparator);
 
@@ -289,8 +289,8 @@ public class TimeSpanCreator
 	private void pickupListsAndExtrapolateThem(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException
 	{
 
-		List<TimeSpanData> tsdList = yearList;
-
+		List<TimeSpanData> tsdList = new ArrayList<>();
+		if(cu.equals(ChronoUnit.YEARS))tsdList = yearList;
 		if(cu.equals(ChronoUnit.MONTHS))tsdList = monthList;
 		if(cu.equals(ChronoUnit.WEEKS))tsdList = weekList;
 		if(cu.equals(ChronoUnit.DAYS))tsdList = dayList;
@@ -307,8 +307,8 @@ public class TimeSpanCreator
 		
 		LocalDateTime startAnker = lastTSD.getEnd().plusNanos(1);
 		int unitTimeNr = lastTSD.getTimeNr();
-		System.out.println("Pickup Nr: " + unitTimeNr);
-		tsdList.addAll(pickup(cu, unitTimeNr, startAnker, endAnker));
+		System.out.println("Pickup Nr: " + unitTimeNr + " for List: " + cu.toString());
+		if(unitTimeNr>0)tsdList.addAll(pickup(cu, unitTimeNr, startAnker, endAnker));
 	}
 	
 	private List<TimeSpanData> pickup(ChronoUnit cu, int unitTimeNr, LocalDateTime startAnker, LocalDateTime stopAnker) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException
@@ -319,10 +319,17 @@ public class TimeSpanCreator
 		
 		int howManyFrames = frames.size();
 		int plus = unitTimeNr+1;
-		for(int n=plus;n<howManyFrames+plus-1;n++)
+		
+		System.out.println("ChronoUnit: " + cu);
+		System.out.println("Frames: " + howManyFrames);
+		System.out.println("UnitTimeNr: " + unitTimeNr);
+		System.out.println("Plus: " + plus + "\n");
+
+		for(int n=plus;n<howManyFrames+plus;n++)
 		{
 
-			Pair<LocalDateTime, LocalDateTime> span = frames.get(n);
+			Pair<LocalDateTime, LocalDateTime> span= frames.get(n-plus);
+			
 			LocalDateTime start = span.getKey();
 			LocalDateTime end = span.getValue();
 
@@ -340,7 +347,6 @@ public class TimeSpanCreator
 		}
 
 		return outputList;
-
 	}
 
 	private List<TimeSpanData> createListOfChronoUnitTimeSpan(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException

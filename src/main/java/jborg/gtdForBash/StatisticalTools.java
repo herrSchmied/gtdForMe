@@ -34,12 +34,12 @@ public class StatisticalTools
 	final Set<JSONObject> prjctSet;
 	final TimeSpanCreator tsc;
 
-	public StatisticalTools(Set<JSONObject> prjctSet, List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, NaturalNumberException
+	public StatisticalTools(Set<JSONObject> prjctSet, Map<String, List<TimeSpanData>> MapOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, NaturalNumberException
 	{
 
 		if(prjctSet==null)throw new NullPointerException("Argument is null.");
 		this.prjctSet = prjctSet;
-		tsc = new TimeSpanCreator(prjctSet, listOfTSDLists);
+		tsc = new TimeSpanCreator(prjctSet, MapOfTSDLists);
 	}
 
  

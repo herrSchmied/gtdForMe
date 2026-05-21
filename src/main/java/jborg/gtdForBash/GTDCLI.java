@@ -165,6 +165,13 @@ public class GTDCLI implements Beholder<String>
     	Path dataFolder = getDataFolder();
 
 		boolean isThereDataFolder = Files.exists(dataFolder)&&Files.isDirectory(dataFolder);
+		Map<String, List<TimeSpanData>> tsdMap = loadTSDMapOfLists();
+		
+		for(String fileName: tsdMap.keySet())
+		{
+			int cnt = tsdMap.get(fileName).size();
+			System.out.println("In File: " +  fileName + " are " + cnt + " TSD's");
+		}
 
 		if(isThereDataFolder)
 		{
@@ -178,7 +185,7 @@ public class GTDCLI implements Beholder<String>
 				knownProjects.put(pName, json);
 			}
 			
-			scds = new SomeCommands(this, knownProjects, states, ds, sLog, loadTSDLists());
+			scds = new SomeCommands(this, knownProjects, states, ds, sLog, tsdMap);
 			commandMap = scds.getCommandMap();
 		}
 		else 
@@ -193,7 +200,7 @@ public class GTDCLI implements Beholder<String>
 	        	if(directory.mkdir())
 	        	{
 	        		System.out.println(dataFolderCreated);
-	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog, loadTSDLists());
+	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog, tsdMap);
 	        		commandMap = scds.getCommandMap();
 	        	}	    				        
 	        	else
@@ -403,16 +410,17 @@ public class GTDCLI implements Beholder<String>
     }
 
     @SuppressWarnings({ "unchecked"})
-	public static List<List<TimeSpanData>> loadTSDLists() throws IOException, URISyntaxException, InterruptedException, ClassNotFoundException
+	public static Map<String, List<TimeSpanData>> loadTSDMapOfLists() throws IOException, URISyntaxException, InterruptedException, ClassNotFoundException
     {
 
-    	List<List<TimeSpanData>> output = new ArrayList<>();
+    	Map<String, List<TimeSpanData>> output = new HashMap<>();
 
     	System.out.println("Try to load TSDLists. From: " + getDataFolder().toAbsolutePath());
 
     	for(String fileName: chronoMap.values())
     	{
-    		output.add(loadOneTSDList(fileName));
+    		System.out.println("Loaded " + fileName);
+    		output.put(fileName, loadOneTSDList(fileName));
     	}
 
     	assert(output.size()==5);

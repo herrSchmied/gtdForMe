@@ -225,7 +225,7 @@ public class SomeCommands
 
 	public SomeCommands(GTDCLI cli, Map<String, JSONObject> knownProjects, StatusMGMT states, 
 			GTDDataSpawnSession ds, SimpleLogger sLog,
-    		List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, NaturalNumberException
+    		Map<String, List<TimeSpanData>> MapOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, NaturalNumberException
     {
 
     	this.iss = cli.getInputStreamSession();
@@ -233,11 +233,10 @@ public class SomeCommands
     	this.nowDef = GTDCLI.now();
 
     	Set<JSONObject> pSet = new HashSet<>(knownProjects.values());
-    	st = new StatisticalTools(pSet, listOfTSDLists);
+    	st = new StatisticalTools(pSet, MapOfTSDLists);
     	tsc = st.getTimeSpanCreator();
 
 		List<Boolean> ioArray;
-
 
 		MeatOfCLICmd<String> worstTSD = (s)->
 		{
