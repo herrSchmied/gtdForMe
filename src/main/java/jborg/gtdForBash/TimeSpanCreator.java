@@ -320,11 +320,6 @@ public class TimeSpanCreator
 		int howManyFrames = frames.size();
 		int plus = unitTimeNr+1;
 		
-		System.out.println("ChronoUnit: " + cu);
-		System.out.println("Frames: " + howManyFrames);
-		System.out.println("UnitTimeNr: " + unitTimeNr);
-		System.out.println("Plus: " + plus + "\n");
-
 		for(int n=plus;n<howManyFrames+plus;n++)
 		{
 
