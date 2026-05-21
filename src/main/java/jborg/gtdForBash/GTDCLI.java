@@ -59,7 +59,6 @@ import static fileShortCuts.TextAndObjSaveAndLoad.*;
 
 public class GTDCLI implements Beholder<String>
 {
-
 	
 	private static boolean useOffSetForLDTs = false;
 	
@@ -85,7 +84,7 @@ public class GTDCLI implements Beholder<String>
 	public static final String yearListFileName = "yearList.tsdList";
 	public static final int yearListIndex = 4;
 
-	Map<ChronoUnit, String> chronoMap = Map.of(ChronoUnit.HOURS, hourListFileName, 
+	public static Map<ChronoUnit, String> chronoMap = Map.of(ChronoUnit.HOURS, hourListFileName, 
 											   ChronoUnit.DAYS, dayListFileName,
 											   ChronoUnit.WEEKS, weekListFileName,
 											   ChronoUnit.MONTHS, monthListFileName,
@@ -179,7 +178,7 @@ public class GTDCLI implements Beholder<String>
 				knownProjects.put(pName, json);
 			}
 			
-			scds = new SomeCommands(this, knownProjects, states, ds, sLog, loadTSDLists(getDataFolder()));
+			scds = new SomeCommands(this, knownProjects, states, ds, sLog, loadTSDLists());
 			commandMap = scds.getCommandMap();
 		}
 		else 
@@ -194,7 +193,7 @@ public class GTDCLI implements Beholder<String>
 	        	if(directory.mkdir())
 	        	{
 	        		System.out.println(dataFolderCreated);
-	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog, loadTSDLists(getDataFolder()));
+	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog, loadTSDLists());
 	        		commandMap = scds.getCommandMap();
 	        	}	    				        
 	        	else
@@ -404,16 +403,32 @@ public class GTDCLI implements Beholder<String>
     }
 
     @SuppressWarnings({ "unchecked"})
-	public static List<List<TimeSpanData>> loadTSDLists(Path path) throws IOException, URISyntaxException, InterruptedException, ClassNotFoundException
+	public static List<List<TimeSpanData>> loadTSDLists() throws IOException, URISyntaxException, InterruptedException, ClassNotFoundException
     {
 
-    	System.out.println("Try to load TSDList.");
-    	
     	List<List<TimeSpanData>> output = new ArrayList<>();
+
+    	System.out.println("Try to load TSDLists. From: " + getDataFolder().toAbsolutePath());
+
+    	for(String fileName: chronoMap.values())
+    	{
+    		output.add(loadOneTSDList(fileName));
+    	}
+
+    	assert(output.size()==5);
+
+    	return output;
+    }
+
+    private static List<TimeSpanData> loadOneTSDList(String fileName) throws ClassNotFoundException, IOException
+    {
+    	
+    	List<TimeSpanData> empty = new ArrayList<>();
 
     	File[] listOfFiles = getListOfFilesFromDataFolder();
 
-    	if(listOfFiles==null)return output;
+    	if(listOfFiles==null)return empty;
+    	
     	Map<String, File> fileNames = new HashMap<>();
     	
     	for(File file: listOfFiles)
@@ -421,79 +436,23 @@ public class GTDCLI implements Beholder<String>
     		if(file.isFile())fileNames.put(file.getName(), file);
     	}
 
-    	if(fileNames.keySet().contains(hourListFileName))
+    	if(fileNames.keySet().contains(fileName))
     	{
-    		System.out.println("Found hour TSD List.");
-    		output.add((List<TimeSpanData>)loadObject(path+"/"+hourListFileName));
-    	}
-    	else 
-    	{
-    		List<TimeSpanData> empty = new ArrayList<>();
-    		output.add(empty);
-      		System.out.println("Couldn't Find hour TSD List.");
-    	}
-    	
-    	if(fileNames.keySet().contains(dayListFileName))
-    	{
-    		
-    		System.out.println("Found day TSD List.");
-    		output.add((List<TimeSpanData>)loadObject(path+"/"+dayListFileName));
-    	}
-    	else 
-    	{
-    		List<TimeSpanData> empty = new ArrayList<>();
-    		output.add(empty);
-      		System.out.println("Couldn't Find day TSD List.");
-    	}
 
-    	if(fileNames.keySet().contains(weekListFileName))
-    	{
-    		
-    		System.out.println("Found week TSD List.");
-    		output.add((List<TimeSpanData>)loadObject(path+"/"+weekListFileName));
+    		System.out.println("Found TSD List (" + fileName + ").");
+    		return ((List<TimeSpanData>)loadObject(getDataFolder().toString()+"/"+fileName));
     	}
     	else 
     	{
-    		List<TimeSpanData> empty = new ArrayList<>();
-    		output.add(empty);
-      		System.out.println("Couldn't Find week TSD List.");
+      		System.out.println("Couldn't Find " + fileName + " TSD List.");
+      		return empty;
     	}
-
-    	if(fileNames.keySet().contains(monthListFileName))
-    	{
-    		
-    		System.out.println("Found month TSD List.");
-    		output.add((List<TimeSpanData>)loadObject(path+"/"+monthListFileName));
-    	}
-    	else 
-    	{
-    		List<TimeSpanData> empty = new ArrayList<>();
-    		output.add(empty);
-      		System.out.println("Couldn't Find month TSD List.");
-    	}
-    	
-    	if(fileNames.keySet().contains(yearListFileName))
-    	{
-    		
-    		System.out.println("Found year TSD List.");
-    		output.add((List<TimeSpanData>)loadObject(path+"/"+yearListFileName));
-    	}
-    	else 
-    	{
-    		List<TimeSpanData> empty = new ArrayList<>();
-    		output.add(empty);
-      		System.out.println("Couldn't Find year TSD List.");
-    	}
-
-    	assert(output.size()==5);
-    	
-    	return output;
     }
 
     public static File[] getListOfFilesFromDataFolder()
     {
 
-    	File folder = projectDataFolderRelativePath.toFile();
+    	File folder = getDataFolder().toFile();
     	return folder.listFiles();
     }
 
@@ -521,15 +480,14 @@ public class GTDCLI implements Beholder<String>
     		cnt++;
     	}
 
-    	saveObject(getDataFolder()+fileName, toBeSaved);
+    	Path path = Path.of(getDataFolder().toString()+"/"+fileName);
+    	saveObject(path, toBeSaved);
     	System.out.println("Saved " + cnt + " TSD's in file"
-    			+ ": " + fileName);
+    			+ ": " + path.toAbsolutePath() + "/" + fileName);
     }
 
     public void saveProjects() throws JSONException, IOException
     {
-    	
-    	
     	for(JSONObject jo: knownProjects.values())
     	{
     		saveText(getDataFolder().toString() + "/" + jo.getString(nameKey)+fileMarker, jo.toString(jsonPrintStyle));

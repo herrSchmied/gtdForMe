@@ -138,7 +138,7 @@ public class TimeSpanCreator
 		pickupListsAndExtrapolateThem(ChronoUnit.HOURS);
     }
 
-	public TimeSpanCreator(Set<JSONObject> prjctSet, Clock clock) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException, NaturalNumberException
+	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException, NaturalNumberException
 	{
 
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
@@ -301,7 +301,8 @@ public class TimeSpanCreator
 			tsdList.addAll(createListOfChronoUnitTimeSpan(cu));
 			return;
 		}
-		
+
+		Collections.reverse(tsdList);
 		TimeSpanData lastTSD = tsdList.getLast();
 		
 		LocalDateTime startAnker = lastTSD.getEnd().plusNanos(1);
@@ -318,7 +319,7 @@ public class TimeSpanCreator
 		
 		int howManyFrames = frames.size();
 		int plus = unitTimeNr+1;
-		for(int n=plus;n<howManyFrames+plus;n++)
+		for(int n=plus;n<howManyFrames+plus-1;n++)
 		{
 
 			Pair<LocalDateTime, LocalDateTime> span = frames.get(n);

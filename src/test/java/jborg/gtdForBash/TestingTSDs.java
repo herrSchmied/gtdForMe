@@ -60,7 +60,6 @@ public class TestingTSDs
     	prjctSet = ProjectSetForTesting.get();
 
     	assert(!prjctSet.isEmpty());
-    	
 	}
 	
 	
@@ -83,9 +82,7 @@ public class TestingTSDs
         assert(tspdListDays.size()>=15&&tspdListDays.size()<=16);
         assert(tspdListWeeks.size()>=3&&tspdListWeeks.size()<=4);
         assert(tspdListMonth.size()>=1&&tspdListMonth.size()<=2);
-        //printTSPList(tspdListMonth);
         assert(tspdListYears.size()>=1&&tspdListYears.size()<=2);     
-        //printTSPList(tspdListYears);
 	}
 	
 	@Test
@@ -124,33 +121,33 @@ public class TestingTSDs
         assert(weeksSize==3);
 
         JSONObject pJSON = st.projectJSONObjByName(wakeProjectName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, NDTKey, st));
-		
+		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, NDTKey, st));
+
 		pJSON = st.projectJSONObjByName(modPrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, NDTKey, st));
-		
+		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, NDTKey, st));
+
 		String addNotePrjctName = ProjectSetForTesting.getSqzFISS().getNewProjectName(2);
 		pJSON = st.projectJSONObjByName(addNotePrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
+		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 
 		pJSON = st.projectJSONObjByName(killPrjctNameNoDLDT);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
-		
+		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
+
 		String killPrjctName = ProjectSetForTesting.getSqzFISS().getNewProjectName(3);
 		pJSON = st.projectJSONObjByName(killPrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
+		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 		assert(projectIsTerminated.test(pJSON));
-		
+
 		String killStepPrjctName = ProjectSetForTesting.getSqzFISS().getNewProjectName(3);
 		pJSON = st.projectJSONObjByName(killStepPrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
+		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 
 		String appendStpPrjctName = ProjectSetForTesting.getSqzFISS().getNewProjectName(4);
 		pJSON = st.projectJSONObjByName(appendStpPrjctName);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
-	
+		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
+
 		pJSON = st.projectJSONObjByName(newPrjctNoDLDT);
-		assert(pickAndCheckByName(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
+		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, ADTKey, st));
 
 		for(int n=0;n<weeksSize;n++)
 		{
@@ -164,27 +161,6 @@ public class TestingTSDs
 
 			System.out.println(tsd);
 			System.out.println("Most Pressing Deadline: " + pNames + "\n");
-			//Thread.sleep(4000);
-
-//			System.out.println("Projects succeeded: " 
-//								+ tsd.projectsSucceededThisTimeSpan() + "\n");
-//			System.out.println("Projects failed: " 
-//								+ tsd.projectsFailedThisTimeSpan() + "\n");
-//			if(n==0)
-//			{	
-//				assert(projectsWritten==8);
-//				assert(projectsActive==7);
-//				assert(projectsSucceeded==1); 
-//				assert(projectsFailed==1);  
-//			}
-//
-//			if(n==1)
-//			{
-//				assert(projectsWritten==1);
-//				assert(projectsActive==0);
-//				assert(projectsSucceeded==0);
-//				assert(projectsFailed==0);
-//			}
 		}
 	}
 	
@@ -218,7 +194,7 @@ public class TestingTSDs
 		prjctSet.add(pJSON);
 	}
 
-	public boolean pickAndCheckByName(ChronoUnit cu, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
+	public boolean checkLDTvsTSD(ChronoUnit cu, int unitNr, JSONObject pJSON, String jsonKey, StatisticalTools st) throws IOException, URISyntaxException, TimeSpanException
 	{
 
 		LocalDateTime ldt = extractLDT(pJSON, jsonKey);

@@ -222,9 +222,9 @@ public class SomeCommands
     private final LocalDateTime nowDef;
 	private final StatisticalTools st;
 	private final TimeSpanCreator tsc;
-	
+
 	public SomeCommands(GTDCLI cli, Map<String, JSONObject> knownProjects, StatusMGMT states, 
-    		GTDDataSpawnSession ds, SimpleLogger sLog,
+			GTDDataSpawnSession ds, SimpleLogger sLog,
     		List<List<TimeSpanData>> listOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, NaturalNumberException
     {
 
