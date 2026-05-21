@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import java.sql.SQLException;
-
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -73,6 +73,8 @@ public class SomeCommands
 	 * Write a Method to check that!!!!!!
 	 * */
 
+	public static final String failData = "fail Data";
+	public static final String succData = "success Data";
 	public static final String worst = "worst";
 	public static final String best = "best";
 	private static final Map<String, ChronoUnit> bestArguments = Map.of("hour", ChronoUnit.HOURS,
@@ -237,6 +239,130 @@ public class SomeCommands
     	tsc = st.getTimeSpanCreator();
 
 		List<Boolean> ioArray;
+
+		MeatOfCLICmd<String> failureData = (s)->
+		{
+			
+			Set<JSONObject> fails = new HashSet<>(pSet.stream().filter(ProjectJSONToolBox.projectIsAFailure).toList());
+
+			int nrOfFails = fails.size();
+			int succSteps = 0;
+			int failSteps = 0;
+			int durationInSeconds = 0;
+			
+			for(JSONObject pJSON: fails)
+			{
+				Set<JSONObject> steps = ProjectJSONToolBox.getAllTheSteps(pJSON);
+				
+				for(JSONObject step: steps)
+				{
+					if(ProjectJSONToolBox.stepIsASuccess.test(step))succSteps++;
+					if(ProjectJSONToolBox.stepIsAFailure.test(step))failSteps++;
+				}
+
+				try
+				{
+
+					LocalDateTime activated = extractLDT(pJSON, ProjectJSONKeyz.ADTKey);
+					LocalDateTime terminated = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
+					
+					ExactPeriode ep = new ExactPeriode(activated, terminated);
+					durationInSeconds += ep.getAbsoluteSeconds();
+				}
+				catch(IOException | URISyntaxException exce)
+				{
+					exce.printStackTrace();
+				}
+				
+			}
+
+			double avgSuccSteps = (double)succSteps/(double)nrOfFails;
+			double avgFailSteps = (double)failSteps/(double)nrOfFails;
+			
+			Duration d = Duration.ofSeconds(durationInSeconds);
+
+			long days = d.toDays();
+			long hours = d.toHours() % 24;
+			long minutes = d.toMinutes() % 60;
+			long secs = d.getSeconds() % 60;
+
+
+			System.out.println("Nr of Failed Projects: " + fails.size() + "\n"
+							+ "AVG successful Steps in those: " + avgSuccSteps + "\n"
+							+ "AVG failed Steps in those: " + avgFailSteps + "\n"
+							+ "AVG duration of those Projects: ");
+			
+			System.out.printf("%dd %dh %dm %ds%n",
+			        days, hours, minutes, secs);
+
+			return "";
+		};
+		
+		ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
+
+		registerCmd(failData, sdcSetName, ioArray, failureData);
+
+		MeatOfCLICmd<String> successData = (s)->
+		{
+			
+			Set<JSONObject> successes = new HashSet<>(pSet.stream().filter(ProjectJSONToolBox.projectIsASuccess).toList());
+
+			int nrOfSuccesses = successes.size();
+			int succSteps = 0;
+			int failSteps = 0;
+			int durationInSeconds = 0;
+			
+			for(JSONObject pJSON: successes)
+			{
+				Set<JSONObject> steps = ProjectJSONToolBox.getAllTheSteps(pJSON);
+				
+				for(JSONObject step: steps)
+				{
+					if(ProjectJSONToolBox.stepIsASuccess.test(step))succSteps++;
+					if(ProjectJSONToolBox.stepIsAFailure.test(step))failSteps++;
+				}
+
+				try
+				{
+
+					LocalDateTime activated = extractLDT(pJSON, ProjectJSONKeyz.ADTKey);
+					LocalDateTime terminated = extractLDT(pJSON, ProjectJSONKeyz.TDTKey);
+					
+					ExactPeriode ep = new ExactPeriode(activated, terminated);
+					durationInSeconds += ep.getAbsoluteSeconds();
+				}
+				catch(IOException | URISyntaxException exce)
+				{
+					exce.printStackTrace();
+				}
+				
+			}
+
+			double avgSuccSteps = (double)succSteps/(double)nrOfSuccesses;
+			double avgFailSteps = (double)failSteps/(double)nrOfSuccesses;
+			
+			Duration d = Duration.ofSeconds(durationInSeconds);
+
+			long days = d.toDays();
+			long hours = d.toHours() % 24;
+			long minutes = d.toMinutes() % 60;
+			long secs = d.getSeconds() % 60;
+
+
+			System.out.println("Nr of Success Projects: " + successes.size() + "\n"
+							+ "AVG successful Steps in those: " + avgSuccSteps + "\n"
+							+ "AVG failed Steps in those: " + avgFailSteps + "\n"
+							+ "AVG duration of those Projects: ");
+			
+			System.out.printf("%dd %dh %dm %ds%n",
+			        days, hours, minutes, secs);
+
+			return "";
+		};
+		
+		ioArray = new ArrayList<>(Arrays.asList(false, false, true, false));
+
+		registerCmd(succData, sdcSetName, ioArray, successData);
 
 		MeatOfCLICmd<String> worstTSD = (s)->
 		{

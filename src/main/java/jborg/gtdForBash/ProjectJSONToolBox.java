@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -245,11 +246,25 @@ public class ProjectJSONToolBox
 		return status.equals(StatusMGMT.success);
 	};
 
+	public static final Predicate<JSONObject> stepIsAFailure = (sJSON)->
+	{
+		String status = sJSON.getString(StepJSONKeyz.statusKey);
+		
+		return status.equals(StatusMGMT.failed);
+	};
+
 	public static final Predicate<JSONObject> projectIsASuccess = (pJSON)->
 	{
 		String status = pJSON.getString(ProjectJSONKeyz.statusKey);
 		
 		return status.equals(StatusMGMT.success);
+	};
+
+	public static final Predicate<JSONObject> projectIsAFailure = (pJSON)->
+	{
+		String status = pJSON.getString(ProjectJSONKeyz.statusKey);
+		
+		return status.equals(StatusMGMT.failed);
 	};
 
 	public static final Predicate<JSONObject> projectIsTerminated = (jo)->
@@ -523,6 +538,21 @@ public class ProjectJSONToolBox
 		int l = stepArr.length();
 		
 		return stepArr.getJSONObject(l-1);
+	}
+	
+	public static Set<JSONObject> getAllTheSteps(JSONObject pJSON)
+	{
+		
+		Set<JSONObject> allTheSteps = new HashSet<>();
+
+		JSONArray stepArr = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+
+		int l = stepArr.length();
+		for(int n=0;n<l;n++)allTheSteps.add(stepArr.getJSONObject(n));
+		
+
+		return allTheSteps;
+
 	}
 
 	public static final Predicate<JSONObject> stepIsTerminated = (step)->
