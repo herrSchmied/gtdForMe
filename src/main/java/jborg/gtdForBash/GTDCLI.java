@@ -181,7 +181,7 @@ public class GTDCLI implements Beholder<String>
 			Set<JSONObject> prjctSet = loadProjects();
 			for(JSONObject json: prjctSet)
 			{
-				String pName = json.getString(ProjectJSONKeyz.nameKey);
+				String pName = json.getString(ProjectJSONKeyz.nameKey).trim();
 				knownProjects.put(pName, json);
 			}
 			
@@ -305,13 +305,13 @@ public class GTDCLI implements Beholder<String>
    		return argument;
     }
     
-    public void isValideCommand(String commandTyped) throws CLICMDException
+    public void isValideCommand(String typedStuff) throws CLICMDException
     {
-    	
+
     	int cnt = 0;
     	for(String commandKnown: commandMap.keySet())
     	{
-    		if(!commandTyped.startsWith(commandKnown))
+    		if(!typedStuff.startsWith(commandKnown))
     		{
     			cnt++;
     			continue;
@@ -320,9 +320,8 @@ public class GTDCLI implements Beholder<String>
 			CLICommand<?> clicmd = commandMap.get(commandKnown);
 			if(clicmd.mustHaveArgument)
 			{
-				if(!hasArgument(commandTyped, commandKnown))throw new CLICMDException(cmdNeedsArgument);
+				if(!hasArgument(typedStuff, commandKnown))throw new CLICMDException(cmdNeedsArgument);
 			}
-
     	}
     	
     	if(cnt==commandMap.keySet().size())
@@ -342,13 +341,13 @@ public class GTDCLI implements Beholder<String>
  
     }
 
-    public boolean hasArgument(String commandTyped, String commandKnown)
+    public boolean hasArgument(String typedStuff, String commandKnown)
     {
     	
-    	if(commandTyped.length()<=commandKnown.length())return false;
-    	String argument = getArgumentOfCommand(commandTyped, commandKnown);
+    	if(typedStuff.length()<=commandKnown.length())return false;
+    	String argument = getArgumentOfCommand(typedStuff, commandKnown);
 
-   		if(!argument.matches("\\s[A-Za-z]+"))return false;
+   		if(argument.trim().equals(""))return false;
     	
     	return true;
     }
