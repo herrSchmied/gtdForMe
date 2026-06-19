@@ -19,7 +19,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
+import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
@@ -41,7 +41,7 @@ public class ProjectSetForTesting
 
     private static Path tempProjectDir;
     
-	public static Set<JSONObject> get() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
+	public static Set<JSONObject> get() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, InputArgumentException
 	{
 		
 		

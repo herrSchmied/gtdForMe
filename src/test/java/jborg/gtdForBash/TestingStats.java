@@ -26,8 +26,7 @@ import org.junit.jupiter.api.Test;
 
 
 import CollectionTools.CollectionManipulation;
-
-
+import consoleTools.InputArgumentException;
 import javafx.util.Pair;
 
 
@@ -53,7 +52,7 @@ public class TestingStats
     static Set<JSONObject> prjctSet;
 
 	@BeforeEach
-	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, ClassNotFoundException
+	void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, ClassNotFoundException, InputArgumentException
 	{
 
 		prjctSet = ProjectSetForTesting.get();

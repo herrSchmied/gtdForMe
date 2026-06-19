@@ -36,8 +36,7 @@ import org.junit.jupiter.api.Test;
 
 
 import allgemein.LittleTimeTools;
-
-
+import consoleTools.InputArgumentException;
 import javafx.util.Pair;
 
 
@@ -53,7 +52,7 @@ public class TestingTSDs
     static Set<JSONObject> prjctSet;
 
 	@BeforeAll
-	static void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, ClassNotFoundException
+	static void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, InterruptedException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, ClassNotFoundException, InputArgumentException
 	{
 
     	System.out.println("Test Setup//\\TestingTSDs");

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
+import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
@@ -22,7 +23,7 @@ public class TestingPickUp
 {
 
 	@Test
-	public void timeTest() throws NaturalNumberException, JSONException, ClassNotFoundException, IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	public void timeTest() throws NaturalNumberException, JSONException, ClassNotFoundException, IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, InputArgumentException
 	{
 
 		String data = SomeCommands.exit + '\n';
@@ -55,7 +56,7 @@ public class TestingPickUp
 //		doNothing();
 	}
 
-	public static void newProject() throws IOException, JSONException, ClassNotFoundException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	public static void newProject() throws IOException, JSONException, ClassNotFoundException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, InputArgumentException
 	{
 	    // Create a guaranteed-empty temp directory for all project data
         Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");
@@ -85,7 +86,7 @@ public class TestingPickUp
         new GTDCLI(iss);
 	}
 	
-	public static void doNothing() throws IOException, JSONException, ClassNotFoundException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException
+	public static void doNothing() throws IOException, JSONException, ClassNotFoundException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, InputArgumentException
 	{
 	    // Create a guaranteed-empty temp directory for all project data
         Path tempProjectDir = Files.createTempDirectory("gtdTestProjectData");

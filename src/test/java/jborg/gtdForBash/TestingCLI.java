@@ -23,8 +23,7 @@ import allgemein.LittleTimeTools;
 
 
 import consoleTools.BashSigns;
-
-
+import consoleTools.InputArgumentException;
 import someMath.NaturalNumberException;
 
 
@@ -46,7 +45,7 @@ public class TestingCLI
 //	final  LocalDateTime stepDLDT = jetzt.plusMinutes(30);
 
 	@BeforeAll
-	static void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
+	static void setup() throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, InputArgumentException
 	{    	
 		
 		

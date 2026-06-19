@@ -131,7 +131,6 @@ public class SomeCommands
 
 	private final String unknownProject = "Unknown Project!";
 	private final String projectIsNotActive = "Project is not active.";
-	private final String sorryDeadlineAbuse = "Sorry Deadline Abuse.";
 	private final String noPrjctFound = "No Projects found.";
 	private final String noMODProjects = "No MOD Projects.";
 	private final String noActiveProjects = "No active Projects!";
@@ -1276,26 +1275,16 @@ public class SomeCommands
     		if(!aPrjcts.contains(prjct))throw new CLICMDException(projectIsNotActive);
     		
     		JSONObject pJSON = knownProjects.get(prjct);
-			boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
-			boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
-    			
-    		if(stepDidIt||projectDidIt)
-    		{
-    			alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
-    			sLog.logNow("Deadline abuse so no next Step for Project " + prjct + ".");
-
-				throw new CLICMDException(sorryDeadlineAbuse);
-    		}
- 
+     
     		try
 			{
 				ds.spawnStep(pJSON);
+	    		sLog.logNow("Step created.");
 			}
     		catch(JSONException | URISyntaxException e)
 			{
 				e.printStackTrace();
 			}
-    		sLog.logNow("Step created.");
 
     		return pJSON;
     		
@@ -1335,14 +1324,6 @@ public class SomeCommands
     		}
     		
     		JSONObject pJSON = knownProjects.get(pName);
-        	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
-
-        	if(projectDidIt)
-        	{
-        		alterProjectAfterDLDTAbuse(pJSON, false, projectDidIt);
-        		if(projectDidIt)sLog.logNow("Project: " + pName + " is already Dead. No Kill");
-        		throw new CLICMDException(sorryDeadlineAbuse);
-    		}
 
     		ds.terminateProject(pJSON);
     		sLog.logNow("Terminated Project: " + pName);
@@ -1379,17 +1360,7 @@ public class SomeCommands
     		}
     		
     		JSONObject pJSON = knownProjects.get(pName);
-        	boolean stepDidIt = checkStepForDeadlineAbuse(pJSON);
-        	boolean projectDidIt = checkProjectForDeadlineAbuse(pJSON);
 
-    		if(stepDidIt||projectDidIt)
-    		{
-    			
-    			alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
-    			if(stepDidIt)sLog.logNow("Step of Project " + pName + " is already Terminated.");
-    			if(projectDidIt)sLog.logNow("Project " + pName + " is Terminated. No Step Termination.");
-    			throw new CLICMDException(sorryDeadlineAbuse);
-    		}
     			
     		ds.terminateStep(pJSON);  				
    

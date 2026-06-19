@@ -154,7 +154,7 @@ public class GTDCLI implements Beholder<String>
 		offsetLDT = offsetLDTSet;
 	}
 
-	public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException
+	public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, InputArgumentException
 	{
 
     	this.iss = iss;
@@ -245,12 +245,12 @@ public class GTDCLI implements Beholder<String>
     	System.out.println("Time: " + time + ":" + seconds + '\n');
     }
 
-    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, CLICMDException
+    public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, CLICMDException, InputArgumentException
     {
     	new GTDCLI(new InputStreamSession(System.in));
     }
 
-    public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException, TimeSpanException
+    public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException, TimeSpanException, InputArgumentException, ToolBoxException
     {
 
     	String px = BashSigns.boldBBCPX;
@@ -357,7 +357,7 @@ public class GTDCLI implements Beholder<String>
     	ds.spawnStep(pJSON);
     }
 
-    public void checkAllForDLDTAbuse() throws NaturalNumberException
+    public void checkAllForDLDTAbuse() throws NaturalNumberException, IOException, InputArgumentException, URISyntaxException, ToolBoxException
     {
     	
     	System.out.println(BashSigns.boldYBCPX + "Checking for DLDT-Abuse." + BashSigns.boldYBCSX);
@@ -367,9 +367,56 @@ public class GTDCLI implements Beholder<String>
     		if(ProjectJSONToolBox.activeProject.test(pJSON))
     		{
     			boolean stepDidIt = ProjectJSONToolBox.checkStepForDeadlineAbuse(pJSON);
-    			boolean projectDidIt = ProjectJSONToolBox.checkProjectForDeadlineAbuse(pJSON);
-    		
-    			if(stepDidIt|| projectDidIt)ProjectJSONToolBox.alterProjectAfterDLDTAbuse(pJSON, stepDidIt, projectDidIt);
+    			String name = pJSON.getString(ProjectJSONKeyz.nameKey);
+    			if(stepDidIt)
+    			{
+    				
+    				JSONObject sJSON = ProjectJSONToolBox.getLastStep(pJSON);
+    				
+    				LocalDateTime dldt = ProjectJSONToolBox.extractLDT(sJSON, StepJSONKeyz.DLDTKey);
+    				System.out.println("Project " + name + " has a last Step for whom the Deadline is over due.");
+    				String desc = sJSON.getString(StepJSONKeyz.descKey);
+    				System.out.println("Step Description: " + desc);
+    				String dldtStr = LittleTimeTools.timeString(dldt);
+    				boolean doneInTime = iss.forcedYesOrNo("Was it done before " + dldtStr);
+    				if(!doneInTime)
+    				{
+    					ProjectJSONToolBox.stepDLDTAbuse(pJSON);
+    					System.out.println("Last Step in Project " + name + " terminated because of DeadlineDateTime violation.");
+    				}
+    				else
+    				{
+    					System.out.println("Data for Step termination please.");
+    					ds.terminateStep(pJSON);
+    				}
+
+    			}
+
+    			boolean projectDidIt = ProjectJSONToolBox.checkProjectForDeadlineAbuse(pJSON); 		
+    			if(projectDidIt)
+    			{
+    				
+    				boolean lastStepIsTerminated = ProjectJSONToolBox.lastStepIsTerminated.test(pJSON);
+    				
+    				if(!lastStepIsTerminated)ds.terminateStep(pJSON);
+    				
+    				LocalDateTime dldt = ProjectJSONToolBox.extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
+    				System.out.println("Project's " + name + " Deadline is over due.");
+    				String goal = pJSON.getString(ProjectJSONKeyz.goalKey);
+    				System.out.println("Project's Goal: " + goal);
+    				String dldtStr = LittleTimeTools.timeString(dldt);
+    				boolean doneInTime = iss.forcedYesOrNo("Was it done before " + dldtStr);
+    				if(!doneInTime)
+    				{
+    					ProjectJSONToolBox.projectDLDTAbuse(pJSON);
+    					System.out.println("Project " + name + " terminated because of DeadlineDateTime violation.");
+    				}
+    				else
+    				{
+    					System.out.println("Data for terminating Project please.");
+    					ds.terminateProject(pJSON);
+    				}
+    			}
     		}
     	}
     }

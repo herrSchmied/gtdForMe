@@ -195,38 +195,37 @@ public class ProjectJSONToolBox
 		return null;
 	}
 
-	public static void alterProjectAfterDLDTAbuse(JSONObject pJSON, boolean stepDidIt, boolean projectDidIt)
+	public static void stepDLDTAbuse(JSONObject pJSON)
 	{
 		
 		JSONObject step = getLastStepOfProject(pJSON);
-		
-		
-		if(stepDidIt)
-		{
-	    	step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-	    	pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
-	    			
-	    	String stepDLDTStr = step.getString(StepJSONKeyz.DLDTKey);
-	    	step.put(StepJSONKeyz.TDTKey, stepDLDTStr);
-	    	step.put(StepJSONKeyz.TDTNoteKey, tdtNoteStpDLDTAbuse);
-		}
-		
-		if(projectDidIt)
-		{
-			
-	    	String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
-	    	
-			pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
-			pJSON.put(ProjectJSONKeyz.TDTKey, projectDLDTStr);
-			pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
-			
-			if(!stepIsTerminated.test(step))//if step is not already Terminal alter step status and TDT(Note) too.
-			{
 				
-	    		step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
-	    		step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
-	    		step.put(StepJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
-			}
+    	step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
+    	pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.needsNewStep);
+	    			
+    	String stepDLDTStr = step.getString(StepJSONKeyz.DLDTKey);
+    	step.put(StepJSONKeyz.TDTKey, stepDLDTStr);
+    	step.put(StepJSONKeyz.TDTNoteKey, tdtNoteStpDLDTAbuse);
+	 }
+	
+	public static void projectDLDTAbuse(JSONObject pJSON)
+	{
+			
+
+		String projectDLDTStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
+	    	
+		pJSON.put(ProjectJSONKeyz.statusKey, StatusMGMT.failed);
+		pJSON.put(ProjectJSONKeyz.TDTKey, projectDLDTStr);
+		pJSON.put(ProjectJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
+		
+		JSONObject step = getLastStep(pJSON);
+
+		if(!stepIsTerminated.test(step))//if step is not already Terminal alter step status and TDT(Note) too.
+		{
+				
+	    	step.put(StepJSONKeyz.TDTKey, projectDLDTStr);
+	    	step.put(StepJSONKeyz.statusKey, StatusMGMT.failed);
+	    	step.put(StepJSONKeyz.TDTNoteKey, tdtNotePrjctDLDTAbuse);
 		}
 	}
 
