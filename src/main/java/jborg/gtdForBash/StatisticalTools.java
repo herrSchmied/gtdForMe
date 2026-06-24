@@ -42,8 +42,6 @@ public class StatisticalTools
 		tsc = new TimeSpanCreator(prjctSet, MapOfTSDLists);
 	}
 
- 
-
 	public void printMap(Map<Integer, Map<String, LocalDateTime>> map)
 	{
 		int s = map.size();

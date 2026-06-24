@@ -8,7 +8,7 @@ import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
-import java.time.Clock;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
+
 
 import org.json.JSONObject;
 
@@ -490,6 +490,8 @@ public class TimeSpanCreator
 			if((tsd.isInThisTimeSpan(dldt))||(tsd.isAfterThisTimeSpan(dldt)))return true;
 		}
 
+		if((tsd.isBeforeThisTimeSpan(activatedLDT))&&(!projectIsTerminated.test(pJSON))
+				&&projectHasNoDLDT.test(pJSON))return true;
 
 		return false;
 	}
@@ -506,7 +508,7 @@ public class TimeSpanCreator
 		return false;
 	}
 
-	public TimeSpanData getCurrentTimeSpanDataObject(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException
+	public TimeSpanData getCurrentTimeSpanDataObject(ChronoUnit cu) throws IOException, URISyntaxException, TimeSpanException, NaturalNumberException, TimeSpanCreatorException
 	{
 
 		int nr = isInWhichTimeSpan(cu, GTDCLI.now());
@@ -519,6 +521,7 @@ public class TimeSpanCreator
     	if(cu.equals(ChronoUnit.DAYS))list = dayList;
     	if(cu.equals(ChronoUnit.HOURS))list = hourList;
     	
+    	if(nr>=list.size()||nr<0)throw new TimeSpanCreatorException("Some how there is no now! Should not happen!!");
     	return list.get(nr);
 	}
 

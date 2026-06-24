@@ -73,6 +73,7 @@ public class SomeCommands
 	 * Write a Method to check that!!!!!!
 	 * */
 
+	public static final String list_actives = "list active projects";
 	public static final String failData = "fail Data";
 	public static final String succData = "success Data";
 	public static final String worst = "worst";
@@ -129,6 +130,7 @@ public class SomeCommands
 																  sdcSetName, showDataCommands,
 																  ocSetName, otherCommands);
 
+	private final String projectDeadlineStr = "Project Deadline";
 	private final String unknownProject = "Unknown Project!";
 	private final String projectIsNotActive = "Project is not active.";
 	private final String noPrjctFound = "No Projects found.";
@@ -139,8 +141,8 @@ public class SomeCommands
 	public final String newPrjctStgClsd = "New Project Stage closed.";
 	
 	private final String projectStr = "Project";
-	private final String nearestProjectDeadlineStr = "nearest Deadline of Projects.";
-	private final String nearestStepDeadlineStr = "nearest Deadline of Project Steps.";
+	//private final String nearestProjectDeadlineStr = "nearest Deadline of Projects.";
+	private final String stepDeadlineStr = "Step Deadline";
 	private final String descStr = "Desc";
 	private final String statusStr = "Status";
 	private final String deadlineStr = "Deadline";
@@ -238,6 +240,37 @@ public class SomeCommands
     	tsc = st.getTimeSpanCreator();
 
 		List<Boolean> ioArray;
+
+		MeatOfCLICmd<String> activeProjects = (s)->
+		{
+
+			TimeSpanData tsd;
+
+			try
+			{
+
+				tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
+				System.out.println(tsd);
+				
+				List<String> prjx = new ArrayList<>(tsd.getActiveProjects());
+				
+				Collections.sort(prjx);
+
+				for(String name: prjx)System.out.println(name);
+
+			}
+			catch (URISyntaxException | TimeSpanException | TimeSpanCreatorException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			return "";
+		};
+
+		ioArray = new ArrayList<>(Arrays.asList(false, false, false, true));
+
+		registerCmd(list_actives, sdcSetName, ioArray, activeProjects);
 
 		MeatOfCLICmd<String> failureData = (s)->
 		{
@@ -634,14 +667,15 @@ public class SomeCommands
 
 				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
 
-				Set<JSONObject> prjx = tsd.getAllActiveStepsWithDLs();
-				Set<JSONObject> steps = tsd.mostPressingStepDeadline();
+				Set<JSONObject> steps = tsd.getAllActiveStepsWithDLs();
+				if(steps.isEmpty())
+				{
+					System.out.println("No Step Deadlines. Current TSD-Hour.");
+					return "";
+				}
 				
 				List<List<String>> rows = new ArrayList<>();
-				Set<Pair<Color, Point>> highlights = new HashSet<>();
-				int row = 1;
-				Color c = Color.RED;
-				for(JSONObject sJSON: prjx)
+				for(JSONObject sJSON: steps)
 				{
 					List<String> singleRow = new ArrayList<>();
 					String timeStr = sJSON.getString(StepJSONKeyz.DLDTKey);
@@ -651,31 +685,17 @@ public class SomeCommands
 					singleRow.add(desc);
 					singleRow.add(timeStr);
 					rows.add(singleRow);
-					if(steps.contains(sJSON))
-					{
-						Point p = new Point(0, row);
-						Point p2 = new Point(1, row);
-						
-						Pair<Color, Point> pair = new Pair<>(c, p);
-						Pair<Color, Point> pair2 = new Pair<>(c, p2);
-						highlights.add(pair);
-						highlights.add(pair2);
-					}
-					row++;
 				}
 
-	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr,  descStr, nearestStepDeadlineStr));
+	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr,  descStr, stepDeadlineStr));
 
-	    		TerminalTableDisplay ttd;
-
-	    		if(highlights.isEmpty())ttd = new TerminalTableDisplay(headers, rows,'|', 18);
-	    		else ttd = new TerminalTableDisplay(headers, rows, '|', 18, highlights);
+	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, '|', 18);
 
 	    		System.out.println(ttd);
 
 	    		return ttd.toString();
 			}
-			catch (TimeSpanException | URISyntaxException | ConsoleToolsException e)
+			catch (TimeSpanException | URISyntaxException | ConsoleToolsException | TimeSpanCreatorException e)
 			{
 	
 				return "Error";
@@ -698,7 +718,13 @@ public class SomeCommands
 				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
 
 				Set<JSONObject> prjx = tsd.getAllActiveProjectDLs();
-				Set<JSONObject> pressingPrjx = tsd.mostPressingProjectDeadline();
+				
+				Set<JSONObject> pressingPrjx = tsd.getAllActiveProjectDLs();
+				if(pressingPrjx.isEmpty())
+				{
+					System.out.println("No Project Deadlines.");
+					return "";
+				}
 				
 				Set<Pair<Color, Point>> highlights = new HashSet<>();
 				List<List<String>> rows = new ArrayList<>();
@@ -727,18 +753,15 @@ public class SomeCommands
 					row++;
 				}
 
-	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, nearestProjectDeadlineStr));
+	    		List<String> headers = new ArrayList<>(Arrays.asList(projectStr, projectDeadlineStr));
 
-	    		TerminalTableDisplay ttd;
-
-	    		if(highlights.isEmpty())ttd = new TerminalTableDisplay(headers, rows,'|', 18);
-	    		else ttd = new TerminalTableDisplay(headers, rows, '|', 18, highlights);
+	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, '|', 18);
 
 	    		System.out.println(ttd);
 				
 	    		return ttd.toString();
 			}
-			catch (TimeSpanException | URISyntaxException | ConsoleToolsException e)
+			catch (TimeSpanException | URISyntaxException | ConsoleToolsException | TimeSpanCreatorException e)
 			{
 	
 				return "Error";

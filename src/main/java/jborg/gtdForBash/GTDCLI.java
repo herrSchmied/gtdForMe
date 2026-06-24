@@ -59,7 +59,7 @@ import static fileShortCuts.TextAndObjSaveAndLoad.*;
 
 public class GTDCLI implements Beholder<String>
 {
-	
+
 	private static boolean useOffSetForLDTs = false;
 	
 	private static LocalDateTime offsetLDT;
@@ -455,7 +455,6 @@ public class GTDCLI implements Beholder<String>
     	return prjctSet;
     }
 
-    @SuppressWarnings({ "unchecked"})
 	public static Map<String, List<TimeSpanData>> loadTSDMapOfLists() throws IOException, URISyntaxException, InterruptedException, ClassNotFoundException
     {
 
@@ -474,7 +473,8 @@ public class GTDCLI implements Beholder<String>
     	return output;
     }
 
-    private static List<TimeSpanData> loadOneTSDList(String fileName) throws ClassNotFoundException, IOException
+    @SuppressWarnings("unchecked")
+	private static List<TimeSpanData> loadOneTSDList(String fileName) throws ClassNotFoundException, IOException
     {
     	
     	List<TimeSpanData> empty = new ArrayList<>();
