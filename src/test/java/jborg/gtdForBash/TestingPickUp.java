@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
+import consoleTools.TestInputReader;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
@@ -26,10 +27,9 @@ public class TestingPickUp
 	public void timeTest() throws NaturalNumberException, JSONException, ClassNotFoundException, IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, InputArgumentException
 	{
 
-		String data = SomeCommands.exit + '\n';
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
-		InputStreamSession iss = new InputStreamSession(bais);
+		String data = SomeCommands.exit;
+		TestInputReader testInput = new TestInputReader(data);
+		InputStreamSession iss = new InputStreamSession(testInput);
 		new GTDCLI(iss);
 
 		
@@ -77,11 +77,9 @@ public class TestingPickUp
 
 		SequenzesForISS sfiss = new SequenzesForISS();
 		
-		String data = sfiss.sequenzNewProject("NewProject")+SomeCommands.exit + '\n';
-		
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
-		InputStreamSession iss = new InputStreamSession(bais);
+		String data = sfiss.sequenzNewProject("NewProject")+SomeCommands.exit;
+		TestInputReader testInput = new TestInputReader(data);
+		InputStreamSession iss = new InputStreamSession(testInput);
 
         new GTDCLI(iss);
 	}
@@ -104,10 +102,9 @@ public class TestingPickUp
         String prjctDataFolder = prjctDataPath.toString();
         System.out.println("Loading from this Folder: " + prjctDataFolder);
 		
-		String data = SomeCommands.exit + '\n';
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
-		InputStreamSession iss = new InputStreamSession(bais);
+		String data = SomeCommands.exit;
+		TestInputReader testInput = new TestInputReader(data);
+		InputStreamSession iss = new InputStreamSession(testInput);
 
         new GTDCLI(iss);
 	}

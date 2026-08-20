@@ -1,16 +1,13 @@
 package jborg.gtdForBash;
 
 
-import java.io.ByteArrayInputStream;
+
 import java.io.IOException;
 
 import java.net.URISyntaxException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,6 +18,7 @@ import org.json.JSONObject;
 
 import consoleTools.InputArgumentException;
 import consoleTools.InputStreamSession;
+import consoleTools.TestInputReader;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
@@ -59,10 +57,10 @@ public class ProjectSetForTesting
 
 		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 0, 0));
 
-		String data = sqzFISS.sequenzManyProjects() + '\n';
+		String[] data = sqzFISS.sequenzManyProjects();
 
-		ByteArrayInputStream bais = new ByteArrayInputStream(data.getBytes());
-		InputStreamSession iss = new InputStreamSession(bais);
+		TestInputReader testInput = new TestInputReader(data);
+		InputStreamSession iss = new InputStreamSession(testInput);
 
 
         GTDCLI cli = new GTDCLI(iss);

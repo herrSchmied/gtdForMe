@@ -478,6 +478,9 @@ public class TimeSpanCreator
 		if(tsd.timeSpanIsInTheFuture())return false;
 		if(tsd.isInThisTimeSpan(activatedLDT))return true;
 
+		if((tsd.isBeforeThisTimeSpan(activatedLDT))&&(!projectIsTerminated.test(pJSON))
+				&&projectHasNoDLDT.test(pJSON))return true;
+
 		if(tsd.isBeforeThisTimeSpan(activatedLDT)&&projectIsTerminated.test(pJSON))
 		{
 			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
@@ -489,9 +492,6 @@ public class TimeSpanCreator
 			LocalDateTime dldt = extractLDT(pJSON, DLDTKey);
 			if((tsd.isInThisTimeSpan(dldt))||(tsd.isAfterThisTimeSpan(dldt)))return true;
 		}
-
-		if((tsd.isBeforeThisTimeSpan(activatedLDT))&&(!projectIsTerminated.test(pJSON))
-				&&projectHasNoDLDT.test(pJSON))return true;
 
 		return false;
 	}

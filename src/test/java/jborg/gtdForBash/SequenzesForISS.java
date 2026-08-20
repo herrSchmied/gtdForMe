@@ -1,7 +1,7 @@
 package jborg.gtdForBash;
 
 
-import java.time.Clock;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -40,7 +40,7 @@ public class SequenzesForISS
 
 	}
 	
-	public String sequenzNXTStep(String prjctName) throws NaturalNumberException
+	public String [] sequenzNXTStep(String prjctName) throws NaturalNumberException
 	{
 
 		LocalDateTime stepDLDT = GTDCLI.now().plusDays(7);
@@ -49,31 +49,33 @@ public class SequenzesForISS
 		String dldtQuestion = "yes";
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 
-		String data = SomeCommands.next_Step + " " + prjctName + '\n'
-				+ chosenFromStatieList + '\n'
-				+ stepDesc2 + '\n'
-				+ dldtQuestion + '\n'
-				+ stepDLDTStr;
+		String[] data = new String[5];
+		data[0] = SomeCommands.next_Step + " " + prjctName;
+		data[1] = chosenFromStatieList;
+		data[2] = stepDesc2;
+		data[3] = dldtQuestion;
+		data[4] = stepDLDTStr;
 		
 		return data;
 	}
 	
-	public String sequenzKillStep(String prjctName)
+	public String [] sequenzKillStep(String prjctName)
 	{
 	
 		String stepWasSuccessQstn  = "No";
 		String wantToMakeTDTNote = "No";
 		String wantToChangeTDT = "No";
 
-		String data = SomeCommands.terminate_Step + " " + prjctName + '\n'
-					+ stepWasSuccessQstn + '\n'
-					+ wantToMakeTDTNote + '\n'
-					+ wantToChangeTDT + '\n';
+		String[] data = new String[4]; 
+		data[0] = SomeCommands.terminate_Step + " " + prjctName;
+		data[1] = stepWasSuccessQstn;
+		data[2] = wantToMakeTDTNote;
+		data[3] = wantToChangeTDT;
 		
 		return data;
 	}
 
-	public String sequenzNewProject(String prjctName) throws NaturalNumberException
+	public String[] sequenzNewProject(String prjctName) throws NaturalNumberException
 	{
 		LocalDateTime prjctDLDT = GTDCLI.now().plusDays(14);
 		LocalDateTime stepDLDT = GTDCLI.now().plusDays(7);
@@ -83,60 +85,64 @@ public class SequenzesForISS
 		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 		
-		String data = SomeCommands.new_Project + '\n'
-				+ prjctName + '\n'
-				+ newPrjctGoal + '\n'
-				+ dldtQuestion + '\n'
-				+ prjctDLDTStr
-				+ chosenFromStatieList + '\n'
-				+ stepDesc + '\n'
-				+ dldtQuestion + '\n'
-				+ stepDLDTStr;
+		String[] data = new String[9];
+		data[0] = SomeCommands.new_Project;
+		data[1] = prjctName;
+		data[2] = newPrjctGoal;
+		data[3] = dldtQuestion;
+		data[4] = prjctDLDTStr;
+		data[5] = chosenFromStatieList;
+		data[6] = stepDesc;
+		data[7] = dldtQuestion;
+		data[8] = stepDLDTStr;
 				
 		return data;
 	}
 
 
-	public String sequenzNewProjectNoDLDT(String prjctName)
+	public String[] sequenzNewProjectNoDLDT(String prjctName)
 	{
 		
 		String dldtQuestion = "no";
 		String chosenFromStatieList = "2";//ATBD//TODO: make it bullet proof. it works for now.
 		
-		String data = SomeCommands.new_Project + '\n'
-				+ prjctName + '\n'
-				+ newPrjctGoal + '\n'
-				+ dldtQuestion + '\n'
-				+ chosenFromStatieList + '\n'
-				+ stepDesc + '\n'
-				+ dldtQuestion + '\n';
+		String[] data = new String[7]; 
+		data[0] = SomeCommands.new_Project;
+		data[1] = prjctName;
+		data[2] = newPrjctGoal;
+		data[3] = dldtQuestion;
+		data[4] = chosenFromStatieList;
+		data[5] = stepDesc;
+		data[6] = dldtQuestion;
 				
 		return data;
 	}
 
-	public String sequenzMODProject(String prjctName)
+	public String[] sequenzMODProject(String prjctName)
 	{
 
-		String data = SomeCommands.new_MOD + '\n'
-				+ prjctName + '\n'
-				+ modPrjctGoal + '\n';
+		String[] data = new String[3];
+		data[0] = SomeCommands.new_MOD;
+		data[1] = prjctName;
+		data[2] = modPrjctGoal;
 				
 		return data;
 	}
 	
 
-	public String sequenzAddNote(String prjctName)
+	public String[] sequenzAddNote(String prjctName)
 	{
 
-		String data = SomeCommands.add_Note + " " + prjctName + '\n'
-				+ noticeOne + "\n"
-				+ SomeCommands.add_Note + " " + prjctName + '\n'
-				+ noticeTwo + "\n";
+		String[] data = new String[4];
+		data[0] = SomeCommands.add_Note + " " + prjctName;
+		data[1] = noticeOne;
+		data[2] = SomeCommands.add_Note + " " + prjctName;
+		data[3] = noticeTwo;
 				
 		return data;
 	}
 	
-	public String sequenzWakeMODProject(String prjctName) throws NaturalNumberException
+	public String[] sequenzWakeMODProject(String prjctName) throws NaturalNumberException
 	{
 
 		LocalDateTime prjctDLDT = GTDCLI.now().plusDays(14);
@@ -147,58 +153,61 @@ public class SequenzesForISS
 		String dldtQuestion = "yes";
 		String stepDLDTStr = translateTimeToAnswerString(stepDLDT);
 
-		String data = SomeCommands.wake_MOD + prjctName + '\n'
-					+ dldtQuestion + '\n'
-					+ prjctDLDTStr
-					+ chosenFromStatieList + '\n'
-					+ stepDesc3 + '\n'
-					+ dldtQuestion + '\n'
-					+ stepDLDTStr;
+		String[] data = new String[7];
+		data[0] = SomeCommands.wake_MOD + prjctName;
+		data[1] = dldtQuestion;
+		data[2] = prjctDLDTStr;
+		data[3] = chosenFromStatieList;
+		data[4] = stepDesc3;
+		data[5] = dldtQuestion;
+		data[6] = stepDLDTStr;
 
 		return data;
 	}
 
-	public String sequenzProjectSucceeds(String prjctName)
+	public String[] sequenzProjectSucceeds(String prjctName)
 	{
 
 		String projectWasSuccessQstn  = "Yes";
 		String wantToMakeTDTNote = "No";
 		String wantToChangeTDT = "No";
 
-		String data = SomeCommands.terminate_Project + " " + prjctName + '\n'
-				+ projectWasSuccessQstn + '\n'
-				+ wantToMakeTDTNote + '\n'
-				+ wantToChangeTDT + '\n';
+		String[] data = new String[4];
+		data[0] = SomeCommands.terminate_Project + " " + prjctName;
+		data[1] = projectWasSuccessQstn;
+		data[2] = wantToMakeTDTNote;
+		data[3] = wantToChangeTDT;
 
 		return data;
 	}
 
-	public String sequenzProjectFails(String prjctName)
+	public String[] sequenzProjectFails(String prjctName)
 	{
 
 		String projectWasSuccessQstn  = "No";
 		String wantToMakeTDTNote = "No";
 		String wantToChangeTDT = "No";
 
-		String data = SomeCommands.terminate_Project + " " + prjctName + '\n'
-				+ projectWasSuccessQstn + '\n'
-				+ wantToMakeTDTNote + '\n'
-				+ wantToChangeTDT + '\n';
+		String[] data = new String[4];
+		data[0] = SomeCommands.terminate_Project + " " + prjctName;
+		data[1] = projectWasSuccessQstn;
+		data[2] = wantToMakeTDTNote;
+		data[3] = wantToChangeTDT;
 
 		return data;
 	}
 
-	public String sequenzOfFourNewProjects() throws NaturalNumberException
+	public String[] sequenzOfFourNewProjects() throws NaturalNumberException
 	{
 
 		int s = 4;
-		String data = "";
+		String[] data = new String[0];
 
 		//starts and ends not like usually.
 		for(int m=1;m<s+1;m++)
 		{
 			String name = getNewProjectName(m);
-			data = data + sequenzNewProject(name);
+			data = append(data, sequenzNewProject(name));
 		}
 
 		return data;
@@ -214,23 +223,27 @@ public class SequenzesForISS
 		return LocalDateTime.of(mLDT, LocalTime.of(0, n)).minusDays(14);
 	}
 
-	public String sequenzManyProjects() throws NaturalNumberException
+	public String[] sequenzManyProjects() throws NaturalNumberException
 	{
 
-		String data = sequenzOfFourNewProjects()
-				+ sequenzAddNote(getNewProjectName(2))
-				+ sequenzKillStep(getNewProjectName(3))
-				+ sequenzProjectFails(getNewProjectName(3))
-				+ sequenzKillStep(getNewProjectName(4))
-				+ sequenzNXTStep(getNewProjectName(4))
-				+ sequenzNewProjectNoDLDT(killPrjctNameNoDLDT)
-				+ sequenzKillStep(killPrjctNameNoDLDT)
-				+ sequenzProjectSucceeds(killPrjctNameNoDLDT)
-				+ sequenzNewProjectNoDLDT(newPrjctNoDLDT)
-				+ sequenzMODProject(modPrjctName)
-				+ sequenzMODProject(wakeProjectName)
-				+ sequenzWakeMODProject(wakeProjectName)
-				+ SomeCommands.exit + '\n';
+		String[] data = new String[0];
+		data = append(data, sequenzOfFourNewProjects());
+		data = append(data,  sequenzAddNote(getNewProjectName(2)));
+		data = append(data, sequenzKillStep(getNewProjectName(3)));
+		data = append(data,  sequenzProjectFails(getNewProjectName(3)));
+		data = append(data,  sequenzKillStep(getNewProjectName(4)));
+		data = append(data,  sequenzNXTStep(getNewProjectName(4)));
+		data = append(data,  sequenzNewProjectNoDLDT(killPrjctNameNoDLDT));
+		data = append(data,  sequenzKillStep(killPrjctNameNoDLDT));
+		data = append(data,  sequenzProjectSucceeds(killPrjctNameNoDLDT));
+		data = append(data,  sequenzNewProjectNoDLDT(newPrjctNoDLDT));
+		data = append(data,  sequenzMODProject(modPrjctName));
+		data = append(data,  sequenzMODProject(wakeProjectName));
+		data = append(data,  sequenzWakeMODProject(wakeProjectName));
+		
+		String[] exit = new String[1];
+		exit[0] = SomeCommands.exit;
+		data = append(data,  exit);
 
 		return data;
 	}
@@ -238,5 +251,15 @@ public class SequenzesForISS
 	public String getNewProjectName(int n)
 	{
 		return "New_Project_"+n;
+	}
+	
+	public static String[] append(String[] a, String[] b)
+	{
+	    String[] result = new String[a.length + b.length];
+
+	    System.arraycopy(a, 0, result, 0, a.length);
+	    System.arraycopy(b, 0, result, a.length, b.length);
+
+	    return result;
 	}
 }

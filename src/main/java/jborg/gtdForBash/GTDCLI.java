@@ -247,7 +247,7 @@ public class GTDCLI implements Beholder<String>
 
     public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, CLICMDException, InputArgumentException
     {
-    	new GTDCLI(new InputStreamSession(System.in));
+    	new GTDCLI(new InputStreamSession(System.in, getDataFolder()));
     }
 
     public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException, TimeSpanException, InputArgumentException, ToolBoxException
@@ -264,8 +264,8 @@ public class GTDCLI implements Beholder<String>
 
     	try
     	{
- 
-        	isValideCommand(fullCmdWithOptArgTyped);
+
+        	throwsCLICMDExceptionIfNotValideCMD(fullCmdWithOptArgTyped);
 
         	for(String commandKnown: commandMap.keySet())
     		{
@@ -278,20 +278,35 @@ public class GTDCLI implements Beholder<String>
     					argument = getArgumentOfCommand(fullCmdWithOptArgTyped, commandKnown);
     				}
     				
-    				Object obj =  clicmd.executeCmd(argument);
+    				
+    				Object obj = clicmd.executeCmd(argument);
+
+    				/*
     				if(obj instanceof JSONObject)
     				{
     					
     				}
+    				*/
+    				
     				break;
     			}
     		}
     	}
-    	catch(CLICMDException | NaturalNumberException | IOException e)
+    	catch(CLICMDException e)
     	{
     		System.out.println(e);
-    	}
-    	
+       		System.out.println(unknownCmdStr);
+       		System.out.println(hereAListOfCmds);
+       		List<String> cmdList = new ArrayList<>(commandMap.keySet());
+       		Collections.sort(cmdList);
+       		for(int n=0;n<cmdList.size();n++)
+       		{
+       			String s = cmdList.get(n);
+       			System.out.println(s);
+       		}
+       		
+       	}
+
     	if(!noMoreLoops)loopForCommands();
     }
 
@@ -305,7 +320,7 @@ public class GTDCLI implements Beholder<String>
    		return argument;
     }
     
-    public void isValideCommand(String typedStuff) throws CLICMDException
+    public void throwsCLICMDExceptionIfNotValideCMD(String typedStuff) throws CLICMDException
     {
 
     	int cnt = 0;
@@ -324,21 +339,7 @@ public class GTDCLI implements Beholder<String>
 			}
     	}
     	
-    	if(cnt==commandMap.keySet().size())
-    	{
-
-    		System.out.println(unknownCmdStr);
-    		System.out.println(hereAListOfCmds);
-    		List<String> cmdList = new ArrayList<>(commandMap.keySet());
-    		Collections.sort(cmdList);
-    		for(int n=0;n<cmdList.size();n++)
-    		{
-    			String s = cmdList.get(n);
-    			System.out.println(s);
-    		}
-    		throw new CLICMDException(unknownCmdStr);
-    	}
- 
+    	if(cnt==commandMap.keySet().size())throw new CLICMDException(unknownCmdStr);
     }
 
     public boolean hasArgument(String typedStuff, String commandKnown)
