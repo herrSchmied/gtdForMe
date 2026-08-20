@@ -60,6 +60,7 @@ import static fileShortCuts.TextAndObjSaveAndLoad.*;
 public class GTDCLI implements Beholder<String>
 {
 
+	private static String historyFileName = "historyFile";
 	private static boolean useOffSetForLDTs = false;
 	
 	private static LocalDateTime offsetLDT;
@@ -247,7 +248,7 @@ public class GTDCLI implements Beholder<String>
 
     public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, CLICMDException, InputArgumentException
     {
-    	new GTDCLI(new InputStreamSession(System.in, getDataFolder()));
+    	new GTDCLI(new InputStreamSession(System.in, getHistoryFilePath()));
     }
 
     public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException, TimeSpanException, InputArgumentException, ToolBoxException
@@ -256,7 +257,6 @@ public class GTDCLI implements Beholder<String>
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
 
-    	System.out.println("\n");
     	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
     	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
 
@@ -596,6 +596,16 @@ public class GTDCLI implements Beholder<String>
     public static Path getDataFolder()
     {
     	return projectDataFolderRelativePath;
+    }
+    
+    public static String getDataFolderAsString()
+    {
+    	return projectDataFolderRelativePath.toString();
+    }
+    
+    public static Path getHistoryFilePath()
+    {
+    	return Path.of(getDataFolderAsString()+"/"+historyFileName);
     }
     
     public void redirectinStndrtOut(PrintStream os)
