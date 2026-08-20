@@ -248,7 +248,7 @@ public class GTDCLI implements Beholder<String>
 
     public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, CLICMDException, InputArgumentException
     {
-    	new GTDCLI(new InputStreamSession(System.in, getHistoryFilePath()));
+    	new GTDCLI(new InputStreamSession(getHistoryFilePath()));
     }
 
     public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException, TimeSpanException, InputArgumentException, ToolBoxException
@@ -257,7 +257,7 @@ public class GTDCLI implements Beholder<String>
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
 
-    	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx + " command. (ex. help or exit).");
+    	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx);
     	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
 
     	checkAllForDLDTAbuse();
