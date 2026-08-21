@@ -6,9 +6,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+
 import someMath.NaturalNumberException;
 
+
+import static CollectionTools.CollectionManipulation.*;
+
+
 import static consoleTools.InputStreamSession.*;
+
+
 
 public class SequenzesForISS
 {
@@ -251,15 +258,5 @@ public class SequenzesForISS
 	public String getNewProjectName(int n)
 	{
 		return "New_Project_"+n;
-	}
-	
-	public static String[] append(String[] a, String[] b)
-	{
-	    String[] result = new String[a.length + b.length];
-
-	    System.arraycopy(a, 0, result, 0, a.length);
-	    System.arraycopy(b, 0, result, a.length, b.length);
-
-	    return result;
 	}
 }

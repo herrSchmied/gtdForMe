@@ -251,7 +251,7 @@ public class GTDCLI implements Beholder<String>
     	new GTDCLI(new InputStreamSession(getHistoryFilePath()));
     }
 
-    public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException, TimeSpanException, InputArgumentException, ToolBoxException
+    public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException, TimeSpanException, InputArgumentException, ToolBoxException, InterruptedException
     {
 
     	String px = BashSigns.boldBBCPX;
@@ -296,6 +296,7 @@ public class GTDCLI implements Beholder<String>
     	{
     		System.out.println(e);
        		System.out.println(unknownCmdStr);
+       		Thread.sleep(1000);
        		System.out.println(hereAListOfCmds);
        		List<String> cmdList = new ArrayList<>(commandMap.keySet());
        		Collections.sort(cmdList);
