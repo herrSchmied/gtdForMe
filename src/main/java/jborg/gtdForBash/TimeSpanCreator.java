@@ -334,7 +334,7 @@ public class TimeSpanCreator
 			for(JSONObject pJSON: prjctSet)
 			{
 				
-				String prjctStr = pJSON.toString();
+				String prjctStr = pJSON.getString(ProjectJSONKeyz.nameKey);
 				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(prjctStr);
 				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(prjctStr);
 				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(prjctStr);
