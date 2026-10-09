@@ -256,7 +256,10 @@ public class SomeCommands
 				
 				Collections.sort(prjx);
 
-				for(String name: prjx)cs.println(name);
+				String namesList = "";
+				for(String name: prjx)namesList += "\n" + name;
+				
+				cs.page(namesList);
 
 			}
 			catch (URISyntaxException | TimeSpanException | TimeSpanCreatorException e)
@@ -500,7 +503,6 @@ public class SomeCommands
 				e.printStackTrace();
 			}
 
-		  
 			throw new RuntimeException("This should not happen.");
 		};
 		

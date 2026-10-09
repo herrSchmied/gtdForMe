@@ -106,7 +106,7 @@ public class TimeSpanCreator
 		{
 			
 			Pair<String, LocalDateTime> oldPair = oldestLDTOverall();
-			Pair<String, LocalDateTime> youngPair = youngestLDTOverall();
+			Pair<String, LocalDateTime> youngPair = new Pair<>("", GTDCLI.now().plusHours(1).truncatedTo(ChronoUnit.HOURS));
 	    
 			this.beginAnker = oldPair.getValue();
 			this.endAnker = youngPair.getValue();
@@ -155,7 +155,7 @@ public class TimeSpanCreator
 		{
 			
 			Pair<String, LocalDateTime> oldPair = oldestLDTOverall();
-			Pair<String, LocalDateTime> youngPair = youngestLDTOverall();
+			Pair<String, LocalDateTime> youngPair = new Pair<>("", GTDCLI.now().plusHours(1).truncatedTo(ChronoUnit.HOURS));
 	    
 			this.beginAnker = oldPair.getValue();
 			this.endAnker = youngPair.getValue();
