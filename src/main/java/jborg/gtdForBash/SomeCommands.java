@@ -250,13 +250,13 @@ public class SomeCommands
 			{
 
 				tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
-				System.out.println(tsd);
+				cs.println(tsd.toString());
 				
 				List<String> prjx = new ArrayList<>(tsd.getActiveProjects());
 				
 				Collections.sort(prjx);
 
-				for(String name: prjx)System.out.println(name);
+				for(String name: prjx)cs.println(name);
 
 			}
 			catch (URISyntaxException | TimeSpanException | TimeSpanCreatorException e)
@@ -319,7 +319,7 @@ public class SomeCommands
 			long secs = d.getSeconds() % 60;
 
 
-			System.out.println("Nr of Failed Projects: " + fails.size() + "\n"
+			cs.println("Nr of Failed Projects: " + fails.size() + "\n"
 							+ "AVG successful Steps in those: " + avgSuccSteps + "\n"
 							+ "AVG failed Steps in those: " + avgFailSteps + "\n"
 							+ "AVG duration of those Projects: ");
@@ -381,7 +381,7 @@ public class SomeCommands
 			long secs = d.getSeconds() % 60;
 
 
-			System.out.println("Nr of Success Projects: " + successes.size() + "\n"
+			cs.println("Nr of Success Projects: " + successes.size() + "\n"
 							+ "AVG successful Steps in those: " + avgSuccSteps + "\n"
 							+ "AVG failed Steps in those: " + avgFailSteps + "\n"
 							+ "AVG duration of those Projects: ");
@@ -405,7 +405,7 @@ public class SomeCommands
 
 			if(!bestArguments.keySet().contains(arg))
 			{
-				System.out.println("Unknown Argument. Command needs valide argument.");
+				cs.println("Unknown Argument. Command needs valide argument.");
 				return output;
 			}
 
@@ -436,7 +436,7 @@ public class SomeCommands
 					output += new PositivityOfATSD(tsd).toString();
 				}
 				
-				System.out.println(output);
+				cs.println(output);
 				return output;
 			}
 			catch (URISyntaxException | TimeSpanException  e)
@@ -459,7 +459,7 @@ public class SomeCommands
 			String output = "";
 			if(!bestArguments.keySet().contains(arg))
 			{
-				System.out.println("Unknown Argument. Command needs valide argument.");
+				cs.println("Unknown Argument. Command needs valide argument.");
 				return output;
 			}
 
@@ -491,7 +491,7 @@ public class SomeCommands
 					output += new PositivityOfATSD(tsd).toString();
 				}
 				
-				System.out.println(output);
+				cs.println(output);
 				return output;
 			}
 			catch (URISyntaxException | TimeSpanException e)
@@ -520,7 +520,7 @@ public class SomeCommands
 				LocalDateTime ldt = pair.getValue();
 				
 				String output = "Project: " + name + ", NDT: " + ldt;
-				System.out.println(output + "\n");
+				cs.println(output + "\n");
 				
 				return output;
 			}
@@ -552,7 +552,7 @@ public class SomeCommands
 			}
 			catch(SQLException sqlExce)
 			{
-				System.out.println(sqlExce);
+				cs.println(sqlExce.toString());
 			}
 			
 			return "Oki";
@@ -580,7 +580,7 @@ public class SomeCommands
 			}
 			catch(SQLException sqlExce)
 			{
-				System.out.println(sqlExce);
+				cs.println(sqlExce.toString());
 			}
 			
 			return "Oki";
@@ -670,7 +670,7 @@ public class SomeCommands
 				Set<JSONObject> steps = tsd.getAllActiveStepsWithDLs();
 				if(steps.isEmpty())
 				{
-					System.out.println("No Step Deadlines. Current TSD-Hour.");
+					cs.println("No Step Deadlines. Current TSD-Hour.");
 					return "";
 				}
 				
@@ -691,7 +691,7 @@ public class SomeCommands
 
 	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, '|', 18);
 
-	    		System.out.println(ttd);
+	    		cs.println(ttd.toString());
 
 	    		return ttd.toString();
 			}
@@ -722,7 +722,7 @@ public class SomeCommands
 				Set<JSONObject> pressingPrjx = tsd.getAllActiveProjectDLs();
 				if(pressingPrjx.isEmpty())
 				{
-					System.out.println("No Project Deadlines.");
+					cs.println("No Project Deadlines.");
 					return "";
 				}
 				
@@ -757,7 +757,7 @@ public class SomeCommands
 
 	    		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, '|', 18);
 
-	    		System.out.println(ttd);
+	    		cs.println(ttd.toString());
 				
 	    		return ttd.toString();
 			}
@@ -788,7 +788,7 @@ public class SomeCommands
 
 			for(String name: knownProjects.keySet())output = output + '\n' + name;
 			
-			System.out.println(output);
+			cs.println(output);
 			return output;
 		};
 		
@@ -817,7 +817,7 @@ public class SomeCommands
     			output = "\n" + cmdStr +output;
     		}
     		
-    		System.out.println(output + "\n");
+    		cs.println(output + "\n");
     		
     		return output;
 		};
@@ -841,7 +841,7 @@ public class SomeCommands
 
 			String output = "";
 
-   			System.out.println("");
+   			cs.println("");
     		List<String> names = new ArrayList<>();
     		
     		for(String name: knownProjects.keySet())
@@ -863,7 +863,7 @@ public class SomeCommands
 	    	sLog.logNow("Project " + s + " Exists and details are displayed.");
 
 	    	output = showProjectDetail(knownProjects.get(prjct));
-	    	System.out.println(output);
+	    	cs.println(output);
 
 
 			return output;
@@ -918,7 +918,7 @@ public class SomeCommands
 		{
 			
 			sLog.logNow("Active Projects display.");
-			System.out.println("");
+			cs.println("");
 			
 			Map<String, JSONObject> map = new HashMap<>();
 			
@@ -968,7 +968,7 @@ public class SomeCommands
 			{
 				
 				sLog.logNow("No active Projects.");
-				System.out.println("No active Projects.");
+				cs.println("No active Projects.");
 				return "";
 			}
 			
@@ -1002,7 +1002,7 @@ public class SomeCommands
 				throw new RuntimeException("TerminalTableDisplay did it!");
 			}
 			
-			System.out.println(ttd);
+			cs.println(ttd.toString());
 			
 			return ttd.toString();
 		};
@@ -1053,7 +1053,7 @@ public class SomeCommands
 			nrOfSuccessStpsStr + nrOfSuccessfulSteps + '\n' +
 			nrOfSuccessPrjctsStr + nrOfSuccessfulPrjcts;
 
-			System.out.println(output);
+			cs.println(output);
 			
 			return output;
 		};
@@ -1090,7 +1090,7 @@ public class SomeCommands
 			
 			sLog.logNow("Trying to add a Note to a Project.");
 
-   			System.out.println("");
+   			cs.println("");
 			List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
 			if(aPrjcts.isEmpty())
 			{
@@ -1125,7 +1125,7 @@ public class SomeCommands
 		{
 	    	
 			sLog.logNow("Note display.");
-			System.out.println("");
+			cs.println("");
 			
 			if(knownProjects.isEmpty())throw new CLICMDException(noPrjctFound);
 	    	
@@ -1159,7 +1159,7 @@ public class SomeCommands
     			output = output + "--> " + noteArr.get(n);
     		}
     				
-    		System.out.println(output);
+    		cs.println(output);
     		return output;
 		};
 		
@@ -1232,7 +1232,7 @@ public class SomeCommands
 			
 			sLog.logNow("Waking MOD-Project.");
 
-			System.out.println("");
+			cs.println("");
     		List<String> modPrjcts = listOfMODs.get();
     		if(modPrjcts.isEmpty())
     		{
@@ -1277,7 +1277,7 @@ public class SomeCommands
 
 			sLog.logNow("Trying to create next Step for Project");
 
-			System.out.println("");
+			cs.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
     		if(aPrjcts.isEmpty())
     		{
@@ -1322,7 +1322,7 @@ public class SomeCommands
 		{
 
 			sLog.logNow("Trying to kill an active Project.");
-			System.out.println("");
+			cs.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
     		if(aPrjcts.isEmpty())
     		{
@@ -1363,7 +1363,7 @@ public class SomeCommands
 		{
 
 			sLog.logNow("Terminating Step.");
-    		System.out.println("");
+    		cs.println("");
     		List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
 
     		String pName;
@@ -1637,7 +1637,7 @@ public class SomeCommands
 
 			TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
 			
-			System.out.println(ttd.toString());
+			cs.println(ttd.toString());
 		}
 		
 		
