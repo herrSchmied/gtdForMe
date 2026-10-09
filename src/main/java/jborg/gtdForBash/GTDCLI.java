@@ -41,7 +41,7 @@ import consoleTools.BashSigns;
 
 import consoleTools.InputArgumentException;
 
-import consoleTools.InputStreamSession;
+import consoleTools.ConsoleSession;
 
 
 import jborg.gtdForBash.exceptions.CLICMDException;
@@ -119,7 +119,7 @@ public class GTDCLI implements Beholder<String>
 	 */
  
 	private final GTDDataSpawnSession ds;
-	private final InputStreamSession iss;
+	private final ConsoleSession cs;
 	private final SomeCommands scds;
 	
 	private final String sayGoodBye = "Bye!";
@@ -155,14 +155,14 @@ public class GTDCLI implements Beholder<String>
 		offsetLDT = offsetLDTSet;
 	}
 
-	public GTDCLI(InputStreamSession iss) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, InputArgumentException
+	public GTDCLI(ConsoleSession cs) throws JSONException, IOException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, InputArgumentException
 	{
 
-    	this.iss = iss;
+    	this.cs = cs;
     	this.sLog =  new SimpleLogger(projectDataFolderRelativePath.toAbsolutePath()+actionLog, "Log of GTD ");
-    	System.out.println(sLog.getSessionString());
+    	cs.println(sLog.getSessionString());
 
-    	ds = new GTDDataSpawnSession(this.iss);
+    	ds = new GTDDataSpawnSession(this.cs);
     	Path dataFolder = getDataFolder();
 
 		boolean isThereDataFolder = Files.exists(dataFolder)&&Files.isDirectory(dataFolder);
@@ -171,13 +171,13 @@ public class GTDCLI implements Beholder<String>
 		for(String fileName: tsdMap.keySet())
 		{
 			int cnt = tsdMap.get(fileName).size();
-			System.out.println("In File: " +  fileName + " are " + cnt + " TSD's");
+			cs.println("In File: " +  fileName + " are " + cnt + " TSD's");
 		}
 
 		if(isThereDataFolder)
 		{
 
-			System.out.println(dataFolderFound);
+			cs.println(dataFolderFound);
 
 			Set<JSONObject> prjctSet = loadProjects();
 			for(JSONObject json: prjctSet)
@@ -191,7 +191,7 @@ public class GTDCLI implements Beholder<String>
 		}
 		else 
 		{
-			System.out.println(thereIsNoDataFolder);
+			cs.println(thereIsNoDataFolder);
 
 	        File directory = dataFolder.toFile();
 
@@ -200,7 +200,7 @@ public class GTDCLI implements Beholder<String>
 	        {	
 	        	if(directory.mkdir())
 	        	{
-	        		System.out.println(dataFolderCreated);
+	        		cs.println(dataFolderCreated);
 	        		scds = new SomeCommands(this, knownProjects, states, ds, sLog, tsdMap);
 	        		commandMap = scds.getCommandMap();
 	        	}	    				        
@@ -209,8 +209,8 @@ public class GTDCLI implements Beholder<String>
 	        	
 	        		scds = null;
 	        		commandMap = null;
-	        		System.out.println(failedToCreateDirectory);
-	        		System.out.println(sayGoodBye);
+	        		cs.println(failedToCreateDirectory);
+	        		cs.println(sayGoodBye);
 	        		System.exit(0);
 	        	}
 	        }
@@ -218,8 +218,8 @@ public class GTDCLI implements Beholder<String>
 	        {
         		scds = null;
         		commandMap = null;
-        		System.out.println(failedToCreateDirectory);
-        		System.out.println(sayGoodBye);
+        		cs.println(failedToCreateDirectory);
+        		cs.println(sayGoodBye);
         		System.exit(0);
 	        }
 		}
@@ -242,13 +242,13 @@ public class GTDCLI implements Beholder<String>
     	String time = LittleTimeTools.timeString(inTheMoment.toLocalTime());
     	String seconds = "" + inTheMoment.getSecond();
     	if(seconds.length()<2)seconds = "0" + seconds;
-    	System.out.println("Hello, Date-> month: " + month.toString() + " day: " + dayOfMonth + " in the Year " + year + ". It's " + dayOfWeek);
-    	System.out.println("Time: " + time + ":" + seconds + '\n');
+    	cs.println("Hello, Date-> month: " + month.toString() + " day: " + dayOfMonth + " in the Year " + year + ". It's " + dayOfWeek);
+    	cs.println("Time: " + time + ":" + seconds + '\n');
     }
 
     public static void main(String... args) throws IOException, URISyntaxException, JSONException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, ClassNotFoundException, CLICMDException, InputArgumentException
     {
-    	new GTDCLI(new InputStreamSession(getHistoryFilePath()));
+    	new GTDCLI(new ConsoleSession(getHistoryFilePath()));
     }
 
     public void loopForCommands() throws NaturalNumberException, IOException, JSONException, URISyntaxException, TimeSpanException, InputArgumentException, ToolBoxException, InterruptedException
@@ -257,7 +257,7 @@ public class GTDCLI implements Beholder<String>
     	String px = BashSigns.boldBBCPX;
     	String sx = BashSigns.boldBBCSX;
 
-    	String fullCmdWithOptArgTyped = iss.getString(px + "Type" + sx);
+    	String fullCmdWithOptArgTyped = cs.getString(px + "Type" + sx);
     	fullCmdWithOptArgTyped = fullCmdWithOptArgTyped.trim();
 
     	checkAllForDLDTAbuse();
@@ -294,16 +294,16 @@ public class GTDCLI implements Beholder<String>
     	}
     	catch(CLICMDException e)
     	{
-    		System.out.println(e);
-       		System.out.println(unknownCmdStr);
+    		cs.println(e.toString());
+       		cs.println(unknownCmdStr);
        		Thread.sleep(1000);
-       		System.out.println(hereAListOfCmds);
+       		cs.println(hereAListOfCmds);
        		List<String> cmdList = new ArrayList<>(commandMap.keySet());
        		Collections.sort(cmdList);
        		for(int n=0;n<cmdList.size();n++)
        		{
        			String s = cmdList.get(n);
-       			System.out.println(s);
+       			cs.println(s);
        		}
        		
        	}
@@ -362,7 +362,7 @@ public class GTDCLI implements Beholder<String>
     public void checkAllForDLDTAbuse() throws NaturalNumberException, IOException, InputArgumentException, URISyntaxException, ToolBoxException
     {
     	
-    	System.out.println(BashSigns.boldYBCPX + "Checking for DLDT-Abuse." + BashSigns.boldYBCSX);
+    	cs.println(BashSigns.boldYBCPX + "Checking for DLDT-Abuse." + BashSigns.boldYBCSX);
     	for(JSONObject pJSON: knownProjects.values())
     	{
 
@@ -376,19 +376,19 @@ public class GTDCLI implements Beholder<String>
     				JSONObject sJSON = ProjectJSONToolBox.getLastStep(pJSON);
     				
     				LocalDateTime dldt = ProjectJSONToolBox.extractLDT(sJSON, StepJSONKeyz.DLDTKey);
-    				System.out.println("Project " + name + " has a last Step for whom the Deadline is over due.");
+    				cs.println("Project " + name + " has a last Step for whom the Deadline is over due.");
     				String desc = sJSON.getString(StepJSONKeyz.descKey);
-    				System.out.println("Step Description: " + desc);
+    				cs.println("Step Description: " + desc);
     				String dldtStr = LittleTimeTools.timeString(dldt);
-    				boolean doneInTime = iss.forcedYesOrNo("Was it done before " + dldtStr);
+    				boolean doneInTime = cs.forcedYesOrNo("Was it done before " + dldtStr);
     				if(!doneInTime)
     				{
     					ProjectJSONToolBox.stepDLDTAbuse(pJSON);
-    					System.out.println("Last Step in Project " + name + " terminated because of DeadlineDateTime violation.");
+    					cs.println("Last Step in Project " + name + " terminated because of DeadlineDateTime violation.");
     				}
     				else
     				{
-    					System.out.println("Data for Step termination please.");
+    					cs.println("Data for Step termination please.");
     					ds.terminateStep(pJSON);
     				}
 
@@ -403,19 +403,19 @@ public class GTDCLI implements Beholder<String>
     				if(!lastStepIsTerminated)ds.terminateStep(pJSON);
     				
     				LocalDateTime dldt = ProjectJSONToolBox.extractLDT(pJSON, ProjectJSONKeyz.DLDTKey);
-    				System.out.println("Project's " + name + " Deadline is over due.");
+    				cs.println("Project's " + name + " Deadline is over due.");
     				String goal = pJSON.getString(ProjectJSONKeyz.goalKey);
-    				System.out.println("Project's Goal: " + goal);
+    				cs.println("Project's Goal: " + goal);
     				String dldtStr = LittleTimeTools.timeString(dldt);
-    				boolean doneInTime = iss.forcedYesOrNo("Was it done before " + dldtStr);
+    				boolean doneInTime = cs.forcedYesOrNo("Was it done before " + dldtStr);
     				if(!doneInTime)
     				{
     					ProjectJSONToolBox.projectDLDTAbuse(pJSON);
-    					System.out.println("Project " + name + " terminated because of DeadlineDateTime violation.");
+    					cs.println("Project " + name + " terminated because of DeadlineDateTime violation.");
     				}
     				else
     				{
-    					System.out.println("Data for terminating Project please.");
+    					cs.println("Data for terminating Project please.");
     					ds.terminateProject(pJSON);
     				}
     			}
@@ -457,16 +457,16 @@ public class GTDCLI implements Beholder<String>
     	return prjctSet;
     }
 
-	public static Map<String, List<TimeSpanData>> loadTSDMapOfLists() throws IOException, URISyntaxException, InterruptedException, ClassNotFoundException
+	public Map<String, List<TimeSpanData>> loadTSDMapOfLists() throws IOException, URISyntaxException, InterruptedException, ClassNotFoundException
     {
 
     	Map<String, List<TimeSpanData>> output = new HashMap<>();
 
-    	System.out.println("Try to load TSDLists. From: " + getDataFolder().toAbsolutePath());
+    	cs.println("Try to load TSDLists. From: " + getDataFolder().toAbsolutePath());
 
     	for(String fileName: chronoMap.values())
     	{
-    		System.out.println("Loaded " + fileName);
+    		cs.println("Loaded " + fileName);
     		output.put(fileName, loadOneTSDList(fileName));
     	}
 
@@ -476,7 +476,7 @@ public class GTDCLI implements Beholder<String>
     }
 
     @SuppressWarnings("unchecked")
-	private static List<TimeSpanData> loadOneTSDList(String fileName) throws ClassNotFoundException, IOException
+	private List<TimeSpanData> loadOneTSDList(String fileName) throws ClassNotFoundException, IOException
     {
     	
     	List<TimeSpanData> empty = new ArrayList<>();
@@ -495,12 +495,12 @@ public class GTDCLI implements Beholder<String>
     	if(fileNames.keySet().contains(fileName))
     	{
 
-    		System.out.println("Found TSD List (" + fileName + ").");
+    		cs.println("Found TSD List (" + fileName + ").");
     		return ((List<TimeSpanData>)loadObject(getDataFolder().toString()+"/"+fileName));
     	}
     	else 
     	{
-      		System.out.println("Couldn't Find " + fileName + " TSD List.");
+      		cs.println("Couldn't Find " + fileName + " TSD List.");
       		return empty;
     	}
     }
@@ -527,7 +527,7 @@ public class GTDCLI implements Beholder<String>
     {
 
     	String fileName = chronoMap.get(cu);
-    	System.out.println("Saving: " + fileName);
+    	cs.println("Saving: " + fileName);
     	List<TimeSpanData> toBeSaved = new ArrayList<>();
     	int cnt = 0;
     	for(TimeSpanData tsd: tsdList)
@@ -538,7 +538,7 @@ public class GTDCLI implements Beholder<String>
 
     	Path path = Path.of(getDataFolder().toString()+"/"+fileName);
     	saveObject(path, toBeSaved);
-    	System.out.println("Saved " + cnt + " TSD's in file"
+    	cs.println("Saved " + cnt + " TSD's in file"
     			+ ": " + path.toAbsolutePath() + "/" + fileName);
     }
 
@@ -567,7 +567,7 @@ public class GTDCLI implements Beholder<String>
     {
 
     	saveAll();
-    	System.out.println(sayGoodBye);
+    	cs.println(sayGoodBye);
     	sLog.saveLog();
     	noMoreLoops = true;
     }
@@ -584,9 +584,9 @@ public class GTDCLI implements Beholder<String>
 		return knownProjects;
 	}
   
-    public InputStreamSession getInputStreamSession()
+    public ConsoleSession getConsoleSession()
     {
-    	return iss;
+    	return cs;
     }
 
     public static void setDataFolder(Path newDataFolder)

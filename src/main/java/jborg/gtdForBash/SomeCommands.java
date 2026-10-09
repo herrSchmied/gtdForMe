@@ -41,7 +41,7 @@ import allgemein.SimpleLogger;
 
 import consoleTools.BashSigns;
 
-import consoleTools.InputStreamSession;
+import consoleTools.ConsoleSession;
 
 import consoleTools.TerminalTableDisplay;
 
@@ -219,7 +219,7 @@ public class SomeCommands
 		return !isActivePrjctName(s);
 	}
 
-    private final InputStreamSession iss;
+    private final ConsoleSession cs;
     private final Map<String, JSONObject> knownProjects;
 	
     private final LocalDateTime nowDef;
@@ -231,7 +231,7 @@ public class SomeCommands
     		Map<String, List<TimeSpanData>> MapOfTSDLists) throws IOException, URISyntaxException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, NaturalNumberException
     {
 
-    	this.iss = cli.getInputStreamSession();
+    	this.cs = cli.getConsoleSession();
     	this.knownProjects = knownProjects;
     	this.nowDef = GTDCLI.now();
 
@@ -852,7 +852,7 @@ public class SomeCommands
 
     		
 	    	String prjct;
-	    	if(s.trim().equals(""))prjct=  iss.forcedOutOfList(whichOnePhrase, names);
+	    	if(s.trim().equals(""))prjct=  cs.forcedOutOfList(whichOnePhrase, names);
 	    	else prjct = s.trim();
 	    		
 	    	if(!knownProjects.keySet().contains(prjct))
@@ -937,7 +937,7 @@ public class SomeCommands
 			
 			try
 			{
-				showProjectMapAsTable(map);
+				cs.page(showProjectMapAsTable(map));
 			}
 			catch(JSONException e)
 			{
@@ -1100,7 +1100,7 @@ public class SomeCommands
 			
 				
 			String pName;
-			if(s.trim().equals(""))pName = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
+			if(s.trim().equals(""))pName = cs.forcedOutOfList(whichOnePhrase, aPrjcts);
 			else pName = s.trim();
 				
 			if(!aPrjcts.contains(pName))
@@ -1131,7 +1131,7 @@ public class SomeCommands
 	    	
 	    	String prjct;
 
-	    	if(s.trim().equals(""))prjct = iss.forcedOutOfList(notesOfWhichPrjctPhrase, new ArrayList<String>(knownProjects.keySet()));
+	    	if(s.trim().equals(""))prjct = cs.forcedOutOfList(notesOfWhichPrjctPhrase, new ArrayList<String>(knownProjects.keySet()));
 			else prjct = s.trim();
 				
 			if(!knownProjects.keySet().contains(prjct))
@@ -1241,7 +1241,7 @@ public class SomeCommands
     		}
    		
     		String prjctName;
-    		if(s.trim().equals(""))prjctName = iss.forcedOutOfList(whichOnePhrase, modPrjcts);
+    		if(s.trim().equals(""))prjctName = cs.forcedOutOfList(whichOnePhrase, modPrjcts);
     		else prjctName = s.trim();
 
     		
@@ -1286,7 +1286,7 @@ public class SomeCommands
     		}
     		
     		String prjct;
-    		if(s.trim().equals(""))prjct = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
+    		if(s.trim().equals(""))prjct = cs.forcedOutOfList(whichOnePhrase, aPrjcts);
     		else prjct = s.trim();
     		
     		if(!knownProjects.keySet().contains(prjct))
@@ -1331,7 +1331,7 @@ public class SomeCommands
     		}
 
     		String pName;
-    		if(s.trim().equals(""))pName = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
+    		if(s.trim().equals(""))pName = cs.forcedOutOfList(whichOnePhrase, aPrjcts);
     		else pName = s.trim();
     			
     		if(!knownProjects.keySet().contains(pName))
@@ -1367,7 +1367,7 @@ public class SomeCommands
     		List<String> aPrjcts = findProjectNamesByCondition(this::isActivePrjctName);
 
     		String pName;
-    		if(s.trim().equals(""))pName = iss.forcedOutOfList(whichOnePhrase, aPrjcts);
+    		if(s.trim().equals(""))pName = cs.forcedOutOfList(whichOnePhrase, aPrjcts);
     		else pName = s.trim();
     			
     		if(!knownProjects.keySet().contains(pName))
@@ -1644,7 +1644,7 @@ public class SomeCommands
 
     }
     
-    public void showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, NaturalNumberException, ConsoleToolsException
+    public String showProjectMapAsTable(Map<String, JSONObject> map) throws JSONException, NaturalNumberException, ConsoleToolsException
     {
  
 		List<String> headers = columnList;
@@ -1670,7 +1670,7 @@ public class SomeCommands
 
 		TerminalTableDisplay ttd = new TerminalTableDisplay(headers, rows, wallOfTableChr, 20);
 
-		System.out.println(ttd.toString());
+		return ttd.toString();
     }
 
     public List<TimeSpanData> getTSDList(ChronoUnit cu) throws TimeSpanException

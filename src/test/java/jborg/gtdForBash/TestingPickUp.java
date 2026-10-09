@@ -11,7 +11,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import consoleTools.InputArgumentException;
-import consoleTools.InputStreamSession;
+import consoleTools.ConsoleSession;
 import consoleTools.TestInputReader;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
@@ -29,8 +29,8 @@ public class TestingPickUp
 
 		String data = SomeCommands.exit;
 		TestInputReader testInput = new TestInputReader(data);
-		InputStreamSession iss = new InputStreamSession(testInput);
-		new GTDCLI(iss);
+		ConsoleSession cs = new ConsoleSession(testInput);
+		new GTDCLI(cs);
 
 		
 		GTDCLI.setUseOffSetForLDTs(LocalDateTime.of(2026, 1, 1, 0, 0));
@@ -79,9 +79,9 @@ public class TestingPickUp
 		
 		String data = sfiss.sequenzNewProject("NewProject")+SomeCommands.exit;
 		TestInputReader testInput = new TestInputReader(data);
-		InputStreamSession iss = new InputStreamSession(testInput);
+		ConsoleSession cs = new ConsoleSession(testInput);
 
-        new GTDCLI(iss);
+        new GTDCLI(cs);
 	}
 	
 	public static void doNothing() throws IOException, JSONException, ClassNotFoundException, URISyntaxException, NaturalNumberException, WeekDataException, TimeSpanException, ToolBoxException, StatisticalToolsException, TimeSpanCreatorException, InterruptedException, InputArgumentException
@@ -104,8 +104,8 @@ public class TestingPickUp
 		
 		String data = SomeCommands.exit;
 		TestInputReader testInput = new TestInputReader(data);
-		InputStreamSession iss = new InputStreamSession(testInput);
+		ConsoleSession cs = new ConsoleSession(testInput);
 
-        new GTDCLI(iss);
+        new GTDCLI(cs);
 	}
 }

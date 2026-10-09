@@ -17,7 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import consoleTools.InputArgumentException;
-import consoleTools.InputStreamSession;
+import consoleTools.ConsoleSession;
 import consoleTools.TestInputReader;
 import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
@@ -60,10 +60,10 @@ public class ProjectSetForTesting
 		String[] data = sqzFISS.sequenzManyProjects();
 
 		TestInputReader testInput = new TestInputReader(data);
-		InputStreamSession iss = new InputStreamSession(testInput);
+		ConsoleSession cs = new ConsoleSession(testInput);
 
 
-        GTDCLI cli = new GTDCLI(iss);
+        GTDCLI cli = new GTDCLI(cs);
         cli.saveAll();
 
 

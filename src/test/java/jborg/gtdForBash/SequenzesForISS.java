@@ -10,10 +10,12 @@ import java.time.LocalTime;
 import someMath.exceptions.*;
 
 
+import static consoleTools.ConsoleSession.*;
+
+
 import static CollectionTools.CollectionManipulation.*;
 
 
-import static consoleTools.InputStreamSession.*;
 
 
 

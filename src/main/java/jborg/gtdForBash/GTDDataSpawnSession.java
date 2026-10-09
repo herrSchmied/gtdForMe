@@ -1,5 +1,7 @@
 package jborg.gtdForBash;
 
+
+
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 import java.io.IOException;
@@ -22,7 +24,10 @@ import allgemein.LittleTimeTools;
 
 
 import consoleTools.*;
+
+
 import someMath.exceptions.*;
+
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
@@ -187,7 +192,7 @@ public class GTDDataSpawnSession
 	public static final Set<String> commands = new HashSet<>();
 
 
-	final InputStreamSession iss;
+	final ConsoleSession cs;
 	
 	/**
 	 * The Constructor
@@ -196,9 +201,9 @@ public class GTDDataSpawnSession
 	 * from System.in.
 	 */
 
-	public GTDDataSpawnSession(InputStreamSession iss)
+	public GTDDataSpawnSession(ConsoleSession cs)
 	{
-		this.iss = iss;
+		this.cs = cs;
 	}
 
 	/**
@@ -218,12 +223,12 @@ public class GTDDataSpawnSession
 	public JSONObject spawnMODProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException, NaturalNumberException 
 	{
 
-		System.out.println("");
-		String name = iss.forcedString(prjctNameR);
+		cs.println("");
+		String name = cs.forcedString(prjctNameR);
 		name = name.trim();
 		if(knownProjectsNames.contains(name))
 		{
-			System.out.println(invalidePrjctName);
+			cs.println(invalidePrjctName);
 			return spawnMODProject(knownProjectsNames, statusMGMT);
 		}
 
@@ -232,8 +237,8 @@ public class GTDDataSpawnSession
 		String status = StatusMGMT.mod;
 
 			
-		System.out.println("");
-		String goal = iss.getString(goalR);
+		cs.println("");
+		String goal = cs.getString(goalR);
 			
 
 		LocalDateTime jetzt = GTDCLI.now();
@@ -267,12 +272,12 @@ public class GTDDataSpawnSession
 	public JSONObject spawnNewProject(Set<String> knownProjectsNames, StatusMGMT statusMGMT) throws IOException, JSONException, URISyntaxException, InterruptedException, NaturalNumberException
 	{
 		
-		System.out.println("");
-		String name = iss.forcedString(prjctNameR);
+		cs.println("");
+		String name = cs.forcedString(prjctNameR);
 		name = name.trim();
 		if(knownProjectsNames.contains(name))
 		{
-			System.out.println(invalidePrjctName);
+			cs.println(invalidePrjctName);
 			return spawnNewProject(knownProjectsNames, statusMGMT);//Force valide name.
 		}
 
@@ -282,8 +287,8 @@ public class GTDDataSpawnSession
 		LocalDateTime adt = GTDCLI.now();
 		LocalDateTime dldt = null;
 			
-		System.out.println("");
-		String goal = iss.forcedString(goalR);
+		cs.println("");
+		String goal = cs.forcedString(goalR);
 		
 		pJson.put(nameKey, name);
 		pJson.put(goalKey, goal);
@@ -294,14 +299,14 @@ public class GTDDataSpawnSession
 		pJson.put(ADTKey, adtStr);
 		pJson.put(NDTKey, adtStr);//NDT is equal to ADT!!!
 
-		boolean wantDLDT = iss.forcedYesOrNo(isThereAPrjctDeadlineQ);
+		boolean wantDLDT = cs.forcedYesOrNo(isThereAPrjctDeadlineQ);
 		
 		if(wantDLDT)
 		{
-			System.out.println("");
-			System.out.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
+			cs.println("");
+			cs.println(prjctDLDTHintPrefix + minMinutesInFutureDLDT + prjctDLDTHintMid + maxYearsInFutureDLDT + prjctDLDTHintSuffix);
 			
-			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, GTDCLI.now().plusMinutes(minMinutesInFutureDLDT), GTDCLI.now().plusYears(maxYearsInFutureDLDT));
+			dldt = cs.forcedDateTimeInOneLine(prjctDLDTR, GTDCLI.now().plusMinutes(minMinutesInFutureDLDT), GTDCLI.now().plusYears(maxYearsInFutureDLDT));
 			String deadLineStr = LittleTimeTools.timeString(dldt);
 			pJson.put(DLDTKey, deadLineStr);//Overwrites current "UNKNOWN" value.
 		}
@@ -314,7 +319,7 @@ public class GTDDataSpawnSession
 		}
 		else
 		{
-			System.out.println(prjctTimeOrGoalNotValideError);
+			cs.println(prjctTimeOrGoalNotValideError);
 			return spawnNewProject(knownProjectsNames, statusMGMT);//Force valide Time.;
 		}
 	}
@@ -354,7 +359,7 @@ public class GTDDataSpawnSession
 			oldStep = getLastStepOfProject(pJson);
 			if(!stepIsAlreadyTerminated(oldStep))
 			{
-				System.out.println(stepSpawnExceptionFormerStepIsntTerminated);
+				cs.println(stepSpawnExceptionFormerStepIsntTerminated);
 				return;
 			}
 		}
@@ -365,22 +370,22 @@ public class GTDDataSpawnSession
 			
 		
 		List<String> stepStarterStatuses = new ArrayList<>(StatusMGMT.stepStarterSet);
-		System.out.println("");
-		stepStatus = iss.forcedOutOfList(stepChooseStatusQstn, stepStarterStatuses);
+		cs.println("");
+		stepStatus = cs.forcedOutOfList(stepChooseStatusQstn, stepStarterStatuses);
 					
 		String phrase;
 		if(stepStatus.equals(StatusMGMT.waiting))phrase = waitingForPhrase;
 		else phrase = stepDescR;
 
-		String descriptionOfStep = iss.getString(phrase);
+		String descriptionOfStep = cs.getString(phrase);
 		
 		String prjctDeadLine = pJson.getString(DLDTKey);
 		String deadLineStr = "";	
 		
-		if(iss.forcedYesOrNo(stepDeadlineQ))
+		if(cs.forcedYesOrNo(stepDeadlineQ))
 		{
 			
-			System.out.println("");
+			cs.println("");
 
 			LocalDateTime minLDT = GTDCLI.now();
 			LocalDateTime maxLDT;
@@ -389,9 +394,9 @@ public class GTDDataSpawnSession
 			
 			String minStr = LittleTimeTools.timeString(minLDT);
 			String maxStr = LittleTimeTools.timeString(maxLDT);
-			System.out.println(nowPrefix + minStr + extrStpDLDTHintMid + maxStr);
+			cs.println(nowPrefix + minStr + extrStpDLDTHintMid + maxStr);
 			
-			LocalDateTime deadLineLDT = iss.forcedDateTimeInOneLine(stepDeadlineR, minLDT, maxLDT);
+			LocalDateTime deadLineLDT = cs.forcedDateTimeInOneLine(stepDeadlineR, minLDT, maxLDT);
 			deadLineStr = LittleTimeTools.timeString(deadLineLDT);
 		}
 		else 
@@ -416,7 +421,7 @@ public class GTDDataSpawnSession
 		}
 		else
 		{
-			System.out.println(stepSpawnExceptionStepAintValide);
+			cs.println(stepSpawnExceptionStepAintValide);
 			spawnStep(pJson);
 		}
 	}
@@ -438,7 +443,7 @@ public class GTDDataSpawnSession
 		else ja = new JSONArray();
 		
 		
-		String noteTxt = iss.getString(noteAddPhrase);
+		String noteTxt = cs.getString(noteAddPhrase);
 		if(!noteTxt.trim().equals(""))
 		{
 			ja.put(noteTxt);
@@ -463,13 +468,13 @@ public class GTDDataSpawnSession
 		
 		LocalDateTime dldt = null;
 
-		System.out.println("");
-		boolean gotDLDT = iss.forcedYesOrNo(isThereAPrjctDeadlineQ);
+		cs.println("");
+		boolean gotDLDT = cs.forcedYesOrNo(isThereAPrjctDeadlineQ);
 		
 		String deadLineStr = "";
 		if(gotDLDT)
 		{
-			dldt = iss.forcedDateTimeInOneLine(prjctDLDTR, GTDCLI.now().plusMinutes(minMinutesInFutureDLDT), GTDCLI.now().plusYears(maxYearsInFutureDLDT));
+			dldt = cs.forcedDateTimeInOneLine(prjctDLDTR, GTDCLI.now().plusMinutes(minMinutesInFutureDLDT), GTDCLI.now().plusYears(maxYearsInFutureDLDT));
 			deadLineStr = LittleTimeTools.timeString(dldt);
 		}
 		else deadLineStr = prjctDeadlineNone;
@@ -485,7 +490,7 @@ public class GTDDataSpawnSession
 		}
 		else
 		{
-			System.out.println(prjctTimeOrGoalNotValideError);
+			cs.println(prjctTimeOrGoalNotValideError);
 			wakeMODProject(pJson);
 		}
 	}
@@ -509,13 +514,13 @@ public class GTDDataSpawnSession
 
 		if(pJson==null)
 		{
-			System.out.println(prjctJSONIsNull);
+			cs.println(prjctJSONIsNull);
 			return;
 		}
 		
 		if(projectIsAlreadyTerminated(pJson))
 		{
-			System.out.println(prjctAlreadyTerminated);
+			cs.println(prjctAlreadyTerminated);
 			return;
 		}
 
@@ -523,13 +528,13 @@ public class GTDDataSpawnSession
 		
 		if(sJson==null)
 		{
-			System.out.println(stepJSONIsNull);
+			cs.println(stepJSONIsNull);
 			return;
 		}
 
 		if(stepIsAlreadyTerminated(sJson))
 		{
-			System.out.println(stepAlreadyTerminated);
+			cs.println(stepAlreadyTerminated);
 			return;
 		}
 
@@ -539,23 +544,23 @@ public class GTDDataSpawnSession
 		String adtStr = sJson.getString(StepJSONKeyz.ADTKey);
 		LocalDateTime adt = LittleTimeTools.LDTfromTimeString(adtStr);
 		
-		boolean wasItASuccess = iss.forcedYesOrNo(stepSuccessQ);
+		boolean wasItASuccess = cs.forcedYesOrNo(stepSuccessQ);
 
 		String stepStatus;
 		if(wasItASuccess)stepStatus = StatusMGMT.success;
 		else stepStatus = StatusMGMT.failed;
 		
 		String terminalNote = "";
-		boolean thereIsATerminalNote = iss.forcedYesOrNo(wantToMakeTerminalNotePhrase);
-		if(thereIsATerminalNote)terminalNote = iss.forcedString(stepTerminationNotePhrase);
+		boolean thereIsATerminalNote = cs.forcedYesOrNo(wantToMakeTerminalNotePhrase);
+		if(thereIsATerminalNote)terminalNote = cs.forcedString(stepTerminationNotePhrase);
 			
 		LocalDateTime tdt = GTDCLI.now();
-		boolean wantToChangeTDTOfStep = iss.forcedYesOrNo(wantToChangeTDTOfStepQstn);
+		boolean wantToChangeTDTOfStep = cs.forcedYesOrNo(wantToChangeTDTOfStepQstn);
 		if(wantToChangeTDTOfStep)
 		{
-			System.out.println(stpTDTHintPrefix + adtStr + stpTDTHintMid + jetztStr);
+			cs.println(stpTDTHintPrefix + adtStr + stpTDTHintMid + jetztStr);
 			//InputStreamSession makes sure that tdt is between ADT and jetzt.
-			tdt = iss.forcedDateTimeInOneLine(stepWhenTDTR, adt, jetzt);
+			tdt = cs.forcedDateTimeInOneLine(stepWhenTDTR, adt, jetzt);
 		}
 
 		sJson.put(StepJSONKeyz.statusKey, stepStatus);
@@ -583,48 +588,48 @@ public class GTDDataSpawnSession
 		
 		if(pJSON==null)
 		{
-			System.out.println(cantTerminateNullDataProjectJSONObject);
+			cs.println(cantTerminateNullDataProjectJSONObject);
 			return;
 		}
 
 		if(projectIsAlreadyTerminated(pJSON)) 
 		{
-			System.out.println(prjctTExcAllreadyDeadMsg);
+			cs.println(prjctTExcAllreadyDeadMsg);
 			return;
 		}
 
 		if(isMODProject.test(pJSON))
 		{
-			System.out.println(isAMODProjectNoKill);
+			cs.println(isAMODProjectNoKill);
 		}
 		
 		JSONObject stepJson = getLastStepOfProject(pJSON);
 				
 		if(!stepIsAlreadyTerminated(stepJson))
 		{
-			System.out.println(lastStepIsNotTerminated);
+			cs.println(lastStepIsNotTerminated);
 			return;
 		}
 
-		System.out.println(infoAlertTxtPhrase);
+		cs.println(infoAlertTxtPhrase);
 
 		LocalDateTime jetzt = GTDCLI.now();
 		
 		String prjctStatus = "";
-		boolean success = iss.forcedYesOrNo(prjctSuccessQ);
+		boolean success = cs.forcedYesOrNo(prjctSuccessQ);
 			
 		if(success)prjctStatus = StatusMGMT.success;
 		else prjctStatus = StatusMGMT.failed;
 		
 		String terminalNote = "";
-		boolean wantToMakeTDTNoteQuestion = iss.forcedYesOrNo(wantToMakeTDTNoteQstn);
-		if(wantToMakeTDTNoteQuestion) terminalNote = iss.getString(prjctTDTNoteR);
+		boolean wantToMakeTDTNoteQuestion = cs.forcedYesOrNo(wantToMakeTDTNoteQstn);
+		if(wantToMakeTDTNoteQuestion) terminalNote = cs.getString(prjctTDTNoteR);
 				
-		boolean wantChangeTDTQuestion = iss.forcedYesOrNo(wantToChangeTDTOfPrjctQ);
+		boolean wantChangeTDTQuestion = cs.forcedYesOrNo(wantToChangeTDTOfPrjctQ);
 		LocalDateTime tdt = jetzt;
 		
 		LocalDateTime lastAction = getLastDateTimeOfProject(pJSON);
-		if(wantChangeTDTQuestion)tdt = iss.forcedDateTimeInOneLine(prjctWhenTDTR, lastAction, jetzt);
+		if(wantChangeTDTQuestion)tdt = cs.forcedDateTimeInOneLine(prjctWhenTDTR, lastAction, jetzt);
 
 		String dldtStr = pJSON.getString(ProjectJSONKeyz.DLDTKey);
 		
@@ -634,7 +639,7 @@ public class GTDDataSpawnSession
 		
 		if(tdt.isAfter(dldt))
 		{
-			System.out.println(prjctTDTAfterDLDTMsg);
+			cs.println(prjctTDTAfterDLDTMsg);
 			return;
 		}
 				
@@ -643,13 +648,13 @@ public class GTDDataSpawnSession
 				
 		if(tdt.isBefore(adt))
 		{
-			System.out.println(prjctTDTBeforeNDDT);
+			cs.println(prjctTDTBeforeNDDT);
 			return;
 		}
 			
 		if(tdt.isAfter(jetzt))
 		{
-			System.out.println(prjctTDTAfterNow);
+			cs.println(prjctTDTAfterNow);
 			return;
 		}
 				
