@@ -1036,15 +1036,21 @@ public class SomeCommands
 				String prjctStatus = pJSON.getString(ProjectJSONKeyz.statusKey);
 				if(prjctStatus.equals(StatusMGMT.success))nrOfSuccessfulPrjcts++;
 				
-				JSONArray steps = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
-				int i = steps.length();
-				for(int n=0;n<i;n++)
+
+				if(!isMODProject.test(pJSON))
 				{
-					JSONObject step = steps.getJSONObject(n);
-					String stepStatus = step.getString(StepJSONKeyz.statusKey);
 					
-					if(stepStatus.equals(StatusMGMT.success))nrOfSuccessfulSteps++;
+					JSONArray steps = pJSON.getJSONArray(ProjectJSONKeyz.stepArrayKey);
+					int i = steps.length();
+					for(int n=0;n<i;n++)
+					{
+						JSONObject step = steps.getJSONObject(n);
+						String stepStatus = step.getString(StepJSONKeyz.statusKey);
+						
+						if(stepStatus.equals(StatusMGMT.success))nrOfSuccessfulSteps++;
+					}
 				}
+
 			}
 			
 			String output = nrOfPrjctsStr + nrOfPrjcts + '\n' +
