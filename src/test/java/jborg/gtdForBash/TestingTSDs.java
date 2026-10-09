@@ -40,7 +40,7 @@ import consoleTools.InputArgumentException;
 import javafx.util.Pair;
 
 
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 
 

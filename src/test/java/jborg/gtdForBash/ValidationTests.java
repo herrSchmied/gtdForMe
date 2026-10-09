@@ -26,7 +26,7 @@ import jborg.gtdForBash.exceptions.WeekDataException;
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 
 

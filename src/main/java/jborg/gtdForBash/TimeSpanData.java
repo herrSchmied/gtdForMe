@@ -34,7 +34,7 @@ import static jborg.gtdForBash.ProjectJSONKeyz.TDTKey;
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 
 
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 
 

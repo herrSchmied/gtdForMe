@@ -30,9 +30,7 @@ import consoleTools.InputArgumentException;
 import javafx.util.Pair;
 
 
-import someMath.NaturalNumberException;
-import someMath.exceptions.CollectionException;
-import someMath.exceptions.ConsoleToolsException;
+import someMath.exceptions.*;
 
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;

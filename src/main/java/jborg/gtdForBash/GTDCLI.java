@@ -27,7 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 
 import allgemein.SimpleLogger;

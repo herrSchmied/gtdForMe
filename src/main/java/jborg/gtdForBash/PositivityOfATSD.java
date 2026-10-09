@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 import allgemein.ExactPeriode;
 import allgemein.LittleTimeTools;
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 import static jborg.gtdForBash.ProjectJSONToolBox.*;

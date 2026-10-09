@@ -23,7 +23,7 @@ import org.json.JSONObject;
 
 import allgemein.LittleTimeTools;
 import jborg.gtdForBash.exceptions.ToolBoxException;
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 

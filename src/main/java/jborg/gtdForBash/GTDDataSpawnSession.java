@@ -22,7 +22,7 @@ import allgemein.LittleTimeTools;
 
 
 import consoleTools.*;
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 

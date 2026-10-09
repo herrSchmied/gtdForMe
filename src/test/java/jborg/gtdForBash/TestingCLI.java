@@ -24,7 +24,7 @@ import allgemein.LittleTimeTools;
 
 import consoleTools.BashSigns;
 import consoleTools.InputArgumentException;
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 
 import jborg.gtdForBash.exceptions.StatisticalToolsException;

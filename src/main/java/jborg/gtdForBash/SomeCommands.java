@@ -60,7 +60,7 @@ import static jborg.gtdForBash.ProjectJSONToolBox.*;
 import static jborg.gtdForBash.ProjectJSONKeyz.*;
 
 
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 import someMath.exceptions.ConsoleToolsException;
 

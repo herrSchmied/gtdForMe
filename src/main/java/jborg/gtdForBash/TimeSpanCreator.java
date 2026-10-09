@@ -39,7 +39,7 @@ import jborg.gtdForBash.exceptions.StatisticalToolsException;
 import jborg.gtdForBash.exceptions.TimeSpanCreatorException;
 import jborg.gtdForBash.exceptions.TimeSpanException;
 import jborg.gtdForBash.exceptions.ToolBoxException;
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 import static jborg.gtdForBash.ProjectJSONToolBox.*;
 

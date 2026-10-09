@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 
-import someMath.NaturalNumberException;
+import someMath.exceptions.*;
 
 
 import static CollectionTools.CollectionManipulation.*;
