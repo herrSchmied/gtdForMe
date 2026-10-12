@@ -109,10 +109,13 @@ public class TimeSpanCreator
 		{
 			
 			Pair<String, LocalDateTime> oldPair = oldestLDTOverall();
-			Pair<String, LocalDateTime> youngPair = new Pair<>("", GTDCLI.now().plusHours(1).truncatedTo(ChronoUnit.HOURS));
-	    
+			Pair<String, LocalDateTime> youngPair = youngestLDTOverall();
+			
+			LocalDateTime youngLDT =  GTDCLI.now().plusHours(1).truncatedTo(ChronoUnit.HOURS);
+			if(youngPair.getValue().isAfter(youngLDT))youngLDT = youngPair.getValue();
+			
 			this.beginAnker = oldPair.getValue();
-			this.endAnker = youngPair.getValue();
+			this.endAnker = youngLDT;
 		}
 		
 		this.yearList.addAll(MapOfTSDLists.get(GTDCLI.yearListFileName));

@@ -79,9 +79,9 @@ public class TestingTSDs
         List<TimeSpanData> tspdListMonth = tsc.getTimeSpanList(ChronoUnit.MONTHS);
         List<TimeSpanData> tspdListYears = tsc.getTimeSpanList(ChronoUnit.YEARS);
  
-        assert(tspdListHours.size()>=0&&tspdListHours.size()<=1);
-        assert(tspdListDays.size()>=0&&tspdListDays.size()<=1);
-        assert(tspdListWeeks.size()>=0&&tspdListWeeks.size()<=1);
+        assert(tspdListHours.size()>=0&&tspdListHours.size()<=(21*24));
+        assert(tspdListDays.size()>=0&&tspdListDays.size()<=21);
+        assert(tspdListWeeks.size()>=0&&tspdListWeeks.size()<=3);
         assert(tspdListMonth.size()>=0&&tspdListMonth.size()<=1);
         assert(tspdListYears.size()>=0&&tspdListYears.size()<=1);     
 	}
@@ -119,7 +119,7 @@ public class TestingTSDs
         System.out.println("Weeksize: " + weeksSize);
         Thread.sleep(2000);
         assert(weeksSize==cnt);
-        assert(weeksSize==1);
+        assert(weeksSize==3);
 
         JSONObject pJSON = st.projectJSONObjByName(wakeProjectName);
 		assert(checkLDTvsTSD(ChronoUnit.WEEKS, firstWeekIndex, pJSON, NDTKey, st));
