@@ -141,28 +141,28 @@ public class TestingStats
 		Set<TimeSpanData> set = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, NDTKey);
 		TimeSpanData tsd = CollectionManipulation.catchRandomElementOfSet(set);
 		int weekNr = tsd.getTimeNr();
-		int n = tsd.allTheNames().size();
+		int n = tsd.allTheProjectNames().size();
 		System.out.println("Week with the most NDTs: " + weekNr + ".\n" + n + " Projects written..\n");
 		//Thread.sleep(3750);
 		
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, ADTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);
 		weekNr = tsd.getTimeNr();
-		n = tsd.allTheNames().size();
+		n = tsd.allTheProjectNames().size();
 		System.out.println("Week with the most ADTs: " + weekNr + ".\n" + n + " Projects active..\n");
 		//Thread.sleep(750);
 
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, DLDTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);
 		weekNr = tsd.getTimeNr();
-		n = tsd.allTheNames().size();
+		n = tsd.allTheProjectNames().size();
 		System.out.println("Week with the most DLDTs: " + weekNr + ".\n" + n + " Project Deadlines..\n");
 		//Thread.sleep(750);
 
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.WEEKS, TDTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);
 		weekNr = tsd.getTimeNr();
-		n = tsd.allTheNames().size();
+		n = tsd.allTheProjectNames().size();
 		System.out.println("Week with the most TDTs: " + weekNr + ".\n" + n + " Project Terminated..\n");
 		//Thread.sleep(750);
 
@@ -176,35 +176,35 @@ public class TestingStats
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.HOURS, NDTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);
 		int hourNr = tsd.getTimeNr();
-		n = tsd.allTheNames().size();
+		n = tsd.allTheProjectNames().size();
 		System.out.println("Hour with the most NDTs: " + hourNr+ ".\n" + n + " Projects written..\n");
 		//Thread.sleep(750);
 
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.HOURS, ADTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);
 		hourNr = tsd.getTimeNr();
-		n =  tsd.allTheNames().size();
+		n =  tsd.allTheProjectNames().size();
 		System.out.println("Hour with the most ADTs: " + hourNr + ".\n" + n + " Projects active..\n");
 		//Thread.sleep(750);
 
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.HOURS, DLDTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);
 		hourNr = tsd.getTimeNr();
-		n = tsd.allTheNames().size();
+		n = tsd.allTheProjectNames().size();
 		System.out.println("Hour with the most DLDTs: " + hourNr + ".\n" + n + " Projects active..\n");
 		//Thread.sleep(750);
 
 		set = tsc.timeSpansWithMostLDTs(ChronoUnit.HOURS, TDTKey);
 		tsd = CollectionManipulation.catchRandomElementOfSet(set);
 		hourNr = tsd.getTimeNr();
-		n =  tsd.allTheNames().size();
+		n =  tsd.allTheProjectNames().size();
 		System.out.println("Hour with the most TDTs: " + hourNr + ".\n" + n + " Projects active..\n");
 		//Thread.sleep(750);
 
 		Set<TimeSpanData>tsdList = tsc.selectSubSetOfTSDListByExtremValue(ChronoUnit.WEEKS, 0.0, PositivityOfATSD.posiValue);
 		Set<TimeSpanData> tsdSet = new HashSet<>(tsdList);
 		tsd = CollectionManipulation.catchRandomElementOfSet(tsdSet);
-		System.out.println("Week Most Positive: \n" + (new PositivityOfATSD(tsd).toString()));
+		System.out.println("Week Most Positive: \n" + (new PositivityOfATSD(st, tsd).toString()));
 		//Thread.sleep(4000);
 		assert(tsd.getTimeNr()==0);
 		assert(tsdSet.size()==1);

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
@@ -46,6 +47,7 @@ import static jborg.gtdForBash.ProjectJSONToolBox.*;
 public class TimeSpanCreator
 {
 
+	private final StatisticalTools st;
 	private final LocalDateTime beginAnker;
 	private final LocalDateTime endAnker;
 	
@@ -90,11 +92,12 @@ public class TimeSpanCreator
     	return b.getTimeNr()-a.getTimeNr();
     };
 
-    public TimeSpanCreator(Set<JSONObject> prjctSet, Map<String, List<TimeSpanData>> MapOfTSDLists) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException, NaturalNumberException
+    public TimeSpanCreator(StatisticalTools st, Set<JSONObject> prjctSet, Map<String, List<TimeSpanData>> MapOfTSDLists) throws TimeSpanException, IOException, URISyntaxException, TimeSpanCreatorException, NaturalNumberException
     {
     	
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
 		this.prjctSet = prjctSet;
+		this.st = st;
 		
 		if(prjctSet.isEmpty())
 		{
@@ -139,12 +142,13 @@ public class TimeSpanCreator
 		pickupListsAndExtrapolateThem(ChronoUnit.HOURS);
     }
 
-	public TimeSpanCreator(Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException, NaturalNumberException
+	public TimeSpanCreator(StatisticalTools st, Set<JSONObject> prjctSet) throws IOException, URISyntaxException, TimeSpanException, ToolBoxException, TimeSpanCreatorException, NaturalNumberException
 	{
 
 		if(prjctSet==null) throw new TimeSpanException("ProjectSet can't be null.");
 		this.prjctSet = prjctSet;
-
+		this.st = st;
+		
 		if(prjctSet.isEmpty())
 		{
 			LocalDateTime now = GTDCLI.now();
@@ -334,10 +338,10 @@ public class TimeSpanCreator
 			for(JSONObject pJSON: prjctSet)
 			{
 				
-				String prjctStr = pJSON.getString(ProjectJSONKeyz.nameKey);
-				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(prjctStr);
-				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(prjctStr);
-				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(prjctStr);
+				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
+				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(prjctName);
+				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(prjctName);
+				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(prjctName);
 			}
 			outputList.add(tsd);
 		}
@@ -364,10 +368,10 @@ public class TimeSpanCreator
 
 			for(JSONObject pJSON: prjctSet)
 			{
-				String prjctStr = pJSON.toString();
-				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(prjctStr);
-				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(prjctStr);
-				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(prjctStr);
+				String prjctName = pJSON.getString(ProjectJSONKeyz.nameKey);
+				if(isActiveGivenTimeSpan(pJSON, tsd))tsd.addProjectActive(prjctName);
+				if(isWrittenGivenTimeSpan(pJSON, tsd))tsd.addProjectWrittenDown(prjctName);
+				if(isTerminatedGivenTimeSpan(pJSON, tsd))tsd.addProjectTerminated(prjctName);
 			}
 			outputList.add(tsd);
 		}
@@ -712,7 +716,7 @@ public class TimeSpanCreator
     	return new Pair<>(NDTKey, ldt);
     }
 
-	public Set<TimeSpanData> selectSubSetOfTSDListByExtremValue(ChronoUnit cu, Double startValue, Function<TimeSpanData, Double> valueOfTSD) throws TimeSpanException
+	public Set<TimeSpanData> selectSubSetOfTSDListByExtremValue(ChronoUnit cu, Double startValue, BiFunction<StatisticalTools, TimeSpanData, Double> valueOfTSD) throws TimeSpanException
 	{
 		
 		List<TimeSpanData> list = getTimeSpanList(cu);
@@ -721,7 +725,7 @@ public class TimeSpanCreator
 		Double d = startValue;
 		for(TimeSpanData tsd: list)
 		{
-			Double value = valueOfTSD.apply(tsd);
+			Double value = valueOfTSD.apply(st, tsd);
 			if(value>d)
 			{
 
@@ -747,7 +751,7 @@ public class TimeSpanCreator
 		for(TimeSpanData tsd: list)
 		{
 
-			int m = tsd.timeSpansLDTs(jsonKey);
+			int m = st.timeSpansLDTs(tsd, jsonKey);
 			if(n<m)
 			{
 				n=m;

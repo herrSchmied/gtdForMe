@@ -436,7 +436,7 @@ public class SomeCommands
 				for(int n=0;n<tsdList.size();n++)
 				{
 					TimeSpanData tsd = tsdList.get(n);
-					output += new PositivityOfATSD(tsd).toString();
+					output += new PositivityOfATSD(st, tsd).toString();
 				}
 				
 				cs.println(output);
@@ -491,7 +491,7 @@ public class SomeCommands
 				for(int n=0;n<tsdList.size();n++)
 				{
 					TimeSpanData tsd = tsdList.get(n);
-					output += new PositivityOfATSD(tsd).toString();
+					output += new PositivityOfATSD(st, tsd).toString();
 				}
 				
 				cs.println(output);
@@ -669,7 +669,7 @@ public class SomeCommands
 
 				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
 
-				Set<JSONObject> steps = tsd.getAllActiveStepsWithDLs();
+				Set<JSONObject> steps = st.getAllActiveStepsWithDLs(tsd);
 				if(steps.isEmpty())
 				{
 					cs.println("No Step Deadlines. Current TSD-Hour.");
@@ -719,9 +719,9 @@ public class SomeCommands
 
 				TimeSpanData tsd = tsc.getCurrentTimeSpanDataObject(ChronoUnit.HOURS);
 
-				Set<JSONObject> prjx = tsd.getAllActiveProjectDLs();
+				Set<JSONObject> prjx = st.getAllActiveProjectDLs(tsd);
 				
-				Set<JSONObject> pressingPrjx = tsd.getAllActiveProjectDLs();
+				Set<JSONObject> pressingPrjx = st.getAllActiveProjectDLs(tsd);
 				if(pressingPrjx.isEmpty())
 				{
 					cs.println("No Project Deadlines.");

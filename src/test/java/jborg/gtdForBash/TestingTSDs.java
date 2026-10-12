@@ -155,7 +155,7 @@ public class TestingTSDs
 
 			TimeSpanData tsd = weekDatas.get(n);
 
-			List<String> pNames = tsd.mostPressingProjectDeadline()
+			List<String> pNames = st.mostPressingProjectDeadline(tsd)
 										.stream()
 										.map(p->p.getString(nameKey))
 										.toList();

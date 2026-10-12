@@ -3,6 +3,7 @@ package jborg.gtdForBash;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.json.JSONObject;
@@ -62,11 +63,11 @@ public class PositivityOfATSD
 	private final Double overAllValue;
 	private final TimeSpanData tsd;
 	
-	public static final Function<TimeSpanData, Double> posiValue = (tsd)->
+	public static final BiFunction<StatisticalTools, TimeSpanData, Double> posiValue = (st, tsd)->
 	{
 		try
 		{
-			return new PositivityOfATSD(tsd).getValue();
+			return new PositivityOfATSD(st, tsd).getValue();
 		}
 		catch (IOException | URISyntaxException | NaturalNumberException e)
 		{
@@ -76,12 +77,12 @@ public class PositivityOfATSD
 		throw new RuntimeException("What the Heck!");
 	};
 
-	public static final Function<TimeSpanData, Double> negPosiValue = (tsd)->
+	public static final BiFunction<StatisticalTools, TimeSpanData, Double> negPosiValue = (st, tsd)->
 	{
 
 		try
 		{
-			return -(new PositivityOfATSD(tsd).getValue());
+			return -(new PositivityOfATSD(st, tsd).getValue());
 		}
 		catch (IOException | URISyntaxException | NaturalNumberException e)
 		{
@@ -92,23 +93,23 @@ public class PositivityOfATSD
 	};
 
 	
-	public PositivityOfATSD(TimeSpanData tsd) throws IOException, URISyntaxException, NaturalNumberException
+	public PositivityOfATSD(StatisticalTools st, TimeSpanData tsd) throws IOException, URISyntaxException, NaturalNumberException
 	{
 		
 		this.tsd = tsd;
 		
 		this.newProjects = tsd.getProjectsWrittenDown().size();
 		this.newProjectsTerm = newProjects *newProjectsWeight;
-		this.projectsSucceed = tsd.howManyProjectsSuceeded();
+		this.projectsSucceed = st.howManyProjectsSuceeded(tsd);
 		this.projectsSucceedTerm = projectsSucceed*projectsSucceedWeight;
 
-		this.newSteps = tsd.howManyNewStepsInThisTSD();
+		this.newSteps = st.howManyNewStepsHere(tsd);
 		this.newStepsTerm = newSteps*newStepsWeight;
-		this.stepsSucceed = tsd.howManyStepsSucceededInThisTSD();
+		this.stepsSucceed = st.howManyStepsSucceeded(tsd);
 		this.stepsSucceedTerm = stepsSucceed*stepsSucceedWeight;
 
-		this.stepsWithDLDTAbuse = tsd.howManyStepsViolatedDLInThisTSD();
-		this.stepsFailed = tsd.howManyStepsFailedInThisTSD()-stepsWithDLDTAbuse;
+		this.stepsWithDLDTAbuse = st.howManyStepsViolatedDL(tsd);
+		this.stepsFailed = st.howManyStepsFailed(tsd)-stepsWithDLDTAbuse;
 
 		this.stepsFaildTerm = stepsFailed*stepsFailedWeight;
 		this.stepsWithDLDTAbuseTerm = stepsWithDLDTAbuse*stepsWithDLDTAbuseWeight;
@@ -116,11 +117,11 @@ public class PositivityOfATSD
 		//Project failed by violating DLDT: -3 Point per active Day.
 		Double sum = 0.0;
 		Double sumDaysDLDTAbuse = 0.0;
-		this.projectsWithDLDTAbuse = tsd.projectsViolatedDLThisTimeSpan().size();
-		for(String pName: tsd.projectsViolatedDLThisTimeSpan())
+		this.projectsWithDLDTAbuse = st.projectsViolatedDL(tsd).size();
+		for(String pName: st.projectsViolatedDL(tsd))
 		{
 
-			JSONObject pJSON = tsd.projectJSONObjByName(pName);
+			JSONObject pJSON = st.projectJSONObjByName(pName);
 			
 			LocalDateTime adt = extractLDT(pJSON, ADTKey);
 			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
@@ -137,13 +138,13 @@ public class PositivityOfATSD
 		//#Project failed: -1 Point per active Day.
 		sum = 0.0;
 		Double sumDaysFailed = 0.0;
-		this.projectsFailed = tsd.projectsFailedThisTimeSpan().size()-projectsWithDLDTAbuse;
-		for(String pName: tsd.projectsFailedThisTimeSpan())
+		this.projectsFailed = st.projectsFailed(tsd).size()-projectsWithDLDTAbuse;
+		for(String pName: st.projectsFailed(tsd))
 		{
 			
-			if(tsd.projectsViolatedDLThisTimeSpan().contains(pName))continue;
+			if(st.projectsViolatedDL(tsd).contains(pName))continue;
 
-			JSONObject pJSON = tsd.projectJSONObjByName(pName);
+			JSONObject pJSON = st.projectJSONObjByName(pName);
 
 			LocalDateTime adt = extractLDT(pJSON, ADTKey);
 			LocalDateTime tdt = extractLDT(pJSON, TDTKey);
