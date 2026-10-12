@@ -1433,7 +1433,7 @@ public class SomeCommands
     		
     		try
 			{
-				showProjectMapAsTable(map);
+				cs.page(showProjectMapAsTable(map));
 			}
     		catch(JSONException e)
 			{
