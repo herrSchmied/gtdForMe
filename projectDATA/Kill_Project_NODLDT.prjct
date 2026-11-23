@@ -1,0 +1,17 @@
+{
+    "Steps": [{
+        "DLDT_of_Step": "No_Step_Deadline!",
+        "Description_of_Step": "Hello Bello GoodBye!",
+        "Project_Name": "Kill_Project_NODLDT",
+        "Status_of_Step": "Done!_No_Success.",
+        "ADT_of_Step": "2026-03-01 08:42:14.392",
+        "TDT_of_Step": "2026-03-01 08:42:14.397"
+    }],
+    "Goal": "Testing this here",
+    "DLDT_of_Project": "No_got_no_Deadline!",
+    "Project_Status": "Done!_successfully.",
+    "ADT_of_Project": "2026-03-01 08:42:14.391",
+    "Project_Name": "Kill_Project_NODLDT",
+    "NDT_of_Project": "2026-03-01 08:42:14.391",
+    "TDT_of_Project": "2026-03-01 08:42:14.402"
+}

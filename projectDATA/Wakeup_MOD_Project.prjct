@@ -1,0 +1,19 @@
+{
+    "Steps": [{
+        "StepTDTNote": "Step Deadline abuse!",
+        "DLDT_of_Step": "2026-03-08 08:42:00.000",
+        "Description_of_Step": "Bla bla",
+        "Project_Name": "Wakeup_MOD_Project",
+        "Status_of_Step": "Done!_No_Success.",
+        "ADT_of_Step": "2026-03-01 08:42:14.425",
+        "TDT_of_Step": "2026-03-08 08:42:00.000"
+    }],
+    "Goal": "MOD-Project Test",
+    "DLDT_of_Project": "2026-03-15 08:42:00.000",
+    "Project_Status": "Done!_No_Success.",
+    "ADT_of_Project": "2026-03-01 08:42:14.425",
+    "Project_Name": "Wakeup_MOD_Project",
+    "NDT_of_Project": "2026-03-01 08:42:14.418",
+    "TDT_of_Project": "2026-03-15 08:42:00.000",
+    "ProjectTDTNote": "Project Deadline abuse!"
+}

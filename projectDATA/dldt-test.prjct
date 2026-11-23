@@ -1,0 +1,15 @@
+{
+    "Steps": [{
+        "DLDT_of_Step": "2029-06-02 00:00:00.000",
+        "Description_of_Step": "this here testen",
+        "Project_Name": "dldt-test",
+        "Status_of_Step": "About_to_be_Done!",
+        "ADT_of_Step": "2026-06-24 10:17:04.330"
+    }],
+    "Goal": "dldt Testing!!!",
+    "DLDT_of_Project": "2030-06-02 00:00:00.000",
+    "Project_Status": "About_to_be_Done!",
+    "ADT_of_Project": "2026-06-24 10:15:53.262",
+    "Project_Name": "dldt-test",
+    "NDT_of_Project": "2026-06-24 10:15:53.262"
+}
